@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
-import { newsArticles } from "@/features/news/server";
+import { getArticleSitemapEntries } from "@/features/news/server";
 import { getPublicProducts } from "@/features/products/server";
 import { getLanguageAlternates, getLocalizedPath } from "@/i18n/locale";
 import { routing, type AppLocale } from "@/i18n/routing";
@@ -33,12 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     createLocalizedEntries(`/products/${encodeURIComponent(slug)}`, { changeFrequency: "weekly", priority: 0.7 }),
   );
 
-  const articles = newsArticles.flatMap((article) =>
-    createLocalizedEntries(`/news/${article.slug}`, {
-      lastModified: new Date(article.publishedAt),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    }),
+  const articles = (await getArticleSitemapEntries()).flatMap(({ path }) =>
+    createLocalizedEntries(path, { changeFrequency: "monthly", priority: 0.6 }),
   );
 
   return [

@@ -1,36 +1,40 @@
 import { z } from "zod";
 
-export const newsCategorySchema = z.enum(["News", "Events", "Company updates", "Features"]);
+const identifierSchema = z.string().min(1);
+const timestampSchema = z.iso.datetime({ offset: true });
 
-const articleSectionSchema = z.object({
-  heading: z.string().min(1),
-  paragraphs: z.array(z.string().min(1)).min(1),
-});
-
-export const newsArticleSchema = z.object({
+export const articleCategorySchema = z.object({
+  id: identifierSchema,
+  name: z.string().min(1),
   slug: z.string().min(1),
-  title: z.string().min(1),
-  excerpt: z.string().min(1),
-  category: newsCategorySchema,
-  publishedAt: z.iso.datetime(),
-  image: z.string().startsWith("/"),
-  heroImage: z.string().startsWith("/").optional(),
-  introLines: z.array(z.string().min(1)).min(1),
-  sections: z.array(articleSectionSchema),
-  gallery: z.array(z.string().startsWith("/")),
 });
 
-export const newsArticlesSchema = z.array(newsArticleSchema).min(1);
+export const articleCategoriesSchema = z.array(articleCategorySchema);
 
-export const eventSchema = z.object({
+export const articleListItemSchema = z.object({
+  id: identifierSchema,
   title: z.string().min(1),
-  month: z.string().min(3).max(3),
-  day: z.string().regex(/^\d{2}$/),
-  location: z.string().min(1),
+  slug: z.string().min(1),
+  startDate: timestampSchema,
+  endDate: timestampSchema,
+  thumbnailUrl: z.string(),
 });
 
-export const eventsSchema = z.array(eventSchema);
+export const articlesPageSchema = z.object({
+  items: z.array(articleListItemSchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+});
 
-export type NewsArticle = z.infer<typeof newsArticleSchema>;
-export type NewsCategory = z.infer<typeof newsCategorySchema>;
-export type NewsEvent = z.infer<typeof eventSchema>;
+export const articleDetailSchema = articleListItemSchema.extend({
+  categoryId: identifierSchema,
+  categorySlug: z.string().min(1),
+  categoryName: z.string().min(1),
+  content: z.string(),
+});
+
+export type ArticleCategory = z.infer<typeof articleCategorySchema>;
+export type ArticleListItem = z.infer<typeof articleListItemSchema>;
+export type ArticlesPage = z.infer<typeof articlesPageSchema>;
+export type ArticleDetail = z.infer<typeof articleDetailSchema>;

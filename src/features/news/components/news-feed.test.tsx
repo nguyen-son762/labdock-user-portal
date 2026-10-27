@@ -1,20 +1,35 @@
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { renderWithProviders } from "@/test/render-with-providers";
 
-import { newsArticles } from "../data/news-data";
+import { articleCategory, articlesPage } from "../test/article-fixtures";
 import { NewsFeed } from "./news-feed";
 
 describe("NewsFeed", () => {
-  it("filters the visible articles by category", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<NewsFeed articles={newsArticles.slice(1)} />);
+  it("uses API category names and resets page when changing categories", () => {
+    renderWithProviders(
+      <NewsFeed
+        categories={[articleCategory, { ...articleCategory, id: "other", name: "Science", slug: "science" }]}
+        category={articleCategory}
+        articles={{ ...articlesPage, page: 2 }}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Science" })).toHaveAttribute("href", "/news?category=science");
+    expect(screen.getByRole("link", { name: "Research updates" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Go to page 3" })).toHaveAttribute(
+      "href",
+      "/news?category=research-updates&page=3",
+    );
+    expect(screen.getByRole("link", { name: /New laboratory research/ })).toHaveAttribute(
+      "href",
+      "/news/research-updates/new-laboratory-research",
+    );
+  });
 
-    await user.click(screen.getByRole("button", { name: "Events" }));
-
-    expect(screen.getByText("LabTech Innovations Showcase connects science and technology")).toBeInTheDocument();
-    expect(screen.queryByText("Advancing research collaboration across Southeast Asia")).not.toBeInTheDocument();
+  it("renders an empty state without fake articles", () => {
+    renderWithProviders(<NewsFeed categories={[]} articles={{ items: [], page: 1, pageSize: 4, total: 0 }} />);
+    expect(screen.getByText("No articles in this category yet.")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "News pagination" })).not.toBeInTheDocument();
   });
 });

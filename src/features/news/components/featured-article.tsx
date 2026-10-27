@@ -1,13 +1,14 @@
-import Image from "next/image";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
-import type { NewsArticle } from "../schemas/news.schema";
+import { Link } from "@/i18n/navigation";
+
+import type { ArticleCategory, ArticleListItem } from "../schemas/news.schema";
 import { formatNewsDate } from "../utils/news-formatters";
+import { getArticlePath } from "../utils/news-paths";
+import { ArticleImage } from "./article-image";
 import { NewsCategoryBadge } from "./news-category-badge";
 
-export function FeaturedArticle({ article }: { article: NewsArticle }) {
+export function FeaturedArticle({ article, category }: { article: ArticleListItem; category: ArticleCategory }) {
   const t = useTranslations("News");
   const locale = useLocale();
   return (
@@ -17,37 +18,29 @@ export function FeaturedArticle({ article }: { article: NewsArticle }) {
       </h2>
       <div className="mt-4 rounded-xl bg-white p-3 md:px-4">
         <Link
-          href={`/news/${article.slug}`}
+          href={getArticlePath(category.slug, article.slug)}
           className="group grid gap-5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990] md:grid-cols-2 md:gap-4"
         >
           <div className="flex min-w-0 flex-col gap-4 py-1">
-            <div className="flex items-center gap-3">
-              <NewsCategoryBadge category={article.category} />
-              <time dateTime={article.publishedAt} className="text-sm font-semibold text-[#73798f]">
-                {formatNewsDate(article.publishedAt, locale)}
+            <div className="flex flex-wrap items-center gap-3">
+              <NewsCategoryBadge category={category.name} />
+              <time dateTime={article.startDate} className="text-sm font-semibold text-[#73798f]">
+                {formatNewsDate(article.startDate, locale)}
               </time>
             </div>
             <h3 className="text-[28px] font-semibold leading-[1.15] text-[#0f3678] transition-colors group-hover:text-[#1f5fa8] lg:text-[32px]">
               {article.title}
             </h3>
-            <p className="line-clamp-3 text-base leading-6 text-[#2e3038]">{article.excerpt}</p>
           </div>
           <div className="relative min-h-[240px] overflow-hidden rounded-xl md:h-[273px]">
-            <Image
-              src={article.image}
-              alt={t("featuredImage", { title: article.title })}
-              fill
+            <ArticleImage
+              thumbnailUrl={article.thumbnailUrl}
+              alt={article.title}
               priority
               sizes="(min-width: 1024px) 386px, 100vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             />
           </div>
         </Link>
-        <div className="mt-6 flex items-center justify-center gap-3" aria-label="Featured article 1 of 3">
-          <span className="size-2 rounded-full bg-[#1f5fa8]" />
-          <span className="size-2 rounded-full bg-[#ecf0f3]" />
-          <span className="size-2 rounded-full bg-[#ecf0f3]" />
-        </div>
       </div>
     </section>
   );

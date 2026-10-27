@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { newsArticles } from "@/features/news/server";
+import { getArticleSitemapEntries } from "@/features/news/server";
 import { getPublicProducts } from "@/features/products/server";
 import { routing } from "@/i18n/routing";
 
@@ -10,6 +10,7 @@ vi.mock("@/features/products/server", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/features/products/server")>()),
   getPublicProducts: vi.fn(),
 }));
+vi.mock("@/features/news/server", () => ({ getArticleSitemapEntries: vi.fn() }));
 const record = (slug: string) => ({
   id: "11111111-1111-1111-1111-111111111111",
   slug,
@@ -26,6 +27,7 @@ const record = (slug: string) => ({
   isOutstanding: false,
 });
 beforeEach(() => {
+  vi.mocked(getArticleSitemapEntries).mockResolvedValue([{ path: "/news/science/real-article" }]);
   vi.mocked(getPublicProducts).mockResolvedValue({
     items: [record("real-api-slug")],
     page: 1,
@@ -62,7 +64,10 @@ describe("sitemap", () => {
 
   it("only supplies evidence-based modification dates", async () => {
     const datedEntries = (await sitemap()).filter((entry) => entry.lastModified !== undefined);
-    expect(datedEntries).toHaveLength(newsArticles.length * routing.locales.length);
+    expect(datedEntries).toHaveLength(0);
+    const articleEntries = (await sitemap()).filter((entry) => entry.url.includes("/news/"));
+    expect(articleEntries).toHaveLength(routing.locales.length);
+    expect(articleEntries.every((entry) => entry.url.endsWith("/news/science/real-article"))).toBe(true);
     expect(datedEntries.every((entry) => entry.url.includes("/news/"))).toBe(true);
   });
 });

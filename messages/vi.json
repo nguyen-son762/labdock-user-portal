@@ -711,6 +711,8 @@
     "imageAlt": "Thiết bị và cơ sở nghiên cứu phòng thí nghiệm có trên Labdock"
   },
   "News": {
+    "loadError": "Không thể tải bài viết. Vui lòng thử lại.",
+    "retry": "Thử lại",
     "copyLink": "Sao chép liên kết",
     "copied": "Đã sao chép",
     "copyError": "Không thể sao chép liên kết. Vui lòng chọn và sao chép URL bên dưới.",

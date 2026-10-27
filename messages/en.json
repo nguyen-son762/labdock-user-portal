@@ -711,6 +711,8 @@
     "imageAlt": "Laboratory equipment and research facilities available through Labdock"
   },
   "News": {
+    "loadError": "We could not load the articles. Please try again.",
+    "retry": "Retry",
     "copyLink": "Copy link",
     "copied": "Copied",
     "copyError": "Could not copy the link. Select and copy the URL below.",
