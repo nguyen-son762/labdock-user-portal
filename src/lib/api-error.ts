@@ -6,18 +6,23 @@ const apiErrorPayloadSchema = z.object({
   detail: z.string().min(1).optional(),
 });
 
-const statusMessages: Readonly<Record<number, string>> = {
-  400: "Yêu cầu chưa hợp lệ. Vui lòng kiểm tra lại thông tin.",
-  401: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-  403: "Bạn không có quyền thực hiện thao tác này.",
-  404: "Không tìm thấy dữ liệu được yêu cầu.",
-  409: "Dữ liệu đã thay đổi. Vui lòng tải lại và thử lại.",
-  429: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+type ApiErrorStatusMessageKey =
+  "badRequest" | "unauthorized" | "forbidden" | "notFound" | "conflict" | "tooManyRequests";
+
+const statusMessageKeys: Readonly<Partial<Record<number, ApiErrorStatusMessageKey>>> = {
+  400: "badRequest",
+  401: "unauthorized",
+  403: "forbidden",
+  404: "notFound",
+  409: "conflict",
+  429: "tooManyRequests",
 };
 
-export function getApiErrorMessage(error: unknown): string {
+type ApiErrorMessageKey = ApiErrorStatusMessageKey | "unknown" | "canceled" | "unavailable";
+
+export function getApiErrorMessage(error: unknown, translate: (key: ApiErrorMessageKey) => string): string {
   if (!axios.isAxiosError(error)) {
-    return "Đã xảy ra lỗi không xác định. Vui lòng thử lại.";
+    return translate("unknown");
   }
 
   const payload = apiErrorPayloadSchema.safeParse(error.response?.data);
@@ -31,13 +36,14 @@ export function getApiErrorMessage(error: unknown): string {
     return payload.data.detail;
   }
 
-  if (status && statusMessages[status]) {
-    return statusMessages[status];
+  const statusMessageKey = status === undefined ? undefined : statusMessageKeys[status];
+  if (statusMessageKey) {
+    return translate(statusMessageKey);
   }
 
   if (error.code === "ERR_CANCELED") {
-    return "Yêu cầu đã được hủy.";
+    return translate("canceled");
   }
 
-  return "Không thể kết nối đến hệ thống. Vui lòng thử lại sau.";
+  return translate("unavailable");
 }

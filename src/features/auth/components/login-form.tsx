@@ -17,6 +17,7 @@ import { useLoginMutation } from "../api/use-login-mutation";
 import { loginSchema, type LoginValues } from "../schemas/login.schema";
 
 export function LoginForm() {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Auth");
   const router = useRouter();
   const loginMutation = useLoginMutation();
@@ -34,7 +35,7 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form className="space-y-4" noValidate onSubmit={form.handleSubmit(handleLogin)}>
-        {loginMutation.isError ? <Alert>{getApiErrorMessage(loginMutation.error)}</Alert> : null}
+        {loginMutation.isError ? <Alert>{getApiErrorMessage(loginMutation.error, tErrors)}</Alert> : null}
 
         <FormField
           control={form.control}

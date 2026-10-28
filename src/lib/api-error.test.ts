@@ -1,9 +1,17 @@
 import axios from "axios";
+import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
+
+import en from "../../messages/en.json";
+import vi from "../../messages/vi.json";
 
 import { getApiErrorMessage } from "./api-error";
 
-describe("getApiErrorMessage", () => {
+describe.each([
+  ["en", en],
+  ["vi", vi],
+] as const)("getApiErrorMessage (%s)", (locale, messages) => {
+  const t = createTranslator({ locale, messages, namespace: "ApiErrors" });
   it("reads RFC problem details returned by the authentication API", () => {
     const error = new axios.AxiosError("Unauthorized", "ERR_BAD_REQUEST", undefined, undefined, {
       data: { title: "invalid_credentials", detail: "Invalid email or password." },
@@ -13,7 +21,7 @@ describe("getApiErrorMessage", () => {
       config: { headers: new axios.AxiosHeaders() },
     });
 
-    expect(getApiErrorMessage(error)).toBe("Invalid email or password.");
+    expect(getApiErrorMessage(error, t)).toBe("Invalid email or password.");
   });
   it("SYS-019 hides internal messages and details from server failures", () => {
     const error = new axios.AxiosError("Internal server error", "ERR_BAD_RESPONSE", undefined, undefined, {
@@ -23,16 +31,16 @@ describe("getApiErrorMessage", () => {
       headers: {},
       config: { headers: new axios.AxiosHeaders() },
     });
-    expect(getApiErrorMessage(error)).not.toMatch(/synthetic-secret|stack trace/);
+    expect(getApiErrorMessage(error, t)).toBe(messages.ApiErrors.unavailable);
   });
 
   it.each([
-    [400, "Yêu cầu chưa hợp lệ."],
-    [401, "Phiên đăng nhập đã hết hạn."],
-    [403, "Bạn không có quyền"],
-    [404, "Không tìm thấy dữ liệu"],
-    [409, "Dữ liệu đã thay đổi."],
-    [429, "Bạn thao tác quá nhanh."],
+    [400, "badRequest"],
+    [401, "unauthorized"],
+    [403, "forbidden"],
+    [404, "notFound"],
+    [409, "conflict"],
+    [429, "tooManyRequests"],
   ] as const)("SYS-018 uses the fallback for status %s", (status, expected) => {
     const error = new axios.AxiosError("failure", "ERR_BAD_REQUEST", undefined, undefined, {
       data: {},
@@ -41,7 +49,7 @@ describe("getApiErrorMessage", () => {
       headers: {},
       config: { headers: new axios.AxiosHeaders() },
     });
-    expect(getApiErrorMessage(error)).toContain(expected);
+    expect(getApiErrorMessage(error, t)).toBe(messages.ApiErrors[expected]);
   });
   it("SYS-018 prefers a public message to detail and handles opaque failures", () => {
     const error = new axios.AxiosError("failure", "ERR_BAD_REQUEST", undefined, undefined, {
@@ -51,9 +59,9 @@ describe("getApiErrorMessage", () => {
       headers: {},
       config: { headers: new axios.AxiosHeaders() },
     });
-    expect(getApiErrorMessage(error)).toBe("Message");
-    expect(getApiErrorMessage(new Error("private error"))).not.toContain("private error");
-    expect(getApiErrorMessage(new axios.CanceledError())).toBe("Yêu cầu đã được hủy.");
-    expect(getApiErrorMessage(new axios.AxiosError("network"))).toContain("Không thể kết nối");
+    expect(getApiErrorMessage(error, t)).toBe("Message");
+    expect(getApiErrorMessage(new Error("private error"), t)).toBe(messages.ApiErrors.unknown);
+    expect(getApiErrorMessage(new axios.CanceledError(), t)).toBe(messages.ApiErrors.canceled);
+    expect(getApiErrorMessage(new axios.AxiosError("network"), t)).toBe(messages.ApiErrors.unavailable);
   });
 });

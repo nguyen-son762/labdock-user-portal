@@ -35,13 +35,15 @@ import { SignupVerificationForm } from "./signup-verification-form";
 type ForgotPasswordFlowState =
   { step: 1 } | { step: 2; challenge: ForgotPasswordChallenge } | { step: 3; challengeId: string; completed: boolean };
 
-function getForgotPasswordErrorMessage(error: unknown): string | null {
-  if (!error) return null;
-  if (error instanceof Error && error.name !== "AxiosError") return error.message;
-  return getApiErrorMessage(error);
-}
-
 export function ForgotPasswordForm() {
+  const tErrors = useTranslations("ApiErrors");
+
+  function getForgotPasswordErrorMessage(error: unknown): string | null {
+    if (!error) return null;
+    if (error instanceof Error && error.name !== "AxiosError") return error.message;
+    return getApiErrorMessage(error, tErrors);
+  }
+
   const t = useTranslations("Auth");
   const [flow, setFlow] = useState<ForgotPasswordFlowState>({ step: 1 });
   const startMutation = useStartForgotPasswordMutation();

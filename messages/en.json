@@ -1,4 +1,15 @@
 {
+  "ApiErrors": {
+    "badRequest": "The request is invalid. Please check your information.",
+    "unauthorized": "Your session has expired. Please log in again.",
+    "forbidden": "You do not have permission to perform this action.",
+    "notFound": "The requested data could not be found.",
+    "conflict": "The data has changed. Please reload and try again.",
+    "tooManyRequests": "You are making requests too quickly. Please try again later.",
+    "unknown": "An unexpected error occurred. Please try again.",
+    "canceled": "The request was canceled.",
+    "unavailable": "Unable to connect to the system. Please try again later."
+  },
   "CountrySelect": {
     "placeholder": "Select country",
     "search": "Search country or code",
@@ -74,6 +85,13 @@
       "about": "About us",
       "news": "News"
     }
+  },
+  "Suppliers": {
+    "title": "Suppliers",
+    "comingSoon": "Coming soon",
+    "description": "We're preparing a dedicated space to help you discover trusted laboratory suppliers. In the meantime, explore our product catalog.",
+    "browseProducts": "Browse products",
+    "backHome": "Back to home"
   },
   "Home": {
     "loadError": "We could not load the homepage content. Please try again.",

@@ -16,6 +16,7 @@ import { RfqItemsCard } from "./rfq-items-card";
 import { RfqStatusBadge } from "./rfq-status-badge";
 
 export function RfqDetailScreen({ rfqId }: { rfqId: string }) {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Rfqs");
   const rfqQuery = useRfqDetailQuery(rfqId);
   const rfq = rfqQuery.data;
@@ -38,7 +39,7 @@ export function RfqDetailScreen({ rfqId }: { rfqId: string }) {
       ) : null}
       {rfqQuery.isError ? (
         <div className="mt-5 space-y-4">
-          <Alert>{getApiErrorMessage(rfqQuery.error)}</Alert>
+          <Alert>{getApiErrorMessage(rfqQuery.error, tErrors)}</Alert>
           <Button asChild variant="outline">
             <Link href="/rfqs">{t("back")}</Link>
           </Button>

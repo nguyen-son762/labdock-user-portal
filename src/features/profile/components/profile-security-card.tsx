@@ -28,6 +28,7 @@ export function ProfileSecurityCard({
   onEdit: () => void;
   onCancel: () => void;
 }) {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Profile");
   const format = useFormatter();
   const mutation = useChangePasswordMutation();
@@ -75,7 +76,7 @@ export function ProfileSecurityCard({
       {editing ? (
         <Form {...form}>
           <form className="space-y-4 p-4" noValidate onSubmit={form.handleSubmit(handleSubmit)}>
-            {mutation.isError ? <Alert>{getApiErrorMessage(mutation.error)}</Alert> : null}
+            {mutation.isError ? <Alert>{getApiErrorMessage(mutation.error, tErrors)}</Alert> : null}
             {mutation.isSuccess ? (
               <p
                 role="status"

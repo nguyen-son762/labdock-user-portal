@@ -20,6 +20,7 @@ function parseFilters(searchParams: URLSearchParams) {
 }
 
 export function RfqsScreen() {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Rfqs");
   const pathname = usePathname();
   const router = useRouter();
@@ -46,7 +47,7 @@ export function RfqsScreen() {
           <Skeleton className="h-[480px] w-full rounded-xl" />
         </div>
       ) : null}
-      {rfqsQuery.isError ? <Alert className="mt-4">{getApiErrorMessage(rfqsQuery.error)}</Alert> : null}
+      {rfqsQuery.isError ? <Alert className="mt-4">{getApiErrorMessage(rfqsQuery.error, tErrors)}</Alert> : null}
       {rfqsQuery.data ? (
         <div
           className={

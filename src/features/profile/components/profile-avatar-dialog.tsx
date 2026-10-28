@@ -25,6 +25,7 @@ const MAX_FILE_SIZE = 1024 * 1024;
 const acceptedTypes = new Set(["image/jpeg", "image/png"]);
 
 export function ProfileAvatarDialog({ children }: { children: ReactNode }) {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Profile");
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File>();
@@ -82,7 +83,7 @@ export function ProfileAvatarDialog({ children }: { children: ReactNode }) {
           <DialogDescription>{t("uploadAvatarDescription")}</DialogDescription>
         </DialogHeader>
         {validationError ? <Alert>{validationError}</Alert> : null}
-        {updateAvatar.isError ? <Alert>{getApiErrorMessage(updateAvatar.error)}</Alert> : null}
+        {updateAvatar.isError ? <Alert>{getApiErrorMessage(updateAvatar.error, tErrors)}</Alert> : null}
         <div
           className="rounded-lg border border-[#c8d0d9] bg-white px-6 py-4 text-center"
           onDragOver={(event) => event.preventDefault()}

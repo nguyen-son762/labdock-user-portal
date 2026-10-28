@@ -64,6 +64,7 @@ function toFormValues(user: CurrentUser): ProfileFormValues {
 }
 
 export function ProfileForm({ user, onCancel }: { user: CurrentUser; onCancel: () => void }) {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Profile");
   const mutation = useUpdateProfileMutation();
   const form = useForm<ProfileFormValues>({
@@ -108,7 +109,7 @@ export function ProfileForm({ user, onCancel }: { user: CurrentUser; onCancel: (
           <div className="grid gap-x-4 gap-y-5 p-4 sm:grid-cols-2">
             {mutation.isError ? (
               <div className="col-span-full">
-                <Alert>{getApiErrorMessage(mutation.error)}</Alert>
+                <Alert>{getApiErrorMessage(mutation.error, tErrors)}</Alert>
               </div>
             ) : null}
             {mutation.isSuccess ? (

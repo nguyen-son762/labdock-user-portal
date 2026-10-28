@@ -1,4 +1,15 @@
 {
+  "ApiErrors": {
+    "badRequest": "Yêu cầu chưa hợp lệ. Vui lòng kiểm tra lại thông tin.",
+    "unauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này.",
+    "notFound": "Không tìm thấy dữ liệu được yêu cầu.",
+    "conflict": "Dữ liệu đã thay đổi. Vui lòng tải lại và thử lại.",
+    "tooManyRequests": "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+    "unknown": "Đã xảy ra lỗi không xác định. Vui lòng thử lại.",
+    "canceled": "Yêu cầu đã được hủy.",
+    "unavailable": "Không thể kết nối đến hệ thống. Vui lòng thử lại sau."
+  },
   "CountrySelect": {
     "placeholder": "Chọn quốc gia",
     "search": "Tìm quốc gia hoặc mã gọi",
@@ -74,6 +85,13 @@
       "about": "Về chúng tôi",
       "news": "Tin tức"
     }
+  },
+  "Suppliers": {
+    "title": "Nhà cung cấp",
+    "comingSoon": "Sắp ra mắt",
+    "description": "Chúng tôi đang xây dựng trang giúp bạn tìm kiếm các nhà cung cấp phòng thí nghiệm uy tín. Trong thời gian chờ đợi, hãy khám phá danh mục sản phẩm.",
+    "browseProducts": "Khám phá sản phẩm",
+    "backHome": "Về trang chủ"
   },
   "Home": {
     "loadError": "Không thể tải nội dung trang chủ. Vui lòng thử lại.",

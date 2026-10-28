@@ -15,6 +15,7 @@ import { OrderItemsCard } from "./order-items-card";
 import { OrderStatusBadge } from "./order-status-badge";
 
 export function OrderDetailScreen({ orderId }: { orderId: string }) {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Orders");
   const orderQuery = useOrderDetailQuery(orderId);
 
@@ -36,7 +37,7 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
       ) : null}
       {orderQuery.isError ? (
         <div className="mt-5 space-y-4">
-          <Alert>{getApiErrorMessage(orderQuery.error)}</Alert>
+          <Alert>{getApiErrorMessage(orderQuery.error, tErrors)}</Alert>
           <Button asChild variant="outline">
             <Link href="/orders">{t("backToOrders")}</Link>
           </Button>

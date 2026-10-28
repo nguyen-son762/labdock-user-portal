@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -23,13 +24,15 @@ import { SignupVerificationForm } from "./signup-verification-form";
 
 type SignupFlowState = { step: 1 } | { step: 2; challenge: SignupChallenge } | { step: 3; challengeId: string };
 
-function getSignupErrorMessage(error: unknown): string | null {
-  if (!error) return null;
-  if (error instanceof Error && error.name !== "AxiosError") return error.message;
-  return getApiErrorMessage(error);
-}
-
 export function SignupForm() {
+  const tErrors = useTranslations("ApiErrors");
+
+  function getSignupErrorMessage(error: unknown): string | null {
+    if (!error) return null;
+    if (error instanceof Error && error.name !== "AxiosError") return error.message;
+    return getApiErrorMessage(error, tErrors);
+  }
+
   const [flow, setFlow] = useState<SignupFlowState>({ step: 1 });
   const signupMutation = useSignupMutation();
   const verifyMutation = useVerifySignupMutation();

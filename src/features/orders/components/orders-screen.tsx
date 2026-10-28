@@ -20,6 +20,7 @@ function parseFilters(searchParams: URLSearchParams) {
 }
 
 export function OrdersScreen() {
+  const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Orders");
   const pathname = usePathname();
   const router = useRouter();
@@ -46,7 +47,7 @@ export function OrdersScreen() {
           <Skeleton className="h-[480px] w-full rounded-xl" />
         </div>
       ) : null}
-      {ordersQuery.isError ? <Alert className="mt-4">{getApiErrorMessage(ordersQuery.error)}</Alert> : null}
+      {ordersQuery.isError ? <Alert className="mt-4">{getApiErrorMessage(ordersQuery.error, tErrors)}</Alert> : null}
       {ordersQuery.data ? (
         <div
           className={

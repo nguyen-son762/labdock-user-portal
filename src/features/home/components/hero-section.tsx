@@ -30,12 +30,12 @@ const guarantees = [
 ] as const;
 
 const quickActions = [
-  { key: "product", icon: Box, href: "/#new-products", imageUrl: "/home/icon/lab_1.svg" },
-  { key: "suppliers", icon: People, href: "/#research-leaders", imageUrl: "/home/icon/group.svg" },
+  { key: "product", icon: Box, href: "/products", imageUrl: "/home/icon/lab_1.svg" },
+  { key: "suppliers", icon: People, href: "/suppliers", imageUrl: "/home/icon/group.svg" },
   { key: "rfq", icon: ClipboardText, href: "/rfqs", imageUrl: "/home/icon/invoice.svg" },
   { key: "orders", icon: ShoppingCart, href: "/orders", imageUrl: "/home/icon/shopping-cart.svg" },
   { key: "chat", icon: MessageText, href: "/contact-us", imageUrl: "/home/icon/chat-box.svg" },
-  { key: "news", icon: ReceiptItem, href: "/#news", imageUrl: "/home/icon/annotation.svg" },
+  { key: "news", icon: ReceiptItem, href: "/news", imageUrl: "/home/icon/annotation.svg" },
 ] as const;
 
 function PromoCard({ event = false }: { event?: boolean }) {
