@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ServiceGuarantees } from "@/components/shared/service-guarantees";
 
@@ -37,6 +39,8 @@ export async function ProductListScreen({
   brandsError,
   activeCategory,
 }: ProductListScreenProps) {
+  const tHeader = await getTranslations("Header");
+  const t = await getTranslations("Catalog");
   const topLevelCategories = categories.filter((category) => category.depth === 0);
   const visibleCategories = await getCatalogCategoriesWithCounts(
     activeCategory ? activeCategory.children : topLevelCategories,
@@ -50,11 +54,11 @@ export async function ProductListScreen({
           items={
             activeCategory
               ? [
-                  { label: "Home", href: "/" },
-                  { label: "All categories", href: "/products" },
+                  { label: tHeader("home"), href: "/" },
+                  { label: t("allCategories"), href: "/products" },
                   { label: activeCategory.name },
                 ]
-              : [{ label: "Home", href: "/" }, { label: "All categories" }]
+              : [{ label: tHeader("home"), href: "/" }, { label: t("allCategories") }]
           }
         />
         {activeCategory && !activeCategory.children.length ? (
@@ -64,7 +68,7 @@ export async function ProductListScreen({
           <CategoryStrip
             categories={visibleCategories}
             selectedCategoryId={activeCategory ? undefined : filters.categoryId}
-            title={activeCategory ? activeCategory.name : "All categories"}
+            title={activeCategory ? activeCategory.name : t("allCategories")}
             headingLevel={activeCategory ? "h1" : "h2"}
           />
         </div>

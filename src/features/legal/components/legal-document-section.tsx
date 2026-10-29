@@ -19,7 +19,7 @@ export function LegalDocumentSection({ index, section }: LegalDocumentSectionPro
           <p key={paragraph}>{paragraph}</p>
         ))}
         {section.list ? (
-          <ul className="list-none" aria-label={`${section.title} details`}>
+          <ul className="list-none" aria-labelledby={headingId}>
             {section.list.map((item) => (
               <li key={item}>{item}</li>
             ))}

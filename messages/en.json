@@ -617,6 +617,7 @@
     "categoryCountUnavailable": "Count unavailable"
   },
   "Product": {
+    "relatedProducts": "Related Products",
     "noDescription": "No description is available.",
     "information": "Product information",
     "descriptionTab": "Description",

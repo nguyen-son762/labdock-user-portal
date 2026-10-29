@@ -1,12 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
+import { renderWithProviders } from "@/test/render-with-providers";
 
 import { privacyDocument, termsDocument } from "../legal.data";
 import { LegalDocumentScreen } from "./legal-document-screen";
 
 describe("LegalDocumentScreen", () => {
   it("renders all Terms and Conditions sections with a single page heading", () => {
-    render(<LegalDocumentScreen document={termsDocument} />);
+    renderWithProviders(<LegalDocumentScreen document={termsDocument} />);
 
     expect(screen.getByRole("heading", { level: 1, name: "Terms and conditions" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(14);
@@ -15,10 +17,10 @@ describe("LegalDocumentScreen", () => {
   });
 
   it("renders Privacy Policy lists as accessible lists", () => {
-    render(<LegalDocumentScreen document={privacyDocument} />);
+    renderWithProviders(<LegalDocumentScreen document={privacyDocument} />);
 
     expect(screen.getByRole("heading", { level: 1, name: "Privacy Policy" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(11);
-    expect(screen.getByRole("list", { name: "User Rights details" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "User Rights" })).toBeInTheDocument();
   });
 });

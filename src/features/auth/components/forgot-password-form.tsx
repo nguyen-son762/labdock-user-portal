@@ -134,7 +134,7 @@ export function ForgotPasswordForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Email address <span className="text-destructive">*</span>
+                    {t("emailAddress")} <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input

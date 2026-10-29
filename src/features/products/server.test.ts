@@ -254,6 +254,55 @@ describe("getCatalogCategoriesWithCounts", () => {
   });
 });
 
+describe("getPublicCategoryTreeWithCounts", () => {
+  it("BP-TC-02-01 fills missing menu counts at every level without replacing known zero counts", async () => {
+    const { getPublicCategoryTreeWithCounts } = await import("./server");
+    const categories: import("@/features/categories").PublicCategoryTreeNode[] = [
+      {
+        id: "22222222-2222-2222-2222-222222222222",
+        name: "Glassware",
+        description: null,
+        slug: "glassware",
+        level: 1,
+        sortOrder: 0,
+        media: [],
+        children: [
+          {
+            id: "33333333-3333-3333-3333-333333333333",
+            name: "Beakers",
+            description: null,
+            slug: "beakers",
+            level: 2,
+            sortOrder: 0,
+            productCount: 0,
+            media: [],
+            children: [],
+          },
+        ],
+      },
+    ];
+    const fetchMock = vi.fn().mockImplementation(async () => new Response(JSON.stringify(productsResponse)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getPublicCategoryTreeWithCounts(categories);
+
+    expect(result[0]?.productCount).toBe(10);
+    expect(result[0]?.children[0]?.productCount).toBe(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(categories[0]).not.toHaveProperty("productCount");
+
+    const parent = categories[0];
+    const child = parent?.children[0];
+    if (!parent || !child) throw new Error("Missing category fixture.");
+    const nestedResult = await getPublicCategoryTreeWithCounts([
+      { ...parent, productCount: 0, children: [{ ...child, productCount: undefined }] },
+    ]);
+    expect(nestedResult[0]?.productCount).toBe(0);
+    expect(nestedResult[0]?.children[0]?.productCount).toBe(10);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("getPublicProductBySlug", () => {
   it("loads and validates a product detail by encoded slug", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(productDetailResponse), { status: 200 }));

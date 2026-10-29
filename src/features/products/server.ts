@@ -1,8 +1,9 @@
 import { clientEnv } from "@/config/client-env";
+import type { PublicCategoryTreeNode } from "@/features/categories";
 import { createServerApiRequestInit } from "@/lib/server-api-request";
 
 import { products } from "./data/products-data";
-import type { CatalogCategoryOption, Product } from "./products.types";
+import type { Product } from "./products.types";
 import { publicProductDetailSchema } from "./schemas/product-detail.schema";
 import { publicProductOriginsSchema } from "./schemas/product-origin.schema";
 import {
@@ -77,9 +78,9 @@ export async function getPublicProductOrigins(): Promise<string[]> {
   return [...new Set(publicProductOriginsSchema.parse(await response.json()))];
 }
 
-export async function getCatalogCategoriesWithCounts(
-  categories: readonly CatalogCategoryOption[],
-): Promise<CatalogCategoryOption[]> {
+export async function getCatalogCategoriesWithCounts<T extends { id: string; productCount?: number }>(
+  categories: readonly T[],
+): Promise<Array<T & { productCount?: number }>> {
   const results = await Promise.allSettled(
     categories.map(async (category) => {
       if (category.productCount !== undefined) return category;
@@ -92,6 +93,17 @@ export async function getCatalogCategoriesWithCounts(
     const result = results[index];
     return result?.status === "fulfilled" ? result.value : category;
   });
+}
+
+export async function getPublicCategoryTreeWithCounts(
+  categories: readonly PublicCategoryTreeNode[],
+): Promise<PublicCategoryTreeNode[]> {
+  const [countedCategories, children] = await Promise.all([
+    getCatalogCategoriesWithCounts(categories),
+    Promise.all(categories.map((category) => getPublicCategoryTreeWithCounts(category.children))),
+  ]);
+
+  return countedCategories.map((category, index) => ({ ...category, children: children[index] ?? [] }));
 }
 
 export async function getPublicProductBySlug(slug: string): Promise<Product> {

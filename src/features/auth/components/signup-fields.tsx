@@ -100,7 +100,7 @@ export function PhoneField({ control }: { control: Control<SignupValues> }) {
   return (
     <div className="space-y-2">
       <p className="inline text-sm font-medium leading-none">
-        Phone no. <span className="text-destructive">*</span>
+        {t("phoneNumber")} <span className="text-destructive">*</span>
       </p>
       <div className="grid grid-cols-[116px_1fr] gap-2">
         <FormField

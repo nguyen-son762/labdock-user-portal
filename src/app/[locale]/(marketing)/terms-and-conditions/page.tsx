@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { LegalDocumentScreen, termsDocument } from "@/features/legal";
+import { getLegalDocument, LegalDocumentScreen } from "@/features/legal";
 import { getLocalizedAlternates, isAppLocale } from "@/i18n/locale";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -16,6 +16,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default function TermsAndConditionsPage() {
-  return <LegalDocumentScreen document={termsDocument} />;
+export default async function TermsAndConditionsPage() {
+  return <LegalDocumentScreen document={getLegalDocument("terms", await getLocale())} />;
 }

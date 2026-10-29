@@ -617,6 +617,7 @@
     "categoryCountUnavailable": "Chưa tải được số lượng"
   },
   "Product": {
+    "relatedProducts": "Sản phẩm liên quan",
     "noDescription": "Chưa có mô tả sản phẩm.",
     "information": "Thông tin sản phẩm",
     "descriptionTab": "Mô tả",

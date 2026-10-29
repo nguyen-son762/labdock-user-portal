@@ -1,2 +1,2 @@
 export { LegalDocumentScreen } from "./components/legal-document-screen";
-export { privacyDocument, termsDocument } from "./legal.data";
+export { getLegalDocument, privacyDocument, termsDocument } from "./legal.data";

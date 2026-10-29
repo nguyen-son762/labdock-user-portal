@@ -1,4 +1,10 @@
 import type { LegalDocument } from "./legal.types";
+import { privacyDocumentVi, termsDocumentVi } from "./legal.data.vi";
+
+export function getLegalDocument(kind: LegalDocument["kind"], locale: string): LegalDocument {
+  if (kind === "terms") return locale === "vi" ? termsDocumentVi : termsDocument;
+  return locale === "vi" ? privacyDocumentVi : privacyDocument;
+}
 
 export const termsDocument: LegalDocument = {
   kind: "terms",

@@ -27,6 +27,7 @@ import { PaymentMethodSection } from "./payment-method-section";
 import { EmptyCartScreen } from "./empty-cart-screen";
 
 export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }) {
+  const tHeader = useTranslations("Header");
   const t = useTranslations("Checkout");
   const cartQuery = useCartQuery();
   const profileQuery = useCurrentUserQuery();
@@ -106,7 +107,7 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
     <div className="bg-[#f5f8fb] py-10">
       <div className="container">
         <Breadcrumbs
-          items={[{ label: "Home", href: "/" }, { label: "Shopping cart", href: "/cart" }, { label: "Checkout" }]}
+          items={[{ label: tHeader("home"), href: "/" }, { label: t("cart"), href: "/cart" }, { label: t("checkout") }]}
         />
         <h1 className="mt-3 text-3xl font-semibold text-[#164990]">{t("checkout")}</h1>
         <Link

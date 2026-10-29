@@ -20,6 +20,7 @@ import { EmptyCartScreen } from "./empty-cart-screen";
 import { QuoteContactForm } from "./quote-contact-form";
 
 export function RequestQuoteScreen({ initialItemIds }: { initialItemIds?: string[] }) {
+  const tHeader = useTranslations("Header");
   const t = useTranslations("Checkout");
   const router = useRouter();
   const cartQuery = useCartQuery();
@@ -56,7 +57,11 @@ export function RequestQuoteScreen({ initialItemIds }: { initialItemIds?: string
         {cartQuery.isError ? <Alert>{t("loadCartError")}</Alert> : null}
         {removeCart.isError ? <Alert>{t("removeItemError")}</Alert> : null}
         <Breadcrumbs
-          items={[{ label: "Home", href: "/" }, { label: "Cart", href: "/cart" }, { label: "Request for quote" }]}
+          items={[
+            { label: tHeader("home"), href: "/" },
+            { label: t("cart"), href: "/cart" },
+            { label: t("requestQuote") },
+          ]}
         />
         <h1 className="mt-3 text-3xl font-semibold text-[#164990]">{t("requestQuote")}</h1>
         <Link

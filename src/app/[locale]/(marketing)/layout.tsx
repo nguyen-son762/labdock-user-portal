@@ -3,12 +3,14 @@ import { connection } from "next/server";
 
 import { SiteFooter } from "@/components/shared/site-footer";
 import { getPublicCategories } from "@/features/categories/server";
+import { getPublicCategoryTreeWithCounts } from "@/features/products/server";
 
 import { MarketingHeader } from "./marketing-header";
 
 export default async function MarketingLayout({ children }: { children: ReactNode }) {
   await connection();
   const categoriesResult = await getPublicCategories()
+    .then(getPublicCategoryTreeWithCounts)
     .then((categories) => ({ categories, hasError: false }))
     .catch(() => ({ categories: [], hasError: true }));
 

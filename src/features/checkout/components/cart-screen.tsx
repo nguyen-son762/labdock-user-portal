@@ -17,6 +17,7 @@ import { CartOrderSummary } from "./cart-order-summary";
 import { EmptyCartScreen } from "./empty-cart-screen";
 
 export function CartScreen({ forceEmpty = false }: { forceEmpty?: boolean }) {
+  const tHeader = useTranslations("Header");
   const t = useTranslations("Checkout");
   const cartQuery = useCartQuery();
   const updateCart = useUpdateCartItemMutation();
@@ -40,7 +41,7 @@ export function CartScreen({ forceEmpty = false }: { forceEmpty?: boolean }) {
   return (
     <div className="min-h-[675px] bg-[#f9fcff] py-10">
       <div className="container">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Cart" }]} />
+        <Breadcrumbs items={[{ label: tHeader("home"), href: "/" }, { label: t("cart") }]} />
         <h1 className="mt-3 text-3xl font-semibold text-[#164990]">{t("cart")}</h1>
         <Link
           href="/products"

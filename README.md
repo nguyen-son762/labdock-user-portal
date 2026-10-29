@@ -214,6 +214,8 @@ Backend luôn phải kiểm tra Authentication và Authorization. Việc ẩn UI
 
 Category được tải trong Server Component bằng native `fetch`. Nếu request có cookie access token, frontend gửi `Authorization: Bearer <token>` và dùng `cache: 'no-store'`; nếu không có token, response public được cache/revalidate mỗi 5 phút. Request thất bại sẽ hiển thị trạng thái không tải được category thay vì làm hỏng header.
 
+Menu và thanh danh mục dùng `productCount` từ API nếu có, kể cả giá trị `0`. Khi thiếu, server bổ sung số đếm bằng `GET /products?page=1&pageSize=1&CategoryIds={id}`, dùng lại cache policy của catalog. Các cấp trong cây được tải song song; lỗi đếm riêng lẻ vẫn giữ liên kết danh mục và không thay số chưa biết bằng `0`.
+
 ### Product catalog
 
 Route `/products` tải song song `GET /products`, `GET /categories`, `GET /brands` và `GET /origins` ở Server Component. Thanh category phía trên và bộ lọc Brand giữ lựa chọn đơn qua `categoryId`, `brandId`; nhóm Origin dưới Brand dùng checkbox chọn nhiều, lưu trong URL qua `origins=SG,DE`. Phân trang và sắp xếp dùng `page`, `sort`. Mỗi lần đổi bộ lọc hoặc sort, trang được đưa về page đầu và Server Component request lại `GET /products` với `pageSize=20`. Server chuyển danh sách ID và origin thành chuỗi phân cách bằng dấu phẩy với tên tham số API `CategoryIds`, `brandIds`, `Origins`; các tham số còn lại là `page`, `pageSize`, `Sort`, `IsNew`, `IsOutstanding`. Trang `/products/category/[slug]` dùng cùng bộ lọc Brand/Origin với category lấy từ route.
