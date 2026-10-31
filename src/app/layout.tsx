@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
+import { Geist } from "next/font/google";
 import { getLocale } from "next-intl/server";
 
 import "./globals.css";
+
+const geist = Geist({
+  subsets: ["latin", "latin-ext"],
+});
 
 export const metadata = {
   icons: {
@@ -23,7 +28,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const locale = await getLocale();
   return (
     <html lang={locale} data-scroll-behavior="smooth">
-      <body className="min-h-dvh font-sans">{children}</body>
+      <body className={`${geist.className} min-h-dvh`}>{children}</body>
     </html>
   );
 }
