@@ -156,23 +156,12 @@ export function PersonalizedProducts({ products }: { products: readonly Product[
               />
             </svg>
             <span className="relative z-10 flex items-center gap-2 text-2xl">
-              <div className="relative">
-                <Image className="relative z-10" src="/home/icon/personal.png" alt="" width={40} height={40} />
-                <svg
-                  className="absolute -top-[1px] right-0"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="33"
-                  height="33"
-                  viewBox="0 0 33 33"
-                  fill="none"
-                >
-                  <path
-                    d="M16.3399 0C7.31561 0 0 7.31561 0 16.3399C0 25.3641 7.31561 32.6797 16.3399 32.6797C25.3641 32.6797 32.6797 25.3641 32.6797 16.3399C32.6797 7.31561 25.3641 0 16.3399 0Z"
-                    fill="url(#paint0_linear_106_4260)"
-                  />
+              <span aria-hidden="true" className="relative isolate block size-10 shrink-0">
+                <svg className="absolute -top-px right-0" width="33" height="33" viewBox="0 0 33 33" fill="none">
+                  <circle cx="16.3399" cy="16.3399" r="16.3399" fill="url(#personalized-icon-orange)" />
                   <defs>
                     <linearGradient
-                      id="paint0_linear_106_4260"
+                      id="personalized-icon-orange"
                       x1="0"
                       y1="16.3399"
                       x2="32.6797"
@@ -184,7 +173,72 @@ export function PersonalizedProducts({ products }: { products: readonly Product[
                     </linearGradient>
                   </defs>
                 </svg>
-              </div>
+                <span className="absolute left-[3.13721px] top-[4.70587px] z-10 size-[32.6797px] rounded-full bg-[#FCDB97]/20 backdrop-blur-[4.5px]" />
+                <svg className="absolute inset-0 z-20 size-full" viewBox="0 0 40 40" fill="none">
+                  <circle cx="19.4771" cy="21.0457" r="15.83985" stroke="url(#personalized-icon-rim-top)" />
+                  <circle
+                    cx="19.4771"
+                    cy="21.0457"
+                    r="15.83985"
+                    stroke="url(#personalized-icon-rim-bottom)"
+                    strokeOpacity="0.2"
+                  />
+                  <path
+                    d="M19.4771 11.2418C16.7699 11.2418 14.5752 13.4365 14.5752 16.1438C14.5752 18.8511 16.7699 21.0457 19.4771 21.0457C22.1845 21.0457 24.3791 18.8511 24.3791 16.1438C24.3791 13.4365 22.1845 11.2418 19.4771 11.2418Z"
+                    fill="url(#personalized-icon-head)"
+                  />
+                  <path
+                    d="M29.1093 28.485C29.3394 28.9449 29.3394 29.4864 29.1093 29.9466C29.1232 29.9178 29.1082 29.9489 29.1082 29.9489L29.1069 29.9513L29.1044 29.9562L29.0987 29.9673L29.0853 29.9928C29.0754 30.0116 29.0634 30.0333 29.0495 30.058C29.0214 30.1075 28.985 30.1686 28.9393 30.2397C28.8479 30.382 28.719 30.5644 28.5456 30.7724C28.1979 31.1895 27.6741 31.7067 26.9201 32.2093C25.3973 33.2245 23.0316 34.1176 19.4776 34.1176C13.4562 34.1176 10.9244 31.5529 10.1091 30.3783C9.61582 29.6675 9.67044 28.8371 9.96881 28.2404C11.1721 25.8338 13.6317 24.3137 16.3223 24.3137H22.3602C25.2183 24.3137 27.8311 25.9286 29.1093 28.485Z"
+                    fill="url(#personalized-icon-body)"
+                  />
+                  <defs>
+                    <linearGradient
+                      id="personalized-icon-rim-top"
+                      x1="31.5686"
+                      y1="7.25489"
+                      x2="19.6078"
+                      y2="21.1765"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="white" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="personalized-icon-rim-bottom"
+                      x1="5.09799"
+                      y1="42.9412"
+                      x2="30.196"
+                      y2="14.7059"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="white" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="personalized-icon-head"
+                      x1="21.5685"
+                      y1="16.0784"
+                      x2="10.7842"
+                      y2="18.0392"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="white" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="personalized-icon-body"
+                      x1="19.608"
+                      y1="27.8431"
+                      x2="8.43158"
+                      y2="34.1176"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="white" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </span>
               {t("personalized")}
             </span>
           </h2>

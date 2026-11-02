@@ -69,6 +69,8 @@ describe("httpClient authentication", () => {
 
   it("refreshes once for concurrent 401 responses and retries with the new access token", async () => {
     authTokenStore.set(initialTokens);
+    const refreshListener = vi.fn();
+    const unsubscribe = authTokenStore.onRefresh(refreshListener);
     let protectedCalls = 0;
     let refreshCalls = 0;
     const retriedAuthorizations: string[] = [];
@@ -89,23 +91,35 @@ describe("httpClient authentication", () => {
       return createResponse(config, { ok: true });
     }) satisfies AxiosAdapter;
 
-    await Promise.all([httpClient.get("/protected/one"), httpClient.get("/protected/two")]);
+    try {
+      await Promise.all([httpClient.get("/protected/one"), httpClient.get("/protected/two")]);
+    } finally {
+      unsubscribe();
+    }
 
     expect(refreshCalls).toBe(1);
     expect(retriedAuthorizations).toEqual(["Bearer refreshed-access-token", "Bearer refreshed-access-token"]);
     expect(authTokenStore.getRefreshToken()).toBe(refreshedTokens.refreshToken);
+    expect(refreshListener).toHaveBeenCalledExactlyOnceWith();
   });
 
   it("clears tokens when refresh fails", async () => {
     authTokenStore.set(initialTokens);
+    const refreshListener = vi.fn();
+    const unsubscribe = authTokenStore.onRefresh(refreshListener);
     httpClient.defaults.adapter = (async (config) => {
       throw unauthorized(config);
     }) satisfies AxiosAdapter;
 
-    await expect(httpClient.get("/protected")).rejects.toSatisfy(axios.isAxiosError);
+    try {
+      await expect(httpClient.get("/protected")).rejects.toSatisfy(axios.isAxiosError);
+    } finally {
+      unsubscribe();
+    }
 
     expect(authTokenStore.getAccessToken()).toBeNull();
     expect(authTokenStore.getRefreshToken()).toBeNull();
+    expect(refreshListener).not.toHaveBeenCalled();
   });
 
   it("SYS-006 does not restore a session when refresh finishes after logout", async () => {

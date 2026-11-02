@@ -20,6 +20,24 @@ const order = {
   createdAt: "2026-08-21T10:00:00+00:00",
 };
 
+const detail = {
+  ...order,
+  platformFeeRateSnap: 0,
+  shippingSnapshotJson: "{}",
+  invoice: {
+    orderNumber: "ORD-001",
+    createdAt: "2026-08-21T10:00:00+00:00",
+    buyerEmail: "sample-buyer-email",
+    lines: [{ productName: "Example product", sku: "SKU-001", unitPrice: 99.5, quantity: 1, lineTotal: 99.5 }],
+    subtotal: 99.5,
+    tax: 9.95,
+    platformFee: 0,
+    total: 109.45,
+    currency: "SGD",
+    status: "Draft",
+  },
+};
+
 describe("ordersService", () => {
   afterEach(() => httpClient.get.mockReset());
 
@@ -38,23 +56,6 @@ describe("ordersService", () => {
   });
 
   it("fetches order detail by id and validates invoice data", async () => {
-    const detail = {
-      ...order,
-      platformFeeRateSnap: 0,
-      shippingSnapshotJson: "{}",
-      invoice: {
-        orderNumber: "ORD-001",
-        createdAt: "2026-08-21T10:00:00+00:00",
-        buyerEmail: "sample-buyer-email",
-        lines: [{ productName: "Example product", sku: "SKU-001", unitPrice: 99.5, quantity: 1, lineTotal: 99.5 }],
-        subtotal: 99.5,
-        tax: 9.95,
-        platformFee: 0,
-        total: 109.45,
-        currency: "SGD",
-        status: "Draft",
-      },
-    };
     httpClient.get.mockResolvedValue({ data: detail });
 
     const result = await ordersService.getById(order.id);
@@ -62,6 +63,30 @@ describe("ordersService", () => {
     expect(httpClient.get).toHaveBeenCalledWith(`/orders/${order.id}`, { signal: undefined });
     expect(result.invoice.lines[0]?.sku).toBe("SKU-001");
     expect(result.shippingSnapshotJson).toBe("{}");
+  });
+
+  it.each([
+    [0, "Draft"],
+    [1, "New"],
+    [2, "Processing"],
+    [3, "Shipped"],
+    [4, "Delivered"],
+    [5, "Cancelled"],
+  ])("normalizes numeric order status %s and nullable fee rate", async (status, label) => {
+    httpClient.get.mockResolvedValue({
+      data: {
+        ...detail,
+        status,
+        platformFeeRateSnap: null,
+        invoice: { ...detail.invoice, status },
+      },
+    });
+
+    const result = await ordersService.getById(order.id);
+
+    expect(result.status).toBe(label);
+    expect(result.invoice.status).toBe(label);
+    expect(result.platformFeeRateSnap).toBeNull();
   });
 
   it("rejects an invalid order id before making a request", async () => {

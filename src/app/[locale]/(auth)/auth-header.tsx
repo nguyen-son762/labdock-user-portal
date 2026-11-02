@@ -21,6 +21,7 @@ export function AuthHeader({ categories, categoriesError = false }: AuthHeaderPr
   return (
     <MainHeader
       account={account}
+      isAuthenticated={sessionQuery.data?.authenticated === true}
       accountContent={account ? <HeaderAccountMenu account={account} /> : undefined}
       compactAccountContent={account ? <HeaderAccountMenu account={account} compact /> : undefined}
       compactCartContent={<CompactCartLink />}

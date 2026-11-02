@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 
-const localeFlags: Record<AppLocale, string> = { en: "🇸🇬", vi: "🇻🇳" };
+const localeFlags: Record<AppLocale, string> = { en: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", vi: "🇻🇳" };
 
 export function LanguageSwitcher() {
   const locale = useLocale();

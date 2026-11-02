@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders } from "@/test/render-with-providers";
 import { profileService } from "@/features/profile";
@@ -11,22 +11,19 @@ import type { CheckoutSession } from "../checkout.types";
 import { checkoutItems } from "../data/checkout-data";
 import { CheckoutScreen } from "./checkout-screen";
 
-const navigation = { assign: vi.fn() };
+const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("@/i18n/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/i18n/navigation")>()),
+  useRouter: () => navigation,
+}));
 
 describe("CheckoutScreen", () => {
   beforeEach(() => {
-    navigation.assign.mockReset();
-    vi.stubGlobal("location", {
-      href: window.location.href,
-      origin: window.location.origin,
-      assign: navigation.assign,
-    });
+    navigation.push.mockReset();
     vi.restoreAllMocks();
     vi.spyOn(cartService, "get").mockResolvedValue(checkoutItems);
     vi.spyOn(profileService, "getCurrent").mockRejectedValue(new Error("No profile fixture"));
   });
-
-  afterEach(() => vi.unstubAllGlobals());
 
   it("prevents duplicate checkout submits while payment is being prepared", async () => {
     const user = userEvent.setup();
@@ -38,6 +35,8 @@ describe("CheckoutScreen", () => {
 
     renderWithProviders(<CheckoutScreen initialItemIds={[checkoutItems[0]!.id]} />);
     const submit = await screen.findByRole("button", { name: "Make payment" });
+    expect(screen.getByRole("radio", { name: "Bank transfer" })).toBeChecked();
+    expect(screen.queryByRole("radio", { name: /PayNow/ })).not.toBeInTheDocument();
     await user.type(screen.getByRole("textbox", { name: "Full name *" }), "QA Tester");
     await user.type(screen.getByRole("textbox", { name: "Email address *" }), "qa@example.test");
     await user.type(screen.getByRole("textbox", { name: "Phone no. *" }), "88009900");
@@ -56,12 +55,17 @@ describe("CheckoutScreen", () => {
       checkoutUrl: "https://checkout.stripe.com/c/pay-test-session",
     });
     await waitFor(() =>
-      expect(navigation.assign).toHaveBeenCalledWith("https://checkout.stripe.com/c/pay-test-session"),
+      expect(navigation.push).toHaveBeenCalledWith("/payment?orderId=11111111-1111-1111-1111-111111111111"),
     );
+    expect(submit).toBeDisabled();
     expect(createSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [checkoutItems[0]],
-        checkout: expect.objectContaining({ city: "Singapore", notes: "Call on arrival" }),
+        checkout: expect.objectContaining({
+          city: "Singapore",
+          notes: "Call on arrival",
+          paymentMethod: "bank-transfer",
+        }),
       }),
       expect.anything(),
     );

@@ -44,10 +44,11 @@ describe("product pricing", () => {
     });
   });
 
-  it("defaults to the cheapest available variant after promotions", () => {
+  it("defaults to the first API variant, preserving its order instead of choosing by price", () => {
     const promoted = { ...variant, id: "promoted", unitPrice: 110, promotionPercent: 20 };
     const missingPrice = { ...variant, id: "missing", unitPrice: null };
-    expect(getDefaultProductVariant({ ...product, variants: [missingPrice, variant, promoted] })).toEqual(promoted);
+    expect(getDefaultProductVariant({ ...product, variants: [variant, promoted] })).toEqual(variant);
+    expect(getDefaultProductVariant({ ...product, variants: [missingPrice, variant, promoted] })).toEqual(missingPrice);
   });
   it("PDP-007 distinguishes a visible zero price from a missing price", () => {
     expect(getProductVariantPresentation(product, { ...variant, unitPrice: 0 })).toMatchObject({

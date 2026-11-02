@@ -39,19 +39,7 @@ export function getProductVariantLabel(variant: ProductVariant): string {
 }
 
 export function getDefaultProductVariant(product: Product): ProductVariant | undefined {
-  const activeVariants = product.variants.filter((variant) => variant.isActive);
-  const purchasableVariants = activeVariants
-    .filter(
-      (variant) =>
-        product.priceVisible &&
-        variant.priceVisible &&
-        variant.stockQty > 0 &&
-        variant.unitPrice !== null &&
-        variant.unitPrice > 0,
-    )
-    .sort((left, right) => getPromotionalPrice(left) - getPromotionalPrice(right));
-
-  return purchasableVariants[0] ?? activeVariants[0] ?? product.variants[0];
+  return product.variants[0];
 }
 
 export function getPromotionalPrice(variant: ProductVariant): number {

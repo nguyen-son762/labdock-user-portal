@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { cartApiItemSchema, cartItemsSchema } from "./cart.schema";
 
-export const paymentMethodSchema = z.enum(["paynow", "bank-transfer"]);
+export const paymentMethodSchema = z.enum(["bank-transfer"]);
 export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
 
 export const checkoutSchema = z
@@ -58,8 +58,4 @@ export const checkoutSessionSchema = z.object({
 });
 export type CheckoutSession = z.infer<typeof checkoutSessionSchema>;
 
-export const completePaymentInputSchema = z.object({
-  paymentReference: z.string().min(1),
-  method: paymentMethodSchema,
-});
-export type CompletePaymentInput = z.infer<typeof completePaymentInputSchema>;
+export const paymentOrderIdSchema = cartApiItemSchema.shape.id;

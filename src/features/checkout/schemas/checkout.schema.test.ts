@@ -14,7 +14,7 @@ const validCheckout = {
   billingSameAsDelivery: true,
   billingAddress: "",
   billingPostalCode: "",
-  paymentMethod: "paynow" as const,
+  paymentMethod: "bank-transfer" as const,
 };
 
 describe("checkoutSchema", () => {

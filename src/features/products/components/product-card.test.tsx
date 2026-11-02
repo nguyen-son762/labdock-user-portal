@@ -1,12 +1,16 @@
-import { screen } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
+import { Toaster } from "@/components/ui/sonner";
 import { renderWithProviders } from "@/test/render-with-providers";
 
 import { cartService } from "@/features/checkout/api/cart.service";
 
 import type { Product } from "../products.types";
+import { productsService } from "../api/products.service";
 import { ProductCard } from "./product-card";
 
 const product: Product = {
@@ -63,6 +67,14 @@ const product: Product = {
 };
 
 describe("ProductCard", () => {
+  beforeEach(() => {
+    vi.spyOn(productsService, "getBySlug").mockResolvedValue(product);
+  });
+  afterEach(() => {
+    act(() => {
+      toast.dismiss();
+    });
+  });
   it("links an available product to its detail page", () => {
     renderWithProviders(<ProductCard product={product} />);
     expect(screen.getByRole("link", { name: `Buy now: ${product.name}` })).toHaveAttribute(
@@ -94,14 +106,105 @@ describe("ProductCard", () => {
     expect(screen.queryByRole("button", { name: `Add ${product.name} to cart` })).not.toBeInTheDocument();
   });
 
-  it("adds the selected product to the shared cart", async () => {
+  it("loads detail and adds its first variant instead of the variant from the product card", async () => {
     const addSpy = vi.spyOn(cartService, "add").mockResolvedValue([]);
+    const firstVariantId = "66666666-6666-6666-6666-666666666666";
+    vi.mocked(productsService.getBySlug).mockResolvedValue({
+      ...product,
+      variants: [
+        { ...product.variants[0]!, id: firstVariantId },
+        { ...product.variants[0]!, id: "77777777-7777-7777-7777-777777777777", unitPrice: 1 },
+      ],
+    });
     const user = userEvent.setup();
-    renderWithProviders(<ProductCard product={product} />);
+    renderWithProviders(
+      <>
+        <ProductCard product={product} />
+        <Toaster />
+      </>,
+    );
 
     await user.click(screen.getByRole("button", { name: `Add ${product.name} to cart` }));
 
-    expect(addSpy.mock.calls[0]?.[0]).toEqual({ variantId: product.variants[0]!.id, quantity: 1 });
-    expect(await screen.findByText(`${product.name} added to cart.`)).toBeInTheDocument();
+    expect(productsService.getBySlug).toHaveBeenCalledExactlyOnceWith(product.slug);
+    expect(addSpy.mock.calls[0]?.[0]).toEqual({ variantId: firstVariantId, quantity: 1 });
+    expect(screen.getByText("$1,000.00")).toBeInTheDocument();
+    expect(await screen.findByText(`${product.name} added to cart.`)).toBeVisible();
+  });
+
+  it("shows a visible error toast when adding to the cart fails", async () => {
+    vi.spyOn(cartService, "add").mockRejectedValue(new AxiosError("Network error", "ERR_NETWORK"));
+    const user = userEvent.setup();
+    renderWithProviders(
+      <>
+        <ProductCard product={product} />
+        <Toaster />
+      </>,
+    );
+
+    await user.click(screen.getByRole("button", { name: `Add ${product.name} to cart` }));
+
+    expect(await screen.findByText("We could not update your cart.")).toBeVisible();
+    expect(screen.getByText("Unable to connect to the system. Please try again later.")).toBeVisible();
+    expect(screen.queryByText(`${product.name} added to cart.`)).not.toBeInTheDocument();
+  });
+
+  it("sends one request and waits for the API before reporting success", async () => {
+    let finishDetail: ((value: Product) => void) | undefined;
+    vi.mocked(productsService.getBySlug).mockReturnValue(
+      new Promise((resolve) => {
+        finishDetail = resolve;
+      }),
+    );
+    let finish: ((items: []) => void) | undefined;
+    const addSpy = vi.spyOn(cartService, "add").mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(
+      <>
+        <ProductCard product={product} />
+        <Toaster />
+      </>,
+    );
+    const button = screen.getByRole("button", { name: `Add ${product.name} to cart` });
+
+    await user.click(button);
+    await user.click(button);
+
+    expect(productsService.getBySlug).toHaveBeenCalledOnce();
+    expect(addSpy).not.toHaveBeenCalled();
+    expect(button).toBeDisabled();
+    finishDetail?.(product);
+    await waitFor(() => expect(addSpy).toHaveBeenCalledOnce());
+    expect(button).toBeDisabled();
+    expect(screen.queryByText(`${product.name} added to cart.`)).not.toBeInTheDocument();
+    finish?.([]);
+    expect(await screen.findByText(`${product.name} added to cart.`)).toBeVisible();
+    await waitFor(() => expect(button).toBeEnabled());
+  });
+
+  it.each(["failed", "no variants"])("does not add to cart when detail loading has %s", async (reason) => {
+    if (reason === "failed") {
+      vi.mocked(productsService.getBySlug).mockRejectedValue(new AxiosError("Network error", "ERR_NETWORK"));
+    } else {
+      vi.mocked(productsService.getBySlug).mockResolvedValue({ ...product, variants: [] });
+    }
+    const addSpy = vi.spyOn(cartService, "add");
+    const user = userEvent.setup();
+    renderWithProviders(
+      <>
+        <ProductCard product={product} />
+        <Toaster />
+      </>,
+    );
+
+    await user.click(screen.getByRole("button", { name: `Add ${product.name} to cart` }));
+
+    expect(await screen.findByText("We could not update your cart.")).toBeVisible();
+    expect(addSpy).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: `Add ${product.name} to cart` })).toBeEnabled();
   });
 });

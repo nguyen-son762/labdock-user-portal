@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { siteConfig } from "@/config/site";
+import { AuthTokenRefreshSync } from "@/features/auth";
 import { getLanguageAlternates, getLocalizedPath, isAppLocale } from "@/i18n/locale";
 import { routing } from "@/i18n/routing";
 import { AppProviders } from "@/providers/app-providers";
@@ -55,7 +56,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <AppProviders>{children}</AppProviders>
+      <AppProviders>
+        <AuthTokenRefreshSync />
+        {children}
+      </AppProviders>
     </NextIntlClientProvider>
   );
 }

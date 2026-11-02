@@ -14,6 +14,7 @@ export type AuthTokens = z.infer<typeof authTokensSchema>;
 let tokens: AuthTokens | null = null;
 let sessionVersion = 0;
 const clearListeners = new Set<() => void>();
+const refreshListeners = new Set<() => void>();
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -89,6 +90,7 @@ export const authTokenStore = {
     tokens = authTokensSchema.parse(input);
     if (!options.preserveSession) sessionVersion += 1;
     persistTokens(tokens);
+    if (options.preserveSession) refreshListeners.forEach((listener) => listener());
     return tokens;
   },
 
@@ -121,5 +123,10 @@ export const authTokenStore = {
   onClear(listener: () => void): () => void {
     clearListeners.add(listener);
     return () => clearListeners.delete(listener);
+  },
+
+  onRefresh(listener: () => void): () => void {
+    refreshListeners.add(listener);
+    return () => refreshListeners.delete(listener);
   },
 };

@@ -6,7 +6,18 @@ const guidSchema = z.guid();
 const currencySchema = z.string().length(3);
 const dateTimeSchema = z.iso.datetime({ offset: true });
 
-export const orderStatusSchema = z.string().trim().min(1);
+const apiOrderStatuses: Readonly<Record<number, string>> = {
+  0: "Draft",
+  1: "New",
+  2: "Processing",
+  3: "Shipped",
+  4: "Delivered",
+  5: "Cancelled",
+};
+
+export const orderStatusSchema = z
+  .union([z.string().trim().min(1), z.number().int().min(0).max(5)])
+  .transform((status) => (typeof status === "number" ? (apiOrderStatuses[status] ?? `Status ${status}`) : status));
 
 export const orderSummarySchema = z.object({
   id: guidSchema,
@@ -41,7 +52,7 @@ export const orderDetailSchema = orderSummarySchema.omit({ subtotal: true, tax: 
   subtotal: z.number().nonnegative(),
   tax: z.number().nonnegative(),
   platformFee: z.number().nonnegative(),
-  platformFeeRateSnap: z.number().nonnegative(),
+  platformFeeRateSnap: z.number().nonnegative().nullable(),
   shippingSnapshotJson: z.string(),
   invoice: z.object({
     orderNumber: z.string().min(1),

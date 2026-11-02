@@ -11,8 +11,3 @@ export type OrderTotals = {
 };
 
 export type { CheckoutSession } from "./schemas/checkout.schema";
-
-export type PaymentResult = {
-  orderId: string;
-  status: "paid";
-};

@@ -17,7 +17,7 @@ const input: CreateCheckoutInput = {
     postalCode: "700000",
     notes: "Postman checkout",
     billingSameAsDelivery: true,
-    paymentMethod: "paynow",
+    paymentMethod: "bank-transfer",
   },
   items: [
     {

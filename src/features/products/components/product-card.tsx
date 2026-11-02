@@ -3,15 +3,15 @@
 import { ArrowRight, BucketSquare, ShoppingCart, Verify } from "iconsax-reactjs";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { useAddCartItemMutation } from "@/features/checkout";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import type { Product } from "../products.types";
-import { createCartItemFromProduct } from "../utils/product-cart";
+import { useAddProductToCartMutation } from "../api/use-add-product-to-cart-mutation";
 import { getProductCardPresentation } from "../utils/product-display";
 
 type ProductCardProps = {
@@ -21,11 +21,18 @@ type ProductCardProps = {
 
 export function ProductCard({ product, appearance = "default" }: ProductCardProps) {
   const t = useTranslations("ProductCard");
-  const addCartItem = useAddCartItemMutation();
-  const [status, setStatus] = useState("");
+  const tErrors = useTranslations("ApiErrors");
+  const addCartItem = useAddProductToCartMutation();
   const presentation = getProductCardPresentation(product);
-  const selectedVariant = presentation.variant;
   const productHref = `/products/${product.slug}`;
+
+  function handleAddToCart() {
+    if (addCartItem.isPending || !presentation.canPurchase) return;
+    addCartItem.mutate(product.slug, {
+      onSuccess: () => toast.success(t("added", { name: product.name })),
+      onError: (error) => toast.error(t("error"), { description: getApiErrorMessage(error, tErrors) }),
+    });
+  }
 
   return (
     <article
@@ -124,7 +131,7 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
             className={cn(
               "h-8 flex-1 rounded-full px-2 text-xs shadow-none",
               !presentation.canPurchase &&
-              "border-[#2f7bc4] bg-white text-[#164990] hover:bg-[#f3f8fc] hover:text-[#164990]",
+                "border-[#2f7bc4] bg-white text-[#164990] hover:bg-[#f3f8fc] hover:text-[#164990]",
             )}
           >
             <Link
@@ -136,28 +143,20 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
               <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
           </Button>
-          {presentation.canPurchase && selectedVariant ? (
+          {presentation.canPurchase ? (
             <Button
               type="button"
               size="icon"
               aria-label={t("addToCart", { name: product.name })}
+              aria-busy={addCartItem.isPending}
               disabled={addCartItem.isPending}
-              onClick={() => {
-                setStatus("");
-                addCartItem.mutate(createCartItemFromProduct(product, { quantity: 1, variantId: selectedVariant.id }), {
-                  onSuccess: () => setStatus(t("added", { name: product.name })),
-                  onError: () => setStatus(t("error")),
-                });
-              }}
+              onClick={handleAddToCart}
               className="size-8 shrink-0 rounded-full bg-gradient-to-r from-[#164990] to-[#2f7bc4] shadow-none hover:brightness-110"
             >
               <ShoppingCart className="size-3.5" variant="Bold" aria-hidden="true" />
             </Button>
           ) : null}
         </div>
-        <p role="status" className="sr-only">
-          {status}
-        </p>
       </div>
     </article>
   );

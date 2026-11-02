@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft2 } from "iconsax-reactjs";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -29,6 +29,7 @@ import { EmptyCartScreen } from "./empty-cart-screen";
 export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }) {
   const tHeader = useTranslations("Header");
   const t = useTranslations("Checkout");
+  const router = useRouter();
   const cartQuery = useCartQuery();
   const profileQuery = useCurrentUserQuery();
   const checkoutMutation = useCreateCheckoutMutation();
@@ -47,7 +48,7 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
       billingSameAsDelivery: true,
       billingAddress: "",
       billingPostalCode: "",
-      paymentMethod: "paynow",
+      paymentMethod: "bank-transfer",
     },
   });
   const { isDirty } = form.formState;
@@ -74,7 +75,7 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
       billingSameAsDelivery: user.billingSameAsDelivery,
       billingAddress: user.billingAddress.address,
       billingPostalCode: user.billingAddress.postalCode,
-      paymentMethod: "paynow",
+      paymentMethod: "bank-transfer",
     });
   }, [form, isDirty, profileQuery.data]);
   const cartItems = cartQuery.data ?? [];
@@ -82,12 +83,12 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
   const orderTotals = calculateOrderTotals(items);
 
   function handleCheckout(values: CheckoutFormValues): void {
-    if (checkoutMutation.isPending) return;
+    if (checkoutMutation.isPending || checkoutMutation.isSuccess) return;
     checkoutMutation.mutate(
       { checkout: values, items },
       {
         onSuccess: (session) => {
-          window.location.assign(session.checkoutUrl);
+          router.push(`/payment?${new URLSearchParams({ orderId: session.orderId })}`);
         },
       },
     );
@@ -131,7 +132,11 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
               <BillingSection form={form} />
               <PaymentMethodSection form={form} />
             </div>
-            <OrderSummary totals={orderTotals} pending={checkoutMutation.isPending} currency={items[0]?.currency} />
+            <OrderSummary
+              totals={orderTotals}
+              pending={checkoutMutation.isPending || checkoutMutation.isSuccess}
+              currency={items[0]?.currency}
+            />
           </form>
         </Form>
       </div>

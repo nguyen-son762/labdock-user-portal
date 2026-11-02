@@ -8,6 +8,6 @@ export { QuoteSuccessScreen } from "./components/quote-success-screen";
 export { RequestQuoteScreen } from "./components/request-quote-screen";
 export { useAddCartItemMutation } from "./api/use-add-cart-item-mutation";
 export type { AddCartItemInput, CartApiItem, CartItem, CartResponse } from "./schemas/cart.schema";
-export { paymentMethodSchema } from "./schemas/checkout.schema";
+export { paymentMethodSchema, paymentOrderIdSchema } from "./schemas/checkout.schema";
 export type { PaymentMethod } from "./schemas/checkout.schema";
 export { parseCartItemSelection } from "./utils/cart-item-selection";

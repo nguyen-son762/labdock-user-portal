@@ -94,6 +94,17 @@ describe("publicProductDetailSchema", () => {
     expect(publicProductDetailSchema.parse({ ...productDetailResponse, status: 1 }).status).toBe(1);
   });
 
+  it("normalizes nullable text fields returned by the product detail endpoint", () => {
+    const result = publicProductDetailSchema.parse({
+      ...productDetailResponse,
+      notes: null,
+      description: null,
+      casNumber: null,
+    });
+
+    expect(result).toEqual(expect.objectContaining({ notes: "", description: "", casNumber: "" }));
+  });
+
   it("preserves hidden prices and normalizes an empty related collection", () => {
     const result = publicProductDetailSchema.parse({
       ...productDetailResponse,

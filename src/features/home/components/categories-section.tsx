@@ -123,7 +123,7 @@ export function CategoriesSection({ categories }: { categories: readonly HomeCat
                     key={category.id}
                     id={`category-${category.slug}`}
                     href={`/products/category/${category.slug}`}
-                    className="relative flex min-h-[92px] items-center gap-3 rounded-lg border border-white bg-[linear-gradient(180deg,#FFF_0%,rgba(255,255,255,0.5)_100%)] p-3 text-[#051a50] transition-[background,box-shadow] duration-300 hover:bg-[linear-gradient(0deg,#FFF_0%,#FFF_100%),linear-gradient(180deg,#FFF_0%,rgba(255,255,255,0.5)_100%)] hover:shadow-[0_0_50px_0_rgba(0,0,0,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
+                    className="relative flex min-h-[92px] items-center gap-3 rounded-[12px] border border-white bg-[linear-gradient(180deg,#FFF_0%,rgba(255,255,255,0.5)_100%)] p-3 text-[#051a50] transition-[background,box-shadow] duration-300 hover:bg-[linear-gradient(0deg,#FFF_0%,#FFF_100%),linear-gradient(180deg,#FFF_0%,rgba(255,255,255,0.5)_100%)] hover:shadow-[0_0_50px_0_rgba(0,0,0,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
                   >
                     {Icon ? (
                       <Icon className="size-8 shrink-0 text-[#1572ad]" variant="Bulk" aria-hidden="true" />
@@ -135,16 +135,16 @@ export function CategoriesSection({ categories }: { categories: readonly HomeCat
                     {index < 4 ? (
                       <span
                         className={cn(
-                          "absolute right-0 top-0 inline-flex items-center gap-1 rounded-bl px-1.5 py-0.5 text-xs font-semibold text-white",
+                          "absolute -right-px -top-px inline-flex h-5 items-center gap-1 whitespace-nowrap rounded-bl-[4px] rounded-tr-[12px] border-r border-t border-transparent px-1.5 text-xs font-semibold leading-4 text-white shadow-[0_0_50px_0_rgba(239,163,59,0.30)] [background-clip:padding-box,border-box] [background-origin:border-box]",
                           isTrending
-                            ? "bg-[linear-gradient(270deg,#217A4F_0%,#4CAF7A_100%)]"
-                            : "bg-[linear-gradient(90deg,#EFA33B_0%,#E57A00_100%)]",
+                            ? "bg-[linear-gradient(270deg,#217A4F_0%,#4CAF7A_100%),linear-gradient(90deg,#FFF_0%,#9BDBB7_100%)]"
+                            : "bg-[linear-gradient(90deg,var(--brand-orange-start)_0%,var(--brand-orange-end)_100%),linear-gradient(90deg,#FFF_0%,#F2BD81_100%)]",
                         )}
                       >
                         {isTrending ? (
-                          <StatusUp variant="Bold" size={12} />
+                          <StatusUp variant="Bold" size={12} className="shrink-0" aria-hidden="true" />
                         ) : (
-                          <Image src="/home/icon/fire.svg" alt="" width={12} height={12} />
+                          <Image src="/home/icon/fire.svg" alt="" width={12} height={12} className="shrink-0" />
                         )}
                         {index < 2 ? t("bestSeller") : t("trending")}
                       </span>

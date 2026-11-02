@@ -24,10 +24,18 @@ describe("MainHeader", () => {
   it("renders account state from session data instead of the pathname", () => {
     const { rerender } = renderWithProviders(<MainHeader />);
     expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
+    expect(screen.queryByText("Orders")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Cart" })).not.toBeInTheDocument();
 
     rerender(<MainHeader account={{ fullName: "Sarah Chen", email: "sarah@example.com" }} />);
     expect(screen.getByRole("link", { name: "My profile" })).toHaveAttribute("href", "/profile");
     expect(screen.getByText("Sarah Chen")).toBeInTheDocument();
+    expect(screen.getByText("Orders")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cart" })).toHaveAttribute("href", "/cart");
+
+    rerender(<MainHeader account={{ fullName: "Sarah Chen", email: "sarah@example.com" }} isAuthenticated={false} />);
+    expect(screen.queryByText("Orders")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Cart" })).not.toBeInTheDocument();
   });
 
   it("switches locale while preserving the current pathname", async () => {

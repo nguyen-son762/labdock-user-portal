@@ -35,6 +35,7 @@ type MainHeaderProps = {
   cartContent?: ReactNode;
   compactCartContent?: ReactNode;
   account?: HeaderAccount;
+  isAuthenticated?: boolean;
   accountContent?: ReactNode;
   compactAccountContent?: ReactNode;
   categories?: readonly HeaderCategory[];
@@ -122,6 +123,7 @@ export function MainHeader({
   cartContent,
   compactCartContent,
   account,
+  isAuthenticated = Boolean(account),
   accountContent,
   compactAccountContent,
   categories = [],
@@ -217,7 +219,7 @@ export function MainHeader({
 
           <Button
             variant="brand"
-            className="ml-[78px] hidden h-11 shrink-0 justify-start rounded-full py-1.5 pl-1.5 pr-4 shadow-[0_0_25px_rgba(239,163,59,0.3)] min-[1380px]:flex"
+            className="ml-auto hidden h-11 shrink-0 justify-start rounded-full py-1.5 pl-1.5 pr-4 shadow-[0_0_25px_rgba(239,163,59,0.3)] min-[1380px]:flex"
           >
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#efa33b] shadow-[0_0_15px_rgba(229,122,0,0.5)]">
               <Shop className="size-4" aria-hidden="true" />
@@ -230,7 +232,7 @@ export function MainHeader({
 
           <div className="ml-2.5 hidden items-center gap-2 min-[1380px]:flex">
             {accountContent ?? <AccountSummary account={account} />}
-            {cartContent ?? <OrderSummary />}
+            {isAuthenticated ? (cartContent ?? <OrderSummary />) : null}
           </div>
 
           <div className="ml-auto flex min-w-0 items-center gap-2 min-[1380px]:hidden">
@@ -245,15 +247,17 @@ export function MainHeader({
                 <ProfileCircle className="size-5" variant="Bold" aria-hidden="true" />
               </Link>
             )}
-            {compactCartContent ?? (
-              <Link
-                href="/cart"
-                aria-label={t("cart")}
-                className="relative flex size-10 items-center justify-center rounded-full bg-white/10"
-              >
-                <ShoppingCart className="size-5" variant="Bold" aria-hidden="true" />
-              </Link>
-            )}
+            {isAuthenticated
+              ? (compactCartContent ?? (
+                  <Link
+                    href="/cart"
+                    aria-label={t("cart")}
+                    className="relative flex size-10 items-center justify-center rounded-full bg-white/10"
+                  >
+                    <ShoppingCart className="size-5" variant="Bold" aria-hidden="true" />
+                  </Link>
+                ))
+              : null}
           </div>
         </div>
       </div>
