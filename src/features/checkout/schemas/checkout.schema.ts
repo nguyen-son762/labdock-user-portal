@@ -54,7 +54,13 @@ export const createCheckoutRequestSchema = z.object({
 export const checkoutSessionSchema = z.object({
   orderId: cartApiItemSchema.shape.id,
   orderNumber: z.string().min(1),
-  checkoutUrl: z.url({ protocol: /^https?$/ }),
+  refCode: z.string().trim().min(1),
+  amount: z.number().nonnegative(),
+  currency: z.string().length(3),
+  paymentExpiresAt: z.iso.datetime({ offset: true }),
+  companyName: z.string().trim(),
+  businessRegistrationNo: z.string().trim(),
+  qrImageUrl: z.union([z.literal(""), z.url({ protocol: /^https?$/ })]),
 });
 export type CheckoutSession = z.infer<typeof checkoutSessionSchema>;
 

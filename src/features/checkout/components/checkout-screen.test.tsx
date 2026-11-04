@@ -9,6 +9,8 @@ import { checkoutService } from "../api/checkout.service";
 import { cartService } from "../api/cart.service";
 import type { CheckoutSession } from "../checkout.types";
 import { checkoutItems } from "../data/checkout-data";
+import { checkoutSessionFixture } from "../test/checkout-session.fixture";
+import { checkoutSessionStorage } from "../utils/checkout-session-storage";
 import { CheckoutScreen } from "./checkout-screen";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
@@ -20,6 +22,7 @@ vi.mock("@/i18n/navigation", async (importOriginal) => ({
 describe("CheckoutScreen", () => {
   beforeEach(() => {
     navigation.push.mockReset();
+    checkoutSessionStorage.clear();
     vi.restoreAllMocks();
     vi.spyOn(cartService, "get").mockResolvedValue(checkoutItems);
     vi.spyOn(profileService, "getCurrent").mockRejectedValue(new Error("No profile fixture"));
@@ -49,15 +52,12 @@ describe("CheckoutScreen", () => {
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(submit).toBeDisabled();
 
-    resolveCheckout?.({
-      orderId: "11111111-1111-1111-1111-111111111111",
-      orderNumber: "ORD-2026-001",
-      checkoutUrl: "https://checkout.stripe.com/c/pay-test-session",
-    });
+    resolveCheckout?.(checkoutSessionFixture);
     await waitFor(() =>
       expect(navigation.push).toHaveBeenCalledWith("/payment?orderId=11111111-1111-1111-1111-111111111111"),
     );
     expect(submit).toBeDisabled();
+    expect(checkoutSessionStorage.get(checkoutSessionFixture.orderId)).toEqual(checkoutSessionFixture);
     expect(createSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [checkoutItems[0]],

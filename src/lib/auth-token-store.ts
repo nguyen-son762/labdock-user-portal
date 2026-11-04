@@ -15,6 +15,7 @@ let tokens: AuthTokens | null = null;
 let sessionVersion = 0;
 const clearListeners = new Set<() => void>();
 const refreshListeners = new Set<() => void>();
+const sessionChangeListeners = new Set<() => void>();
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -91,6 +92,7 @@ export const authTokenStore = {
     if (!options.preserveSession) sessionVersion += 1;
     persistTokens(tokens);
     if (options.preserveSession) refreshListeners.forEach((listener) => listener());
+    else sessionChangeListeners.forEach((listener) => listener());
     return tokens;
   },
 
@@ -99,7 +101,10 @@ export const authTokenStore = {
     tokens = null;
     sessionVersion += 1;
     clearPersistedTokens();
-    if (hadTokens) clearListeners.forEach((listener) => listener());
+    if (hadTokens) {
+      clearListeners.forEach((listener) => listener());
+      sessionChangeListeners.forEach((listener) => listener());
+    }
   },
 
   getAccessToken(): string | null {
@@ -128,5 +133,10 @@ export const authTokenStore = {
   onRefresh(listener: () => void): () => void {
     refreshListeners.add(listener);
     return () => refreshListeners.delete(listener);
+  },
+
+  onSessionChange(listener: () => void): () => void {
+    sessionChangeListeners.add(listener);
+    return () => sessionChangeListeners.delete(listener);
   },
 };

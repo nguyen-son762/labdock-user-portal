@@ -4,6 +4,8 @@ const httpClient = vi.hoisted(() => ({ post: vi.fn() }));
 vi.mock("@/lib/http-client", () => ({ httpClient }));
 
 import type { CreateCheckoutInput } from "../schemas/checkout.schema";
+import { authTokenStore } from "@/lib/auth-token-store";
+import { checkoutSessionFixture as session } from "../test/checkout-session.fixture";
 import { checkoutService } from "./checkout.service";
 
 const input: CreateCheckoutInput = {
@@ -30,12 +32,6 @@ const input: CreateCheckoutInput = {
     },
   ],
 };
-const session = {
-  orderId: "33333333-3333-3333-3333-333333333333",
-  orderNumber: "ORD-2026-001",
-  checkoutUrl: "https://checkout.stripe.com/c/pay-test-session",
-};
-
 beforeEach(() => httpClient.post.mockReset());
 
 describe("checkoutService.create", () => {
@@ -89,13 +85,38 @@ describe("checkoutService.create", () => {
 
   it.each([
     { ...session, orderId: "invalid" },
-    { ...session, checkoutUrl: "" },
-    { ...session, checkoutUrl: "javascript:alert(1)" },
-    { ...session, checkoutUrl: "data:text/html,test" },
+    { ...session, qrImageUrl: "javascript:alert(1)" },
+    { ...session, qrImageUrl: "data:text/html,test" },
+    { ...session, paymentExpiresAt: "invalid" },
+    { ...session, amount: -1 },
+    { ...session, currency: "" },
+    { ...session, refCode: " " },
+    { orderId: session.orderId, orderNumber: session.orderNumber, checkoutUrl: "https://example.test/old" },
     { paymentReference: "PAY-LOCAL", amount: 99.5 },
   ])("rejects malformed or unsafe checkout responses", async (response) => {
     httpClient.post.mockResolvedValue({ data: response });
 
     await expect(checkoutService.create(input)).rejects.toThrow();
+  });
+
+  it("discards checkout instructions returned after the account session changes", async () => {
+    httpClient.post.mockImplementation(async () => {
+      authTokenStore.clear();
+      return { data: session };
+    });
+    await expect(checkoutService.create(input)).rejects.toThrow("The account session changed.");
+  });
+
+  it("accepts the live checkout response when transfer configuration has not been filled in", async () => {
+    const response = {
+      ...session,
+      companyName: "",
+      businessRegistrationNo: "",
+      qrImageUrl: "",
+      paymentExpiresAt: "2026-11-04T03:55:45.1233513+00:00",
+    };
+    httpClient.post.mockResolvedValue({ data: response });
+    await expect(checkoutService.create(input)).resolves.toEqual(response);
+    expect(httpClient.post).toHaveBeenCalledOnce();
   });
 });

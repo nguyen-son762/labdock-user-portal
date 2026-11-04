@@ -9,7 +9,9 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrderDetailQuery } from "@/features/orders";
+import { Link } from "@/i18n/navigation";
 
+import { useCheckoutSessionQuery } from "../api/use-checkout-session-query";
 import { formatCurrency } from "../data/checkout-data";
 import { PaymentCountdown } from "./payment-countdown";
 
@@ -17,14 +19,17 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
   const t = useTranslations("Checkout");
   const tHeader = useTranslations("Header");
   const orderQuery = useOrderDetailQuery(orderId, { refetchOnMount: "always" });
+  const sessionQuery = useCheckoutSessionQuery(orderId);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
-  const isLoadingPayment = orderQuery.isPending || (orderQuery.isFetching && !orderQuery.isFetchedAfterMount);
+  const isLoadingPayment =
+    sessionQuery.isPending || orderQuery.isPending || (orderQuery.isFetching && !orderQuery.isFetchedAfterMount);
   const order = isLoadingPayment || orderQuery.isError ? undefined : orderQuery.data;
+  const session = sessionQuery.data;
 
   async function copyReference() {
-    if (!order) return;
+    if (!session) return;
     try {
-      await navigator.clipboard.writeText(order.orderNumber);
+      await navigator.clipboard.writeText(session.refCode);
       setCopyStatus("copied");
     } catch {
       setCopyStatus("error");
@@ -60,7 +65,15 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
             </Button>
           </div>
         ) : null}
-        {order ? (
+        {!isLoadingPayment && !orderQuery.isError && !session ? (
+          <div className="mt-6 space-y-4">
+            <Alert>{t("paymentSessionMissing")}</Alert>
+            <Button asChild>
+              <Link href={`/orders/${orderId}`}>{t("viewOrder")}</Link>
+            </Button>
+          </div>
+        ) : null}
+        {order && session ? (
           <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_392px]">
             <section
               className="min-w-0 space-y-6 rounded-xl border border-[#ecf0f3] bg-white p-4"
@@ -74,26 +87,40 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
                   <h2 id="payment-method-title" className="text-2xl font-semibold leading-8 text-[#051a50]">
                     {t("bankTransfer")}
                   </h2>
-                  <p className="text-sm leading-5 text-[#73798f]">{t("scanQr")}</p>
+                  {session.qrImageUrl ? <p className="text-sm leading-5 text-[#73798f]">{t("scanQr")}</p> : null}
                 </div>
               </div>
               <div className="flex flex-col items-center gap-6 rounded-xl bg-[#f5f7f8] p-4 text-center sm:p-6">
                 <div className="flex w-full flex-col items-center gap-3">
-                  <Image
-                    src="/checkout/bank-transfer/qr.png"
-                    alt={t("bankTransferQr")}
-                    width={300}
-                    height={300}
-                    priority
-                    unoptimized
-                    className="h-auto w-full max-w-[300px]"
-                  />
+                  {session.qrImageUrl ? (
+                    <Image
+                      src={session.qrImageUrl}
+                      alt={t("bankTransferQr")}
+                      width={300}
+                      height={300}
+                      priority
+                      unoptimized
+                      className="h-auto w-full max-w-[300px]"
+                    />
+                  ) : (
+                    <Alert className="flex min-h-[300px] max-w-[300px] items-center justify-center">
+                      {t("qrUnavailable")}
+                    </Alert>
+                  )}
                   <div className="flex w-full flex-col items-center gap-2 text-[#051a50]">
                     <strong className="text-lg font-semibold leading-6 text-[#1f5fa8]">
-                      {t("amount", { amount: formatCurrency(order.total, order.currency) })}
+                      {t("amount", { amount: formatCurrency(session.amount, session.currency) })}
                     </strong>
-                    <p className="text-base font-semibold leading-6">{t("companyName")}: i-DNA</p>
-                    <p className="text-base font-semibold leading-6">{t("businessRegistration")}: 202012345Z</p>
+                    {session.companyName ? (
+                      <p className="text-base font-semibold leading-6">
+                        {t("companyName")}: {session.companyName}
+                      </p>
+                    ) : null}
+                    {session.businessRegistrationNo ? (
+                      <p className="text-base font-semibold leading-6">
+                        {t("businessRegistration")}: {session.businessRegistrationNo}
+                      </p>
+                    ) : null}
                     <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-base font-semibold leading-6">
                       <span>{t("refCode")}</span>
                       <Button
@@ -103,7 +130,7 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
                         onClick={() => void copyReference()}
                         className="h-auto max-w-full gap-1.5 rounded-md border border-dashed border-[#1f5fa8] bg-[#f2f7fd] py-1 pl-2.5 pr-2 text-base text-[#1f5fa8] hover:bg-[#e6f0fb]"
                       >
-                        <span className="break-all whitespace-normal text-left">{order.orderNumber}</span>
+                        <span className="break-all whitespace-normal text-left">{session.refCode}</span>
                         <Image
                           src="/checkout/bank-transfer/copy.svg"
                           alt=""
@@ -123,10 +150,10 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
                     <p className="text-sm leading-5 text-[#73798f]">{t("transferReferenceHelp")}</p>
                   </div>
                 </div>
-                <p className="text-sm leading-5 text-[#73798f]">{t("transferQrHelp")}</p>
+                {session.qrImageUrl ? <p className="text-sm leading-5 text-[#73798f]">{t("transferQrHelp")}</p> : null}
               </div>
             </section>
-            <PaymentCountdown orderId={order.id} createdAt={order.createdAt} />
+            <PaymentCountdown orderId={order.id} paymentExpiresAt={session.paymentExpiresAt} />
           </div>
         ) : null}
       </div>

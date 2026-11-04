@@ -55,4 +55,25 @@ describe("authTokenStore", () => {
 
     expect(listener).toHaveBeenCalledTimes(1);
   });
+
+  it("notifies session changes for login and logout while preserving data across token refresh", () => {
+    const listener = vi.fn();
+    const unsubscribe = authTokenStore.onSessionChange(listener);
+    try {
+      authTokenStore.set(tokens);
+      expect(listener).toHaveBeenCalledTimes(1);
+      authTokenStore.set({ ...tokens, accessToken: "refreshed-token" }, { preserveSession: true });
+      expect(listener).toHaveBeenCalledTimes(1);
+      authTokenStore.set({ ...tokens, accessToken: "another-account-token" });
+      expect(listener).toHaveBeenCalledTimes(2);
+      authTokenStore.clear();
+      expect(listener).toHaveBeenCalledTimes(3);
+      authTokenStore.clear();
+      expect(listener).toHaveBeenCalledTimes(3);
+    } finally {
+      unsubscribe();
+    }
+    authTokenStore.set(tokens);
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
 });

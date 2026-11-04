@@ -7,13 +7,11 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 
-const TRANSFER_WINDOW_MS = 60 * 60 * 1000;
-
-export function PaymentCountdown({ orderId, createdAt }: { orderId: string; createdAt: string }) {
+export function PaymentCountdown({ orderId, paymentExpiresAt }: { orderId: string; paymentExpiresAt: string }) {
   const t = useTranslations("Checkout");
   const locale = useLocale();
   const router = useRouter();
-  const deadline = new Date(createdAt).getTime() + TRANSFER_WINDOW_MS;
+  const deadline = new Date(paymentExpiresAt).getTime();
   const [remaining, setRemaining] = useState<number | null>(null);
   const [deadlineLabel, setDeadlineLabel] = useState("");
 
