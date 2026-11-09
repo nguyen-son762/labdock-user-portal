@@ -7,8 +7,6 @@ import { renderWithProviders } from "@/test/render-with-providers";
 import { ordersService } from "@/features/orders/api/orders.service";
 import { orderKeys } from "@/features/orders/api/order-query-keys";
 import { checkoutSessionFixture as session } from "../test/checkout-session.fixture";
-import { checkoutSessionStorage } from "../utils/checkout-session-storage";
-import { checkoutSessionKeys } from "../api/use-checkout-session-query";
 import { PaymentScreen } from "./payment-screen";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
@@ -31,6 +29,11 @@ const order = {
   currency: "SGD",
   createdAt: new Date().toISOString(),
   shippingSnapshotJson: "{}",
+  refCode: session.refCode,
+  paymentExpiresAt: session.paymentExpiresAt,
+  companyName: session.companyName,
+  businessRegistrationNo: session.businessRegistrationNo,
+  qrImageUrl: session.qrImageUrl,
   invoice: {
     orderNumber: "LDK20261",
     createdAt: new Date().toISOString(),
@@ -47,8 +50,6 @@ const order = {
 
 beforeEach(() => {
   navigation.push.mockReset();
-  checkoutSessionStorage.clear();
-  checkoutSessionStorage.set(session);
   vi.spyOn(ordersService, "getById").mockResolvedValue(order);
 });
 
@@ -72,18 +73,18 @@ describe("Bank transfer screen", () => {
     await waitFor(() => expect(ordersService.getById).toHaveBeenCalledWith(order.id, expect.any(AbortSignal)));
     expect(screen.queryByText("CACHED-ORDER")).not.toBeInTheDocument();
     expect(screen.queryByRole("img", { name: /QR code/ })).not.toBeInTheDocument();
-    resolveOrder?.({ ...order, status: "Draft" });
-    expect(await screen.findByText("Amount: $99.50")).toBeInTheDocument();
+    resolveOrder?.(order);
+    expect(await screen.findByText("Amount: $1,128.15")).toBeInTheDocument();
     expect(screen.getByText(session.refCode)).toBeInTheDocument();
   });
 
-  it("restores API payment instructions after reload, copies refCode, and opens the success screen", async () => {
+  it("loads payment instructions directly from order detail, copies refCode, and opens the success screen", async () => {
     const user = userEvent.setup();
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
     renderWithProviders(<PaymentScreen orderId={order.id} />);
 
     expect(await screen.findByText("Bank transfer")).toBeInTheDocument();
-    expect(screen.getByText("Amount: $99.50")).toBeInTheDocument();
+    expect(screen.getByText("Amount: $1,128.15")).toBeInTheDocument();
     expect(screen.getByText("Company name: i-DNA")).toBeInTheDocument();
     expect(screen.getByText("Business registration no.: 202012345A")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Bank transfer payment QR code" })).toHaveAttribute(
@@ -101,7 +102,10 @@ describe("Bank transfer screen", () => {
   });
 
   it("preserves the deadline on reload and prevents continuing after it expires", async () => {
-    checkoutSessionStorage.set({ ...session, paymentExpiresAt: new Date(Date.now() - 1000).toISOString() });
+    vi.mocked(ordersService.getById).mockResolvedValue({
+      ...order,
+      paymentExpiresAt: new Date(Date.now() - 1000).toISOString(),
+    });
     renderWithProviders(<PaymentScreen orderId={order.id} />);
     await screen.findByText("Bank transfer");
     await waitFor(() => expect(screen.getByRole("button", { name: "I've transferred" })).toBeDisabled());
@@ -129,13 +133,14 @@ describe("Bank transfer screen", () => {
   });
 
   it.each(["Paid", "Shipped", "Cancelled"])(
-    "shows the QR screen for a %s order without checking status",
+    "keeps the QR visible but hides countdown and transfer actions for a %s order",
     async (status) => {
       vi.mocked(ordersService.getById).mockResolvedValue({ ...order, status });
       renderWithProviders(<PaymentScreen orderId={order.id} />);
       expect(await screen.findByRole("img", { name: "Bank transfer payment QR code" })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "I've transferred" })).toBeInTheDocument();
-      expect(screen.queryByText(/no longer awaiting payment/)).not.toBeInTheDocument();
+      expect(screen.queryByRole("timer")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "I've transferred" })).not.toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "View order" })).toHaveAttribute("href", `/orders/${order.id}`);
     },
   );
 
@@ -155,30 +160,38 @@ describe("Bank transfer screen", () => {
     expect(screen.queryByText(/The payment window has ended/)).not.toBeInTheDocument();
   });
 
-  it("uses in-memory instructions when storage is unavailable", async () => {
-    checkoutSessionStorage.clear();
+  it("removes the countdown when a refreshed order is no longer awaiting payment", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    queryClient.setQueryData(checkoutSessionKeys.detail(order.id), session);
     renderWithProviders(
       <QueryClientProvider client={queryClient}>
         <PaymentScreen orderId={order.id} />
       </QueryClientProvider>,
     );
-    expect(await screen.findByText(session.refCode)).toBeInTheDocument();
+    expect(await screen.findByRole("timer")).toBeInTheDocument();
+    vi.mocked(ordersService.getById).mockResolvedValue({ ...order, status: "Paid" });
+    await queryClient.invalidateQueries({ queryKey: orderKeys.detail(order.id) });
+    await waitFor(() => expect(screen.queryByRole("timer")).not.toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: "I've transferred" })).not.toBeInTheDocument();
   });
 
-  it("does not show a sample QR when payment instructions are missing", async () => {
-    checkoutSessionStorage.clear();
+  it("does not show a countdown when an awaiting order has no deadline", async () => {
+    vi.mocked(ordersService.getById).mockResolvedValue({ ...order, paymentExpiresAt: null });
     renderWithProviders(<PaymentScreen orderId={order.id} />);
-    expect(await screen.findByRole("alert")).toHaveTextContent("Payment instructions are unavailable");
-    expect(screen.queryByRole("img", { name: /QR code/ })).not.toBeInTheDocument();
+    await screen.findByText("Bank transfer");
+    expect(screen.queryByRole("timer")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "I've transferred" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "View order" })).toHaveAttribute("href", `/orders/${order.id}`);
   });
 
   it("opens payment with the amount and reference when the API returns blank bank configuration", async () => {
-    checkoutSessionStorage.set({ ...session, companyName: "", businessRegistrationNo: "", qrImageUrl: "" });
+    vi.mocked(ordersService.getById).mockResolvedValue({
+      ...order,
+      companyName: "",
+      businessRegistrationNo: "",
+      qrImageUrl: "",
+    });
     renderWithProviders(<PaymentScreen orderId={order.id} />);
-    expect(await screen.findByText("Amount: $99.50")).toBeInTheDocument();
+    expect(await screen.findByText("Amount: $1,128.15")).toBeInTheDocument();
     expect(screen.getByText(session.refCode)).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("The payment QR code is not available yet.");
     expect(screen.queryByRole("img", { name: /QR code/ })).not.toBeInTheDocument();

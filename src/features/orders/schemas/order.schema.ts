@@ -54,6 +54,26 @@ export const orderDetailSchema = orderSummarySchema.omit({ subtotal: true, tax: 
   platformFee: z.number().nonnegative(),
   platformFeeRateSnap: z.number().nonnegative().nullable(),
   shippingSnapshotJson: z.string(),
+  refCode: z
+    .string()
+    .trim()
+    .nullish()
+    .transform((value) => value ?? ""),
+  paymentExpiresAt: dateTimeSchema.nullish().transform((value) => value ?? null),
+  companyName: z
+    .string()
+    .trim()
+    .nullish()
+    .transform((value) => value ?? ""),
+  businessRegistrationNo: z
+    .string()
+    .trim()
+    .nullish()
+    .transform((value) => value ?? ""),
+  qrImageUrl: z
+    .union([z.literal(""), z.url({ protocol: /^https?$/ })])
+    .nullish()
+    .transform((value) => value ?? ""),
   invoice: z.object({
     orderNumber: z.string().min(1),
     createdAt: dateTimeSchema,

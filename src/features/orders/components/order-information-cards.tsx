@@ -1,66 +1,88 @@
-import { Calendar2, MessageText1, TruckFast } from "iconsax-reactjs";
+import { Card as CardIcon, DocumentDownload } from "iconsax-reactjs";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import { orderDetailPlaceholders } from "../data/order-detail-placeholders";
 import type { OrderDetail } from "../schemas/order.schema";
-import { formatCurrency, formatOrderDate } from "../utils/order-formatters";
+import { formatCurrency } from "../utils/order-formatters";
+import { isOrderAwaitingPayment } from "../utils/is-order-awaiting-payment";
+import { parseOrderDeliveryAddress } from "../utils/parse-order-delivery-address";
 
 export function OrderInformationCards({ order }: { order: OrderDetail }) {
   const t = useTranslations("Orders");
-  let shippingSnapshot = order.shippingSnapshotJson;
-  try {
-    shippingSnapshot = JSON.stringify(JSON.parse(order.shippingSnapshotJson) as unknown, null, 2);
-  } catch {
-    // Keep the original snapshot visible if the API value isn't valid JSON.
-  }
+  const address = parseOrderDeliveryAddress(order.shippingSnapshotJson);
+  const pending = isOrderAwaitingPayment(order.status);
+  const cancelled = ["cancelled", "canceled"].includes(order.status.toLowerCase());
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card className="overflow-hidden border-[#dde2e8] shadow-none">
-        <h2 className="flex items-center gap-2 border-b border-[#dde2e8] px-4 py-3 text-lg font-semibold text-[#1f5fa8]">
-          <TruckFast className="size-5" aria-hidden="true" /> {t("shippingDetails")}
+    <div className="grid items-stretch gap-4 md:grid-cols-2">
+      <Card className="overflow-hidden border-[#dde2e8] !shadow-none">
+        <h2 className="border-b border-[#dde2e8] px-4 py-3 text-lg font-semibold leading-6 text-[#1f5fa8]">
+          {t("deliveryAddress")}
         </h2>
-        <div className="p-4">
-          {order.shippingSnapshotJson ? (
-            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[#f5f7f8] p-3 font-sans text-sm leading-6 text-[#051a50]">
-              {shippingSnapshot}
-            </pre>
+        <div className="space-y-2 p-4 pt-6 text-sm text-[#73798f]">
+          {address?.recipient || address?.address || address?.phone ? (
+            <>
+              {address.recipient ? <p className="text-base font-semibold text-[#051a50]">{address.recipient}</p> : null}
+              <div className="max-w-[320px] space-y-2 text-center">
+                {address.address ? <p>{address.address}</p> : null}
+                {address.phone ? <p>{address.phone}</p> : null}
+              </div>
+            </>
           ) : (
-            <p className="text-sm text-[#73798f]">{t("noShippingDetails")}</p>
+            <p>{t("noShippingDetails")}</p>
           )}
         </div>
       </Card>
-      <Card className="overflow-hidden border-[#dde2e8] shadow-none">
-        <h2 className="flex items-center gap-2 border-b border-[#dde2e8] px-4 py-3 text-lg font-semibold text-[#1f5fa8]">
-          <MessageText1 className="size-5" aria-hidden="true" /> {t("invoice")}
+      <Card className="overflow-hidden border-[#dde2e8] !shadow-none">
+        <h2 className="border-b border-[#dde2e8] px-4 py-3 text-lg font-semibold leading-6 text-[#1f5fa8]">
+          {t("payment")}
         </h2>
-        <dl className="space-y-3 p-4 text-sm">
-          <div className="flex justify-between gap-3">
-            <dt className="text-[#73798f]">{t("invoiceOrderNumber")}</dt>
-            <dd className="text-right font-medium text-[#051a50]">#{order.invoice.orderNumber}</dd>
+        <div className="px-3 pb-3 pt-6 sm:px-4">
+          <div className="flex items-start gap-4">
+            {pending || cancelled ? (
+              <CardIcon size={28} className="shrink-0 text-[#1f5fa8]" aria-hidden="true" />
+            ) : (
+              <Image src="/orders/visa.svg" alt="Visa" width={28} height={20} className="mt-0.5 shrink-0" />
+            )}
+            <div className="space-y-1.5">
+              <p className="text-base font-semibold text-[#051a50]">
+                {pending || cancelled
+                  ? t("bankTransfer")
+                  : t("visaEnding", { digits: orderDetailPlaceholders.cardLastFour })}
+              </p>
+              <p className="break-words text-xs leading-5 text-[#73798f]">
+                {pending
+                  ? t("notPaid", { refCode: order.refCode || "—" })
+                  : cancelled
+                    ? t("statuses.cancelled")
+                    : t("chargedOn", {
+                        amount: formatCurrency(order.total, order.currency),
+                        date: orderDetailPlaceholders.chargedDate,
+                      })}
+              </p>
+            </div>
           </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-[#73798f]">{t("buyerEmail")}</dt>
-            <dd className="break-all text-right font-medium text-[#051a50]">{order.invoice.buyerEmail}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="flex items-center gap-1 text-[#73798f]">
-              <Calendar2 className="size-4" aria-hidden="true" /> {t("created")}
-            </dt>
-            <dd className="text-right text-[#051a50]">{formatOrderDate(order.invoice.createdAt)}</dd>
-          </div>
-          <div className="flex justify-between gap-3 border-t border-[#dde2e8] pt-3">
-            <dt className="text-[#73798f]">{t("invoiceStatus")}</dt>
-            <dd className="font-medium text-[#051a50]">{order.invoice.status}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-[#73798f]">{t("invoiceTotal")}</dt>
-            <dd className="font-semibold text-[#164990]">
-              {formatCurrency(order.invoice.total, order.invoice.currency)}
-            </dd>
-          </div>
-        </dl>
+          {!pending && !cancelled ? (
+            <div className="mt-2 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-t border-[#dde2e8] pt-2 text-xs text-[#051a50] sm:justify-between sm:pl-16">
+              <p>
+                {t("invoiceNumber")}: #{orderDetailPlaceholders.invoiceNumber}
+              </p>
+              <Button
+                disabled
+                variant="ghost"
+                className="h-auto gap-2 p-0 text-xs font-normal text-[#164990] disabled:opacity-100"
+                title={t("invoiceDownloadUnavailable")}
+              >
+                <DocumentDownload size={18} aria-hidden="true" />
+                {t("downloadInvoice")}
+              </Button>
+            </div>
+          ) : null}
+        </div>
       </Card>
     </div>
   );

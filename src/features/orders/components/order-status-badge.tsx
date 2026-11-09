@@ -1,5 +1,6 @@
 import { cn } from "@/lib/class-names";
 import { useTranslations } from "next-intl";
+import { isOrderAwaitingPayment } from "../utils/is-order-awaiting-payment";
 
 type OrderStatusTranslationKey =
   | "draft"
@@ -30,6 +31,13 @@ const statusConfig: Record<string, { key: OrderStatusTranslationKey; className: 
 
 export function OrderStatusBadge({ status }: { status: string }) {
   const t = useTranslations("Orders.statuses");
+  if (isOrderAwaitingPayment(status))
+    return (
+      <span className="inline-flex items-center gap-2 rounded-full bg-[#fff9ea] px-3 py-1.5 text-sm font-medium text-[#b94f00]">
+        <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
+        {t("pendingPayment")}
+      </span>
+    );
   const normalizedStatus = status
     .trim()
     .toLowerCase()

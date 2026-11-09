@@ -6,26 +6,23 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
+import { useCountdown } from "@/hooks/use-countdown";
 
 export function PaymentCountdown({ orderId, paymentExpiresAt }: { orderId: string; paymentExpiresAt: string }) {
   const t = useTranslations("Checkout");
   const locale = useLocale();
   const router = useRouter();
   const deadline = new Date(paymentExpiresAt).getTime();
-  const [remaining, setRemaining] = useState<number | null>(null);
+  const remaining = useCountdown(paymentExpiresAt);
   const [deadlineLabel, setDeadlineLabel] = useState("");
 
   useEffect(() => {
-    const updateRemaining = () => setRemaining(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
-    updateRemaining();
     setDeadlineLabel(
       new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-SG", {
         dateStyle: "medium",
         timeStyle: "short",
       }).format(deadline),
     );
-    const interval = window.setInterval(updateRemaining, 1000);
-    return () => window.clearInterval(interval);
   }, [deadline, locale]);
 
   const expired = remaining === 0;

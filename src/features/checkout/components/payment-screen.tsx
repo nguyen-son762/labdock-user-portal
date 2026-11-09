@@ -8,10 +8,9 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOrderDetailQuery } from "@/features/orders";
+import { isOrderAwaitingPayment, useOrderDetailQuery } from "@/features/orders";
 import { Link } from "@/i18n/navigation";
 
-import { useCheckoutSessionQuery } from "../api/use-checkout-session-query";
 import { formatCurrency } from "../data/checkout-data";
 import { PaymentCountdown } from "./payment-countdown";
 
@@ -19,17 +18,14 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
   const t = useTranslations("Checkout");
   const tHeader = useTranslations("Header");
   const orderQuery = useOrderDetailQuery(orderId, { refetchOnMount: "always" });
-  const sessionQuery = useCheckoutSessionQuery(orderId);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
-  const isLoadingPayment =
-    sessionQuery.isPending || orderQuery.isPending || (orderQuery.isFetching && !orderQuery.isFetchedAfterMount);
+  const isLoadingPayment = orderQuery.isPending || (orderQuery.isFetching && !orderQuery.isFetchedAfterMount);
   const order = isLoadingPayment || orderQuery.isError ? undefined : orderQuery.data;
-  const session = sessionQuery.data;
 
   async function copyReference() {
-    if (!session) return;
+    if (!order?.refCode) return;
     try {
-      await navigator.clipboard.writeText(session.refCode);
+      await navigator.clipboard.writeText(order.refCode);
       setCopyStatus("copied");
     } catch {
       setCopyStatus("error");
@@ -65,15 +61,7 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
             </Button>
           </div>
         ) : null}
-        {!isLoadingPayment && !orderQuery.isError && !session ? (
-          <div className="mt-6 space-y-4">
-            <Alert>{t("paymentSessionMissing")}</Alert>
-            <Button asChild>
-              <Link href={`/orders/${orderId}`}>{t("viewOrder")}</Link>
-            </Button>
-          </div>
-        ) : null}
-        {order && session ? (
+        {order ? (
           <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_392px]">
             <section
               className="min-w-0 space-y-6 rounded-xl border border-[#ecf0f3] bg-white p-4"
@@ -87,14 +75,14 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
                   <h2 id="payment-method-title" className="text-2xl font-semibold leading-8 text-[#051a50]">
                     {t("bankTransfer")}
                   </h2>
-                  {session.qrImageUrl ? <p className="text-sm leading-5 text-[#73798f]">{t("scanQr")}</p> : null}
+                  {order.qrImageUrl ? <p className="text-sm leading-5 text-[#73798f]">{t("scanQr")}</p> : null}
                 </div>
               </div>
               <div className="flex flex-col items-center gap-6 rounded-xl bg-[#f5f7f8] p-4 text-center sm:p-6">
                 <div className="flex w-full flex-col items-center gap-3">
-                  {session.qrImageUrl ? (
+                  {order.qrImageUrl ? (
                     <Image
-                      src={session.qrImageUrl}
+                      src={order.qrImageUrl}
                       alt={t("bankTransferQr")}
                       width={300}
                       height={300}
@@ -109,37 +97,39 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
                   )}
                   <div className="flex w-full flex-col items-center gap-2 text-[#051a50]">
                     <strong className="text-lg font-semibold leading-6 text-[#1f5fa8]">
-                      {t("amount", { amount: formatCurrency(session.amount, session.currency) })}
+                      {t("amount", { amount: formatCurrency(order.total, order.currency) })}
                     </strong>
-                    {session.companyName ? (
+                    {order.companyName ? (
                       <p className="text-base font-semibold leading-6">
-                        {t("companyName")}: {session.companyName}
+                        {t("companyName")}: {order.companyName}
                       </p>
                     ) : null}
-                    {session.businessRegistrationNo ? (
+                    {order.businessRegistrationNo ? (
                       <p className="text-base font-semibold leading-6">
-                        {t("businessRegistration")}: {session.businessRegistrationNo}
+                        {t("businessRegistration")}: {order.businessRegistrationNo}
                       </p>
                     ) : null}
-                    <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-base font-semibold leading-6">
-                      <span>{t("refCode")}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        aria-label={t("copyReference")}
-                        onClick={() => void copyReference()}
-                        className="h-auto max-w-full gap-1.5 rounded-md border border-dashed border-[#1f5fa8] bg-[#f2f7fd] py-1 pl-2.5 pr-2 text-base text-[#1f5fa8] hover:bg-[#e6f0fb]"
-                      >
-                        <span className="break-all whitespace-normal text-left">{session.refCode}</span>
-                        <Image
-                          src="/checkout/bank-transfer/copy.svg"
-                          alt=""
-                          width={16}
-                          height={16}
-                          className="shrink-0"
-                        />
-                      </Button>
-                    </div>
+                    {order.refCode ? (
+                      <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-base font-semibold leading-6">
+                        <span>{t("refCode")}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          aria-label={t("copyReference")}
+                          onClick={() => void copyReference()}
+                          className="h-auto max-w-full gap-1.5 rounded-md border border-dashed border-[#1f5fa8] bg-[#f2f7fd] py-1 pl-2.5 pr-2 text-base text-[#1f5fa8] hover:bg-[#e6f0fb]"
+                        >
+                          <span className="break-all whitespace-normal text-left">{order.refCode}</span>
+                          <Image
+                            src="/checkout/bank-transfer/copy.svg"
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="shrink-0"
+                          />
+                        </Button>
+                      </div>
+                    ) : null}
                     <span role="status" className={copyStatus === "error" ? "text-sm text-destructive" : "sr-only"}>
                       {copyStatus === "copied"
                         ? t("referenceCopied")
@@ -147,13 +137,25 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
                           ? t("copyReferenceError")
                           : ""}
                     </span>
-                    <p className="text-sm leading-5 text-[#73798f]">{t("transferReferenceHelp")}</p>
+                    {order.refCode ? (
+                      <p className="text-sm leading-5 text-[#73798f]">{t("transferReferenceHelp")}</p>
+                    ) : null}
                   </div>
                 </div>
-                {session.qrImageUrl ? <p className="text-sm leading-5 text-[#73798f]">{t("transferQrHelp")}</p> : null}
+                {order.qrImageUrl ? <p className="text-sm leading-5 text-[#73798f]">{t("transferQrHelp")}</p> : null}
               </div>
             </section>
-            <PaymentCountdown orderId={order.id} paymentExpiresAt={session.paymentExpiresAt} />
+            {isOrderAwaitingPayment(order.status) && order.paymentExpiresAt ? (
+              <PaymentCountdown
+                key={`${order.id}:${order.paymentExpiresAt}`}
+                orderId={order.id}
+                paymentExpiresAt={order.paymentExpiresAt}
+              />
+            ) : (
+              <Button asChild>
+                <Link href={`/orders/${order.id}`}>{t("viewOrder")}</Link>
+              </Button>
+            )}
           </div>
         ) : null}
       </div>

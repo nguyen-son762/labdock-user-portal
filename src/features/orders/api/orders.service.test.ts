@@ -24,6 +24,11 @@ const detail = {
   ...order,
   platformFeeRateSnap: 0,
   shippingSnapshotJson: "{}",
+  refCode: "AB12CD34",
+  paymentExpiresAt: "2026-08-21T11:00:00+00:00",
+  companyName: "i-DNA",
+  businessRegistrationNo: "202012345A",
+  qrImageUrl: "https://cdn.example/qr.png",
   invoice: {
     orderNumber: "ORD-001",
     createdAt: "2026-08-21T10:00:00+00:00",
@@ -63,6 +68,11 @@ describe("ordersService", () => {
     expect(httpClient.get).toHaveBeenCalledWith(`/orders/${order.id}`, { signal: undefined });
     expect(result.invoice.lines[0]?.sku).toBe("SKU-001");
     expect(result.shippingSnapshotJson).toBe("{}");
+    expect(result.refCode).toBe(detail.refCode);
+    expect(result.paymentExpiresAt).toBe(detail.paymentExpiresAt);
+    expect(result.companyName).toBe(detail.companyName);
+    expect(result.businessRegistrationNo).toBe(detail.businessRegistrationNo);
+    expect(result.qrImageUrl).toBe(detail.qrImageUrl);
   });
 
   it.each([
@@ -92,5 +102,22 @@ describe("ordersService", () => {
   it("rejects an invalid order id before making a request", async () => {
     await expect(ordersService.getById("not-an-id")).rejects.toThrow();
     expect(httpClient.get).not.toHaveBeenCalled();
+  });
+
+  it("allows missing bank configuration and deadlines on historical orders", async () => {
+    httpClient.get.mockResolvedValue({
+      data: { ...detail, paymentExpiresAt: null, companyName: "", businessRegistrationNo: "", qrImageUrl: "" },
+    });
+    const result = await ordersService.getById(order.id);
+    expect(result.paymentExpiresAt).toBeNull();
+    expect(result.qrImageUrl).toBe("");
+  });
+
+  it.each([
+    { ...detail, paymentExpiresAt: "invalid-date" },
+    { ...detail, qrImageUrl: "javascript:alert(1)" },
+  ])("rejects invalid payment metadata", async (response) => {
+    httpClient.get.mockResolvedValue({ data: response });
+    await expect(ordersService.getById(order.id)).rejects.toThrow();
   });
 });

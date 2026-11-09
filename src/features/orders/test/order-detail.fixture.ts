@@ -1,0 +1,60 @@
+import type { OrderDetail } from "../schemas/order.schema";
+
+export function createOrderDetailFixture(overrides: Partial<OrderDetail> = {}): OrderDetail {
+  return {
+    id: "11111111-1111-1111-1111-111111111111",
+    orderNumber: "OR-3005",
+    status: "PendingPayment",
+    subtotal: 4500,
+    tax: 405,
+    shippingFee: 0,
+    additionalFeeTotal: 0,
+    platformFee: 0,
+    platformFeeRateSnap: null,
+    total: 4905,
+    currency: "SGD",
+    createdAt: "2026-01-08T08:00:00Z",
+    paymentExpiresAt: new Date(Date.now() + (45 * 60 + 12) * 1000).toISOString(),
+    refCode: "LDK-20261031-4905",
+    companyName: "i-DNA",
+    businessRegistrationNo: "202012345A",
+    qrImageUrl: "",
+    shippingSnapshotJson: JSON.stringify({
+      recipientName: "Sarah Chen",
+      companyName: "Biogenix Pte Ltd",
+      addressLine1: "745 Lor. 5 Toa Payoh",
+      addressLine2: "#03-03, The Lifeline Building",
+      postalCode: "319455",
+      country: "Singapore",
+      phone: "+65 88009900",
+    }),
+    invoice: {
+      orderNumber: "OR-3005",
+      createdAt: "2026-01-08T08:00:00Z",
+      buyerEmail: "buyer@example.test",
+      lines: [
+        {
+          productName: "Beakers, Griffin, Low Form, with spout",
+          sku: "9000000001",
+          unitPrice: 35,
+          quantity: 100,
+          lineTotal: 3500,
+        },
+        {
+          productName: "Digital Laboratory Microscope with HD Camera",
+          sku: "1000000001",
+          unitPrice: 1000,
+          quantity: 1,
+          lineTotal: 1000,
+        },
+      ],
+      subtotal: 4500,
+      tax: 405,
+      platformFee: 0,
+      total: 4905,
+      currency: "SGD",
+      status: "PendingPayment",
+    },
+    ...overrides,
+  };
+}
