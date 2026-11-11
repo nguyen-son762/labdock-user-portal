@@ -6,6 +6,7 @@ import { ServiceGuarantees } from "@/components/shared/service-guarantees";
 import type { Product } from "../products.types";
 import { getProductGallery } from "../utils/product-display";
 import { mapRelatedProduct } from "../utils/map-public-product";
+import { sanitizeProductDescription } from "../utils/product-description";
 import { ProductGallery } from "./product-gallery";
 import { ProductInformation } from "./product-information";
 import { ProductPurchasePanel } from "./product-purchase-panel";
@@ -32,7 +33,7 @@ export function ProductDetailScreen({ product }: { product: Product }) {
           <div className="mt-6 grid items-stretch gap-6 xl:grid-cols-12">
             <div className="flex min-w-0 flex-col gap-4 xl:col-span-8">
               <ProductGallery images={gallery} productName={product.name} />
-              <ProductInformation product={product} />
+              <ProductInformation product={product} descriptionHtml={sanitizeProductDescription(product.description)} />
             </div>
             <div className="min-w-0 xl:col-span-4">
               <ProductPurchasePanel key={product.id} product={product} />

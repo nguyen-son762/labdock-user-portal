@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAddCartItemMutation } from "@/features/checkout";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
 
 import type { Product } from "../products.types";
@@ -58,12 +58,10 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       .map((selection) => selection.attributeName)
       .filter((value, index, values) => Boolean(value) && values.indexOf(value) === index)
       .join(" / ") || t("productOption");
-  console.warn('product', product);
-  const notices = [
-    product.restrictedCondition ? t("restrictedNotice") : "",
-    product.specialRequirement ? t("specialRequirementNotice") : "",
-    product.notes,
-  ].filter(Boolean);
+  const notices = product.notes
+    .split(/\r\n|\r|\n/)
+    .map((notice) => notice.trim())
+    .filter(Boolean);
 
   function addProduct(destination?: "/checkout" | "/request-quote") {
     if (addCartItem.isPending || !presentation.canPurchase || !selectedVariant) return;
@@ -98,10 +96,18 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         ) : null}
         <h1 className="text-2xl font-semibold leading-[1.3] text-[#051a50]">{product.name}</h1>
         <p className="mt-4 flex flex-wrap items-baseline gap-2 text-[32px] font-bold leading-tight text-[#e57a00]">
-          {presentation.priceVisible ? presentation.price : t("contactForPrice")}
-          {presentation.originalPrice ? (
-            <span className="text-lg font-normal text-[#a3abbd] line-through">{presentation.originalPrice}</span>
-          ) : null}
+          {presentation.priceVisible ? (
+            <>
+              {presentation.price}
+              {presentation.originalPrice ? (
+                <span className="text-lg font-normal text-[#a3abbd] line-through">{presentation.originalPrice}</span>
+              ) : null}
+            </>
+          ) : (
+            <Link href="/login" className="hover:underline focus-visible:rounded-sm focus-visible:outline-none">
+              {t("loginToViewPrice")}
+            </Link>
+          )}
         </p>
         <div className="mt-5">
           <ProductFacts product={product} />
@@ -112,7 +118,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
             <legend className="contents">
               <span className="flex-1 text-sm font-semibold text-[#051a50]">{variantLabel}</span>
             </legend>
-            <div className="flex w-full flex-wrap gap-2 sm:w-[240px]">
+            <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-2 sm:w-[240px]">
               {product.variants.map((variant) => {
                 const label = getProductVariantLabel(variant);
                 return (
@@ -126,7 +132,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                       setQuantity((value) => Math.min(value, Math.max(1, variant.stockQty)));
                     }}
                     className={cn(
-                      "h-8 min-w-[72px] flex-1 rounded-lg border-[#d4d4d4] bg-white px-2 text-sm text-[#404040] shadow-none",
+                      "h-8 min-w-[72px] rounded-lg border-[#d4d4d4] bg-white px-2 text-sm text-[#404040] shadow-none",
                       selectedVariant?.id === variant.id &&
                       "border-[#164990] bg-[#164990] text-white hover:bg-[#164990] hover:text-white",
                     )}
@@ -224,7 +230,10 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
         {product.certificates.length ? (
           <div
-            className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-[6px] bg-[#effaf3] px-2 py-1 text-sm text-[#1a1a1a]"
+            className={cn(
+              "mt-4 flex flex-wrap items-center justify-start gap-4 rounded-[6px] bg-[#effaf3] px-2 py-1 text-sm text-[#1a1a1a]",
+              product.certificates.length === 3 && "justify-between gap-2",
+            )}
             aria-label={t("certificates")}
           >
             {product.certificates.map((certificate) => (
@@ -260,8 +269,8 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         <div className="border-t border-[#e9eaeb] p-6 pt-4">
           <h2 className="text-sm font-semibold text-[#051a50]">{t("noteOptional")}</h2>
           <ol className="mt-4 list-decimal space-y-1 rounded-md bg-[#fff0f1] py-2 pl-8 pr-3 text-sm leading-5 text-[#770b23]">
-            {notices.map((notice) => (
-              <li key={notice}>{notice}</li>
+            {notices.map((notice, index) => (
+              <li key={`${index}-${notice}`}>{notice}</li>
             ))}
           </ol>
         </div>

@@ -43,7 +43,7 @@ const product: Product = {
 describe("ProductInformation", () => {
   it("renders API specifications and product documents", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<ProductInformation product={product} />);
+    renderWithProviders(<ProductInformation product={product} descriptionHtml={product.description} />);
 
     expect(screen.getByText("Purity")).toBeInTheDocument();
     expect(screen.getByText("99%")).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe("ProductInformation", () => {
     );
   });
   it("PDP-020 SEO-008 renders every tab panel and preserves its accessible relationship", () => {
-    renderWithProviders(<ProductInformation product={product} />);
+    renderWithProviders(<ProductInformation product={product} descriptionHtml={product.description} />);
     for (const tab of screen.getAllByRole("tab")) {
       const panelId = tab.getAttribute("aria-controls");
       expect(panelId).not.toBeNull();

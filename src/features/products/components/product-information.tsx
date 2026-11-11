@@ -13,7 +13,7 @@ import { resolveProductMediaUrl } from "../utils/product-display";
 const tabs = ["Description", "Specifications", "References"] as const;
 type Tab = (typeof tabs)[number];
 
-export function ProductInformation({ product }: { product: Product }) {
+export function ProductInformation({ product, descriptionHtml }: { product: Product; descriptionHtml: string }) {
   const t = useTranslations("Product");
   const [activeTab, setActiveTab] = useState<Tab>("Specifications");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -89,9 +89,10 @@ export function ProductInformation({ product }: { product: Product }) {
           className="p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#164990]"
         >
           {tab === "Description" ? (
-            <p className="text-sm leading-6 text-[#5e6375]">
-              {product.description || product.notes || t("noDescription")}
-            </p>
+            <div
+              className="text-sm leading-6 text-[#5e6375] [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6"
+              dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+            />
           ) : null}
           {tab === "Specifications" ? (
             product.specifications.length ? (
@@ -142,9 +143,10 @@ export function ProductInformation({ product }: { product: Product }) {
         </div>
       ))}
       <noscript>
-        <p className="p-4 text-sm leading-6 text-[#5e6375]">
-          {product.description || product.notes || t("noDescription")}
-        </p>
+        <div
+          className="p-4 text-sm leading-6 text-[#5e6375]"
+          dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+        />
       </noscript>
     </section>
   );

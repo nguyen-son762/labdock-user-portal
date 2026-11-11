@@ -28,7 +28,7 @@ describe("ProductPurchasePanel", () => {
     expect(screen.getByText("ISO 27001")).toBeInTheDocument();
   });
 
-  it("shows contact pricing and hides promotions for hidden or missing prices", () => {
+  it("links to login and hides promotions for hidden or missing prices", () => {
     renderWithProviders(
       <ProductPurchasePanel
         product={{
@@ -39,7 +39,7 @@ describe("ProductPurchasePanel", () => {
       />,
     );
 
-    expect(screen.getByText("Contact for price")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Login to view Price" })).toHaveAttribute("href", "/login");
     expect(screen.queryByText("-10%")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Buy now" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Add to cart" })).toBeDisabled();
