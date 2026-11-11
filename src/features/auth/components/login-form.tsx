@@ -14,15 +14,21 @@ import { Input } from "@/components/ui/input";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 import { useLoginMutation } from "../api/use-login-mutation";
-import { loginSchema, type LoginValues } from "../schemas/login.schema";
+import { createLoginSchema, type LoginValues } from "../schemas/login.schema";
 
 export function LoginForm() {
   const tErrors = useTranslations("ApiErrors");
   const t = useTranslations("Auth");
+  const schema = createLoginSchema({
+    emailRequired: t("validationEmailRequired"),
+    emailInvalid: t("validationEmailInvalid"),
+    passwordMinLength: t("validationPasswordMinLength"),
+    passwordMaxLength: t("validationPasswordMaxLength"),
+  });
   const router = useRouter();
   const loginMutation = useLoginMutation();
   const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
 

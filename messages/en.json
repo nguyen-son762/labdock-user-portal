@@ -202,6 +202,10 @@
   },
   "Auth": {
     "emailAddress": "Email address",
+    "validationEmailRequired": "Please enter your email.",
+    "validationEmailInvalid": "Please enter a valid email address.",
+    "validationPasswordMinLength": "Password must be at least 8 characters.",
+    "validationPasswordMaxLength": "Password must be no more than 128 characters.",
     "loginDescription": "Log in securely to Labdock.",
     "loginWelcome": "Welcome back! Please enter your details.",
     "enterEmailAddress": "Enter email address",

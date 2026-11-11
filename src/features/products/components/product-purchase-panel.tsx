@@ -58,6 +58,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       .map((selection) => selection.attributeName)
       .filter((value, index, values) => Boolean(value) && values.indexOf(value) === index)
       .join(" / ") || t("productOption");
+  console.warn('product', product);
   const notices = [
     product.restrictedCondition ? t("restrictedNotice") : "",
     product.specialRequirement ? t("specialRequirementNotice") : "",

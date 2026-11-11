@@ -43,7 +43,7 @@ export function HeaderAccountMenu({ account, compact = false }: HeaderAccountMen
           className={
             compact
               ? "size-10 rounded-full bg-white/10 p-0 text-white hover:bg-white/15 hover:text-white focus-visible:ring-white"
-              : "h-10 w-[132px] shrink-0 justify-start gap-2 rounded-full p-0 pr-1 font-normal text-white hover:bg-white/10 hover:text-white focus-visible:ring-white"
+              : "h-10 w-[132px] shrink-0 justify-start gap-2 rounded-full p-0 pr-1 font-normal text-white transition-[height,padding,background-color] duration-200 hover:h-12 hover:px-1 hover:py-1 hover:bg-white/10 hover:text-white focus-visible:ring-white"
           }
         >
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">

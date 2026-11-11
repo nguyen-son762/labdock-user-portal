@@ -49,7 +49,7 @@ function AccountSummary({ account }: { account?: HeaderAccount }) {
   return (
     <Link
       href={account ? "/profile" : "/login"}
-      className="flex h-9 w-[120px] shrink-0 items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      className="flex h-9 w-[120px] shrink-0 items-center gap-2 rounded-full transition-[height,padding] duration-200 hover:h-11 hover:px-0.5 hover:py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
     >
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">
         <ProfileCircle className="size-4" variant="Bold" aria-hidden="true" />
@@ -77,7 +77,7 @@ function OrderSummary() {
   return (
     <Link
       href="/cart"
-      className="flex h-9 w-[114px] shrink-0 items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      className="flex h-9 w-[114px] shrink-0 items-center gap-2 rounded-full transition-[height,padding] duration-200 hover:h-11 hover:px-1 hover:py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
     >
       <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">
         <ShoppingCart className="size-4" variant="Bold" aria-hidden="true" />

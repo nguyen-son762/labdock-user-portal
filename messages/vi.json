@@ -202,6 +202,10 @@
   },
   "Auth": {
     "emailAddress": "Địa chỉ email",
+    "validationEmailRequired": "Vui lòng nhập email.",
+    "validationEmailInvalid": "Email chưa đúng định dạng.",
+    "validationPasswordMinLength": "Mật khẩu phải có ít nhất 8 ký tự.",
+    "validationPasswordMaxLength": "Mật khẩu quá dài.",
     "loginDescription": "Đăng nhập an toàn vào Labdock.",
     "loginWelcome": "Chào mừng bạn quay lại! Vui lòng nhập thông tin.",
     "enterEmailAddress": "Nhập địa chỉ email",
