@@ -15,6 +15,12 @@ export const publicProductListItemSchema = z.object({
   fromPrice: z.number().nonnegative().nullable(),
   currency: z.string().length(3),
   outOfStock: z.boolean(),
+  promotionPercent: z
+    .number()
+    .min(0)
+    .max(100)
+    .nullish()
+    .transform((value) => value ?? 0),
   publishedAt: z.iso.datetime({ offset: true }),
   isNew: z.boolean(),
   isOutstanding: z.boolean(),

@@ -61,6 +61,7 @@ export const productFixture: Product = {
   ],
   media: [],
   documents: [],
+  references: [],
   related: [],
   certificates: [{ id: "77777777-7777-7777-7777-777777777777", name: "ISO 27001" }],
   isNew: false,

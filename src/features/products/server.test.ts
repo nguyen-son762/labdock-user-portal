@@ -26,6 +26,7 @@ const productsResponse = {
       fromPrice: 99.5,
       currency: "SGD",
       outOfStock: true,
+      promotionPercent: 0,
       publishedAt: "2026-08-21T10:00:00+00:00",
       isNew: true,
       isOutstanding: true,
@@ -104,7 +105,7 @@ describe("getPublicProducts", () => {
     );
 
     const result = await getProductCatalogPage({ page: 1, pageSize: 20 });
-    expect(result.items[0]).toEqual({ ...detail, related: [] });
+    expect(result.items[0]).toEqual({ ...detail, references: [], related: [] });
   });
 
   it("serializes every supported filter with the backend parameter casing", async () => {
@@ -308,7 +309,7 @@ describe("getPublicProductBySlug", () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(productDetailResponse), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(getPublicProductBySlug("example slug")).resolves.toEqual(productDetailResponse);
+    await expect(getPublicProductBySlug("example slug")).resolves.toEqual({ ...productDetailResponse, references: [] });
     expect(fetchMock).toHaveBeenCalledWith(
       "https://uat-api-labdock.365studio.vn/api/public/v1/products/example%20slug",
       { next: { revalidate: 300, tags: ["products", "product:example slug"] } },

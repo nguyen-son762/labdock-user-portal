@@ -31,7 +31,7 @@ export function mapPublicProduct(product: PublicProductListItem | PublicProductD
         priceVisible: product.priceVisible,
         unitPrice,
         rfqBasePrice: unitPrice,
-        promotionPercent: 0,
+        promotionPercent: product.promotionPercent,
         currency: product.currency,
         stockQty: product.outOfStock ? 0 : 1,
         isActive: true,
@@ -50,6 +50,7 @@ export function mapPublicProduct(product: PublicProductListItem | PublicProductD
         ]
       : [],
     documents: [],
+    references: [],
     related: [],
     certificates: [],
     isNew: product.isNew,
@@ -98,6 +99,7 @@ export function mapRelatedProduct(product: RelatedProduct): Product {
         ]
       : [],
     documents: [],
+    references: [],
     related: [],
     certificates: [],
     isNew: false,

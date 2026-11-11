@@ -58,6 +58,7 @@ export function mapProductViewModel(product: ProductViewModel): Product {
       isPrimary: index === 0,
     })),
     documents: [],
+    references: [],
     related: [],
     certificates: [],
     isNew: false,

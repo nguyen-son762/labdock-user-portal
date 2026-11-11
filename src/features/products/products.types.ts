@@ -43,6 +43,13 @@ export type ProductDocument = {
   url: string;
 };
 
+export type ProductReference = {
+  id: string;
+  title: string;
+  url: string;
+  sortOrder: number;
+};
+
 export type RelatedProduct = {
   id: string;
   name: string;
@@ -76,6 +83,7 @@ export type Product = {
   variants: ProductVariant[];
   media: ProductMedia[];
   documents: ProductDocument[];
+  references: ProductReference[];
   related: RelatedProduct[];
   certificates: ProductCertificate[];
   isNew: boolean;

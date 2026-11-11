@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { PublicProductListItem } from "../schemas/product-list.schema";
 import { mapPublicProduct } from "./map-public-product";
+import { getProductCardPresentation } from "./product-display";
 
 const apiProduct: PublicProductListItem = {
   id: "11111111-1111-1111-1111-111111111111",
@@ -14,6 +15,7 @@ const apiProduct: PublicProductListItem = {
   fromPrice: 99.5,
   currency: "SGD",
   outOfStock: true,
+  promotionPercent: 0,
   publishedAt: "2026-08-21T10:00:00+00:00",
   isNew: true,
   isOutstanding: true,
@@ -38,6 +40,18 @@ describe("mapPublicProduct", () => {
         ],
         media: [expect.objectContaining({ url: "/media/public/example.jpg", isPrimary: true })],
       }),
+    );
+  });
+
+  it("applies the list promotion to the card price and discount badge", () => {
+    const product = mapPublicProduct({ ...apiProduct, fromPrice: 1250, promotionPercent: 25, outOfStock: false });
+    const card = getProductCardPresentation(product);
+
+    expect(product.variants[0]?.promotionPercent).toBe(25);
+    expect(card.discount).toBe("-25%");
+    expect(card.price).toBe(new Intl.NumberFormat("en-SG", { style: "currency", currency: "SGD" }).format(937.5));
+    expect(card.originalPrice).toBe(
+      new Intl.NumberFormat("en-SG", { style: "currency", currency: "SGD" }).format(1250),
     );
   });
 

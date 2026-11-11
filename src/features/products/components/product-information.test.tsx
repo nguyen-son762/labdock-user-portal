@@ -34,6 +34,20 @@ const product: Product = {
       url: "/media/public/safety-sheet.pdf",
     },
   ],
+  references: [
+    {
+      id: "33333333-3333-3333-3333-333333333333",
+      title: "PubChem entry",
+      url: "https://pubchem.ncbi.nlm.nih.gov/compound/5280723",
+      sortOrder: 1,
+    },
+    {
+      id: "44444444-4444-4444-4444-444444444444",
+      title: "Unsafe link",
+      url: "javascript:alert(1)",
+      sortOrder: 0,
+    },
+  ],
   related: [],
   certificates: [],
   isNew: false,
@@ -57,6 +71,33 @@ describe("ProductInformation", () => {
       "href",
       "https://uat-api-labdock.365studio.vn/media/public/safety-sheet.pdf",
     );
+    expect(screen.getByRole("link", { name: /PubChem entry/ })).toHaveAttribute(
+      "href",
+      "https://pubchem.ncbi.nlm.nih.gov/compound/5280723",
+    );
+    expect(screen.queryByRole("link", { name: /Unsafe link/ })).not.toBeInTheDocument();
+  });
+
+  it("shows the empty state only when there are no references or documents", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ProductInformation
+        product={{ ...product, documents: [], references: [] }}
+        descriptionHtml={product.description}
+      />,
+    );
+    await user.click(screen.getByRole("tab", { name: "References" }));
+    expect(screen.getByText("No product documents are available.")).toBeVisible();
+  });
+
+  it("renders references when the product has no documents", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ProductInformation product={{ ...product, documents: [] }} descriptionHtml={product.description} />,
+    );
+    await user.click(screen.getByRole("tab", { name: "References" }));
+    expect(screen.getByRole("link", { name: /PubChem entry/ })).toHaveAttribute("target", "_blank");
+    expect(screen.queryByText("No product documents are available.")).not.toBeInTheDocument();
   });
   it("PDP-020 SEO-008 renders every tab panel and preserves its accessible relationship", () => {
     renderWithProviders(<ProductInformation product={product} descriptionHtml={product.description} />);

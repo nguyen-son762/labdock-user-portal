@@ -18,6 +18,19 @@ export function resolveProductMediaUrl(mediaUrl: string): string {
   return new URL(assetPath, `${new URL(clientEnv.NEXT_PUBLIC_API_BASE_URL).origin}/`).toString();
 }
 
+/** Returns an http(s) URL for an editor-entered link, or undefined when it is unsafe or invalid. */
+export function toSafeExternalUrl(rawUrl: string): string | undefined {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return undefined;
+  const candidate = /^[a-z][a-z\d+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed.replace(/^\/+/, "")}`;
+  try {
+    const url = new URL(candidate);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function getProductGallery(product: Product): string[] {
   const images = [...product.media]
     .sort((left, right) => Number(right.isPrimary) - Number(left.isPrimary) || left.sortOrder - right.sortOrder)

@@ -1,6 +1,6 @@
 "use client";
 
-import { DocumentDownload } from "iconsax-reactjs";
+import { DocumentDownload, Link21 } from "iconsax-reactjs";
 import { type KeyboardEvent, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/class-names";
 
 import type { Product } from "../products.types";
-import { resolveProductMediaUrl } from "../utils/product-display";
+import { resolveProductMediaUrl, toSafeExternalUrl } from "../utils/product-display";
 
 const tabs = ["Description", "Specifications", "References"] as const;
 type Tab = (typeof tabs)[number];
@@ -17,6 +17,13 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
   const t = useTranslations("Product");
   const [activeTab, setActiveTab] = useState<Tab>("Specifications");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const references = [...product.references]
+    .sort((left, right) => left.sortOrder - right.sortOrder)
+    .flatMap((reference) => {
+      const href = toSafeExternalUrl(reference.url);
+      return href ? [{ id: reference.id, title: reference.title.trim() || href, href }] : [];
+    });
+  const documents = [...product.documents].sort((left, right) => left.sortOrder - right.sortOrder);
 
   function selectTab(index: number) {
     const tab = tabs[index];
@@ -115,26 +122,37 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
             )
           ) : null}
           {tab === "References" ? (
-            product.documents.length ? (
+            references.length || documents.length ? (
               <ul className="space-y-2">
-                {[...product.documents]
-                  .sort((left, right) => left.sortOrder - right.sortOrder)
-                  .map((document) => (
-                    <li key={document.id}>
-                      <a
-                        href={resolveProductMediaUrl(document.url)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-2 rounded-lg border border-[#e5e9ef] px-4 py-3 text-sm font-medium text-[#164990] transition-colors hover:bg-[#f3f8fc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
-                      >
-                        <DocumentDownload className="size-5 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate">{document.displayName}</span>
-                        <span className="text-xs font-normal text-[#73798f]">
-                          {(document.sizeBytes / 1024).toLocaleString("en-SG", { maximumFractionDigits: 1 })} KB
-                        </span>
-                      </a>
-                    </li>
-                  ))}
+                {references.map((reference) => (
+                  <li key={reference.id}>
+                    <a
+                      href={reference.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg border border-[#e5e9ef] px-4 py-3 text-sm font-medium text-[#164990] transition-colors hover:bg-[#f3f8fc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
+                    >
+                      <Link21 className="size-5 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 flex-1 truncate">{reference.title}</span>
+                    </a>
+                  </li>
+                ))}
+                {documents.map((document) => (
+                  <li key={document.id}>
+                    <a
+                      href={resolveProductMediaUrl(document.url)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-lg border border-[#e5e9ef] px-4 py-3 text-sm font-medium text-[#164990] transition-colors hover:bg-[#f3f8fc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
+                    >
+                      <DocumentDownload className="size-5 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 flex-1 truncate">{document.displayName}</span>
+                      <span className="text-xs font-normal text-[#73798f]">
+                        {(document.sizeBytes / 1024).toLocaleString("en-SG", { maximumFractionDigits: 1 })} KB
+                      </span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="text-sm leading-6 text-[#5e6375]">{t("noDocuments")}</p>
@@ -143,10 +161,7 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
         </div>
       ))}
       <noscript>
-        <div
-          className="p-4 text-sm leading-6 text-[#5e6375]"
-          dangerouslySetInnerHTML={{ __html: descriptionHtml }}
-        />
+        <div className="p-4 text-sm leading-6 text-[#5e6375]" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
       </noscript>
     </section>
   );

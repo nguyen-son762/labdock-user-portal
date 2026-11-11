@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { mapProductViewModel } from "./map-product-view-model";
-import { getDefaultProductVariant, getProductVariantPresentation } from "./product-display";
+import { getDefaultProductVariant, getProductVariantPresentation, toSafeExternalUrl } from "./product-display";
 
 const product = mapProductViewModel({
   id: "product-id",
@@ -67,5 +67,22 @@ describe("product pricing", () => {
       outOfStock: true,
       canPurchase: false,
     });
+  });
+});
+
+describe("toSafeExternalUrl", () => {
+  it("keeps http and https links", () => {
+    expect(toSafeExternalUrl(" https://example.com/paper ")).toBe("https://example.com/paper");
+    expect(toSafeExternalUrl("http://example.com")).toBe("http://example.com/");
+  });
+
+  it("adds https to links entered without a scheme", () => {
+    expect(toSafeExternalUrl("www.example.com/doc")).toBe("https://www.example.com/doc");
+  });
+
+  it("rejects unsafe or empty links", () => {
+    expect(toSafeExternalUrl("javascript:alert(1)")).toBeUndefined();
+    expect(toSafeExternalUrl("data:text/html,hi")).toBeUndefined();
+    expect(toSafeExternalUrl("  ")).toBeUndefined();
   });
 });

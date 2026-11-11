@@ -54,6 +54,7 @@ const homepageResponse = {
       fromPrice: 99.5,
       currency: "SGD",
       outOfStock: false,
+      promotionPercent: 0,
       publishedAt: "2026-08-21T10:00:00+00:00",
       isNew: true,
       isOutstanding: true,

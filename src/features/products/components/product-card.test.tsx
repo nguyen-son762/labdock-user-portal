@@ -60,6 +60,7 @@ const product: Product = {
     },
   ],
   documents: [],
+  references: [],
   related: [],
   certificates: [],
   isNew: true,

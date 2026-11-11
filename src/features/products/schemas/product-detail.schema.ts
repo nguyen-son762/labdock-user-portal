@@ -5,6 +5,7 @@ import type {
   ProductCertificate,
   ProductDocument,
   ProductMedia,
+  ProductReference,
   ProductSpecification,
   ProductVariant,
   ProductVariantSelection,
@@ -58,6 +59,13 @@ const productDocumentSchema: z.ZodType<ProductDocument> = z.object({
   url: z.string().min(1),
 });
 
+const productReferenceSchema: z.ZodType<ProductReference> = z.object({
+  id: guidSchema,
+  title: z.string(),
+  url: z.string(),
+  sortOrder: z.number().int(),
+});
+
 const relatedProductSchema: z.ZodType<RelatedProduct> = z.object({
   id: guidSchema,
   name: z.string().min(1),
@@ -81,16 +89,29 @@ export const publicProductDetailSchema: z.ZodType<Product> = z.object({
   supplierItemNo: z.string().optional(),
   status: z.union([z.string().min(1), z.number().int()]),
   brandName: z.string().min(1),
-  notes: z.string().nullish().transform((value) => value ?? ""),
-  description: z.string().nullish().transform((value) => value ?? ""),
+  notes: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ""),
+  description: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ""),
   specialRequirement: z.boolean(),
   restrictedCondition: z.boolean(),
   priceVisible: z.boolean(),
-  casNumber: z.string().nullish().transform((value) => value ?? ""),
+  casNumber: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ""),
   specifications: z.array(productSpecificationSchema),
   variants: z.array(productVariantSchema),
   media: z.array(productMediaSchema),
   documents: z.array(productDocumentSchema),
+  references: z
+    .array(productReferenceSchema)
+    .nullish()
+    .transform((value) => value ?? []),
   related: z
     .array(relatedProductSchema)
     .nullable()

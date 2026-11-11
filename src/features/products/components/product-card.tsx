@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BucketSquare, ShoppingCart, Verify } from "iconsax-reactjs";
+import { ArrowRight, ShoppingCart, Verify } from "iconsax-reactjs";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -79,7 +79,7 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
           </span>
         ) : null}
         {presentation.discount ? (
-          <span className="absolute right-0 top-0 rounded-bl bg-[#dc2626] px-1.5 py-0.5 text-[10px] font-medium text-white">
+          <span className="absolute right-0 top-0 rounded-bl bg-[linear-gradient(270deg,#e16555_0%,#ce2823_100%)] px-1.5 py-0.5 text-xs font-medium text-white shadow-[0_0_50px_0_rgba(239,163,59,0.30)]">
             {presentation.discount}
           </span>
         ) : null}
@@ -96,23 +96,15 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
           </Link>
         </div>
 
-        {presentation.variantLabel || product.brandName ? (
+        {product.brandName ? (
           <div className="flex items-center gap-1 overflow-hidden text-xs text-[#5e6375]">
-            {presentation.variantLabel ? (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#ecf0f3] px-1.5 py-0.5">
-                <BucketSquare className="size-3 text-[#1f6db2]" variant="Bold" aria-hidden="true" />
-                {presentation.variantLabel}
-              </span>
-            ) : null}
-            {product.brandName ? (
-              <span
-                className="inline-flex min-w-0 items-center gap-1 rounded-full border border-[#ecf0f3] px-1.5 py-0.5"
-                title={product.brandName}
-              >
-                <Verify className="size-3 shrink-0 text-[#3eb584]" variant="Bold" aria-hidden="true" />
-                <span className="truncate">{product.brandName}</span>
-              </span>
-            ) : null}
+            <span
+              className="inline-flex min-w-0 items-center gap-1 rounded-full border border-[#ecf0f3] px-1.5 py-0.5"
+              title={product.brandName}
+            >
+              <Verify className="size-3 shrink-0 text-[#3eb584]" variant="Bold" aria-hidden="true" />
+              <span className="truncate">{product.brandName}</span>
+            </span>
           </div>
         ) : null}
 
@@ -131,7 +123,7 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
             className={cn(
               "h-8 flex-1 rounded-full px-2 text-xs shadow-none",
               !presentation.canPurchase &&
-                "border-[#2f7bc4] bg-white text-[#164990] hover:bg-[#f3f8fc] hover:text-[#164990]",
+              "border-[#2f7bc4] bg-white text-[#164990] hover:bg-[#f3f8fc] hover:text-[#164990]",
             )}
           >
             <Link

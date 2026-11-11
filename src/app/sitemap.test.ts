@@ -22,6 +22,7 @@ const record = (slug: string) => ({
   fromPrice: 10,
   currency: "SGD",
   outOfStock: false,
+  promotionPercent: 0,
   publishedAt: "2026-08-21T00:00:00Z",
   isNew: false,
   isOutstanding: false,

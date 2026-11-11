@@ -60,6 +60,14 @@ const productDetailResponse: Product = {
       url: "/media/public/example.jpg",
     },
   ],
+  references: [
+    {
+      id: "11111111-1111-1111-1111-111111111111",
+      title: "Example reference",
+      url: "https://example.com/paper",
+      sortOrder: 0,
+    },
+  ],
   related: [
     {
       id: "11111111-1111-1111-1111-111111111111",
@@ -79,6 +87,13 @@ const productDetailResponse: Product = {
 describe("publicProductDetailSchema", () => {
   it("validates the complete product detail payload", () => {
     expect(publicProductDetailSchema.parse(productDetailResponse)).toEqual(productDetailResponse);
+  });
+
+  it("defaults missing references to an empty list", () => {
+    const withoutReferences: Partial<Product> = { ...productDetailResponse };
+    delete withoutReferences.references;
+    expect(publicProductDetailSchema.parse({ ...withoutReferences, references: null }).references).toEqual([]);
+    expect(publicProductDetailSchema.parse(withoutReferences).references).toEqual([]);
   });
 
   it("rejects malformed nested variant data", () => {
