@@ -185,7 +185,8 @@
     "added": "{name} added to cart.",
     "error": "We could not update your cart.",
     "outOfStock": "Out of stock",
-    "bestSeller": "Best Seller"
+    "bestSeller": "Best Seller",
+    "loginToViewPrice": "Login to view Price"
   },
   "ServiceGuarantees": {
     "label": "Labdock service guarantees",

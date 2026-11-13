@@ -8,7 +8,14 @@ import { renderWithProviders } from "@/test/render-with-providers";
 import { productFixture as product } from "../test/product-fixture";
 import { ProductPurchasePanel } from "./product-purchase-panel";
 
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 describe("ProductPurchasePanel", () => {
   it("adds the variant selected from the API payload to cart", async () => {

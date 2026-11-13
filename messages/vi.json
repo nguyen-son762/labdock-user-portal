@@ -185,7 +185,8 @@
     "added": "Đã thêm {name} vào giỏ hàng.",
     "error": "Không thể cập nhật giỏ hàng.",
     "outOfStock": "Hết hàng",
-    "bestSeller": "Bán chạy"
+    "bestSeller": "Bán chạy",
+    "loginToViewPrice": "Đăng nhập để xem giá"
   },
   "ServiceGuarantees": {
     "label": "Cam kết dịch vụ Labdock",

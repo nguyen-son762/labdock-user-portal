@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useAuthSessionQuery } from "@/features/auth";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -23,8 +24,10 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
   const t = useTranslations("ProductCard");
   const tErrors = useTranslations("ApiErrors");
   const addCartItem = useAddProductToCartMutation();
+  const sessionQuery = useAuthSessionQuery();
   const presentation = getProductCardPresentation(product);
   const productHref = `/products/${product.slug}`;
+  const showLoginToViewPrice = !presentation.priceVisible && sessionQuery.data?.authenticated === false;
 
   function handleAddToCart() {
     if (addCartItem.isPending || !presentation.canPurchase) return;
@@ -109,10 +112,21 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
         ) : null}
 
         <p className="flex min-h-5 items-center gap-1.5 text-base font-bold text-[#e57a00]">
-          {presentation.price}
-          {presentation.originalPrice ? (
-            <span className="text-base font-normal text-[#a3abbd] line-through">{presentation.originalPrice}</span>
-          ) : null}
+          {showLoginToViewPrice ? (
+            <Link
+              href="/login"
+              className="hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
+            >
+              {t("loginToViewPrice")}
+            </Link>
+          ) : (
+            <>
+              {presentation.price}
+              {presentation.originalPrice ? (
+                <span className="text-base font-normal text-[#a3abbd] line-through">{presentation.originalPrice}</span>
+              ) : null}
+            </>
+          )}
         </p>
 
         <div className="flex gap-2">

@@ -107,6 +107,7 @@ export function getProductCardPresentation(product: Product) {
     variantLabel: variant ? getProductVariantLabel(variant) : product.productNo,
     image: getPrimaryProductImage(product),
     price: variantPresentation.price,
+    priceVisible: variantPresentation.priceVisible,
     originalPrice: variantPresentation.originalPrice,
     discount: variantPresentation.discount,
     outOfStock,
