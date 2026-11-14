@@ -683,6 +683,7 @@
   },
   "Product": {
     "relatedProducts": "Sản phẩm liên quan",
+    "recentViewed": "Đã xem gần đây",
     "noDescription": "Chưa có mô tả sản phẩm.",
     "information": "Thông tin sản phẩm",
     "descriptionTab": "Mô tả",

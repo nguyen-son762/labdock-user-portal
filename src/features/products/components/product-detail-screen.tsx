@@ -7,10 +7,12 @@ import type { Product } from "../products.types";
 import { getProductGallery } from "../utils/product-display";
 import { mapRelatedProduct } from "../utils/map-public-product";
 import { sanitizeProductDescription } from "../utils/product-description";
+import { toRecentViewedProduct } from "../utils/recent-viewed-products";
 import { ProductGallery } from "./product-gallery";
 import { ProductInformation } from "./product-information";
 import { ProductPurchasePanel } from "./product-purchase-panel";
 import { ProductShelf } from "./product-shelf";
+import { RecentViewedProducts } from "./recent-viewed-products";
 
 export function ProductDetailScreen({ product }: { product: Product }) {
   const tHeader = useTranslations("Header");
@@ -39,13 +41,14 @@ export function ProductDetailScreen({ product }: { product: Product }) {
               <ProductPurchasePanel key={product.id} product={product} />
             </div>
           </div>
-          {relatedProducts.length ? (
-            <div className="mt-12 grid gap-5 xl:grid-cols-2">
-              <div className="min-w-0 xl:col-start-2">
+          <div className="mt-12 grid gap-5 empty:hidden xl:grid-cols-2 [&>*]:min-w-0">
+            <RecentViewedProducts product={toRecentViewedProduct(product)} />
+            {relatedProducts.length ? (
+              <div className="xl:col-start-2">
                 <ProductShelf title={t("relatedProducts")} products={relatedProducts} tone="orange" />
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
       <ServiceGuarantees />
