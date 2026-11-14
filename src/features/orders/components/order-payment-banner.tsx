@@ -57,3 +57,25 @@ export function OrderPaymentBanner({
     </section>
   );
 }
+
+/** Shown while an admin verifies a transfer the buyer has reported. */
+export function OrderPaymentSubmittedBanner({ refCode }: { refCode: string }) {
+  const t = useTranslations("Orders");
+
+  return (
+    <section
+      className="flex items-center gap-4 rounded-xl border border-[#c7930a] bg-[#fffbe6] px-4 py-3.5 text-[#051a50]"
+      aria-labelledby="order-payment-submitted-title"
+    >
+      <Timer size={24} className="shrink-0 text-[#c7930a]" aria-hidden="true" />
+      <div className="min-w-0 space-y-1">
+        <h2 id="order-payment-submitted-title" className="text-base font-semibold leading-6">
+          {t("paymentSubmittedTitle")}
+        </h2>
+        <p className="break-words text-sm leading-5 text-[#73798f]">
+          {t("paymentSubmittedHelp", { refCode: refCode || "—" })}
+        </p>
+      </div>
+    </section>
+  );
+}

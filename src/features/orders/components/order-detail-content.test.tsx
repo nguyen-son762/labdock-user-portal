@@ -24,7 +24,7 @@ describe("order detail layouts", () => {
       "href",
       `/payment?orderId=${order.id}`,
     );
-    expect(screen.getByRole("button", { name: "Cancel payment" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancel payment" })).toBeEnabled();
     expect(screen.getByText(/Sarah Chen • Biogenix/)).toBeInTheDocument();
     expect(screen.getByText(/745 Lor. 5 Toa Payoh/)).toBeInTheDocument();
     expect(screen.getByText("Bank transfer")).toBeInTheDocument();
@@ -42,6 +42,14 @@ describe("order detail layouts", () => {
     expect(screen.getByRole("heading", { name: "The payment window has ended" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue payment" })).toBeDisabled();
     expect(screen.getByText("Pending payment")).toBeInTheDocument();
+  });
+
+  it("shows the awaiting confirmation state without payment actions once the transfer is reported", () => {
+    renderWithProviders(<OrderDetailContent order={createOrderDetailFixture({ status: "PaymentSubmitted" })} />);
+    expect(screen.getByRole("heading", { name: /awaiting confirmation/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel payment" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Continue payment" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Delivery tracking" })).not.toBeInTheDocument();
   });
 
   it.each(["New", "Processing", "Shipped", "Delivered"])("shows the delivery layout for %s", (status) => {

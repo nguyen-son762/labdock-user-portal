@@ -9,14 +9,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 import { useOrdersQuery } from "../api/use-orders-query";
-import { orderFiltersSchema } from "../schemas/order.schema";
+import { orderFilterStatusSchema, orderFiltersSchema, type OrderFilterStatus } from "../schemas/order.schema";
 import { OrdersEmptyState } from "./orders-empty-state";
+import {
+  getOrderPeriodRange,
+  orderPeriodSchema,
+  parseOrderPeriodSelection,
+  type OrderPeriod,
+  type OrderPeriodSelection,
+} from "../utils/order-period";
+import { OrdersFilters } from "./orders-filters";
 import { OrdersSummary } from "./orders-summary";
 import { OrdersTable } from "./orders-table";
 
-function parseFilters(searchParams: URLSearchParams) {
+function parseFilters(searchParams: URLSearchParams, periodSelection: OrderPeriodSelection | undefined) {
   const page = Number(searchParams.get("page") ?? 1);
-  return orderFiltersSchema.parse({ page: Number.isInteger(page) && page > 0 ? page : 1, pageSize: 10 });
+  const status = orderFilterStatusSchema.safeParse(searchParams.get("status"));
+  return orderFiltersSchema.parse({
+    page: Number.isInteger(page) && page > 0 ? page : 1,
+    pageSize: 10,
+    status: status.success ? status.data : undefined,
+    search: searchParams.get("search")?.trim().slice(0, 100) || undefined,
+    ...(periodSelection ? getOrderPeriodRange(periodSelection) : {}),
+  });
 }
 
 export function OrdersScreen() {
@@ -25,7 +40,10 @@ export function OrdersScreen() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const filters = parseFilters(searchParams);
+  const periodSelection = parseOrderPeriodSelection(searchParams.get("period"), searchParams.get("date"));
+  const filters = parseFilters(searchParams, periodSelection);
+  const parsedPeriod = orderPeriodSchema.safeParse(searchParams.get("period"));
+  const period = periodSelection?.period ?? (parsedPeriod.success ? parsedPeriod.data : "month");
   const ordersQuery = useOrdersQuery(filters);
 
   function updateParams(updates: Record<string, string | number | null>) {
@@ -37,10 +55,41 @@ export function OrdersScreen() {
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
+  function handleStatusChange(status: OrderFilterStatus | undefined) {
+    updateParams({ status: status ?? null, page: null });
+  }
+
+  function handleSearchChange(search: string) {
+    updateParams({ search: search.trim() || null, page: null });
+  }
+
+  function handlePeriodSelectionChange(selection: OrderPeriodSelection) {
+    updateParams({ period: selection.period, date: selection.anchor, page: null });
+  }
+
+  function handlePeriodChange(nextPeriod: OrderPeriod) {
+    updateParams(periodSelection ? { period: nextPeriod, page: null } : { period: nextPeriod });
+  }
+
+  function handleClearAll() {
+    updateParams({ search: null, status: null, period: null, date: null, page: null });
+  }
+
   return (
     <div className="mx-auto w-full max-w-[1440px] px-5 pb-12 pt-6 sm:px-10 xl:px-[100px]">
       <Breadcrumbs items={[{ label: t("home"), href: "/" }, { label: t("title") }]} />
-      <h1 className="mb-4 mt-2 text-[32px] font-semibold leading-none text-[#0f3678]">{t("title")}</h1>
+      <h1 className="mb-4 mt-1 text-[32px] font-semibold leading-none text-[#0f3678]">{t("title")}</h1>
+      <OrdersFilters
+        search={filters.search ?? ""}
+        onSearchChange={handleSearchChange}
+        status={filters.status}
+        onStatusChange={handleStatusChange}
+        periodSelection={periodSelection}
+        period={period}
+        onPeriodSelectionChange={handlePeriodSelectionChange}
+        onPeriodChange={handlePeriodChange}
+        onClearAll={handleClearAll}
+      />
       {ordersQuery.isPending ? (
         <div className="mt-4 space-y-3" aria-label={t("loading")} aria-busy="true">
           <Skeleton className="h-11 w-full" />
@@ -52,12 +101,17 @@ export function OrdersScreen() {
         <div
           className={
             ordersQuery.isFetching
-              ? "mt-4 space-y-3 opacity-70 transition-opacity"
-              : "mt-4 space-y-3 transition-opacity"
+              ? "mt-4 space-y-4 opacity-70 transition-opacity"
+              : "mt-4 space-y-4 transition-opacity"
           }
           aria-busy={ordersQuery.isFetching}
         >
-          <OrdersSummary total={ordersQuery.data.total} />
+          <OrdersSummary
+            summary={ordersQuery.data.summary}
+            total={ordersQuery.data.total}
+            activeStatus={filters.status}
+            onStatusChange={handleStatusChange}
+          />
           {ordersQuery.data.items.length ? (
             <OrdersTable
               orders={ordersQuery.data.items}
@@ -67,7 +121,7 @@ export function OrdersScreen() {
               onPageChange={(page) => updateParams({ page })}
             />
           ) : (
-            <OrdersEmptyState />
+            <OrdersEmptyState isFiltered={Boolean(filters.search || filters.status || periodSelection)} />
           )}
         </div>
       ) : null}

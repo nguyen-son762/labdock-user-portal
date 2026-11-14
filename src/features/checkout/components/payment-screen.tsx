@@ -149,6 +149,7 @@ export function PaymentScreen({ orderId }: { orderId: string }) {
               <PaymentCountdown
                 key={`${order.id}:${order.paymentExpiresAt}`}
                 orderId={order.id}
+                orderNumber={order.orderNumber}
                 paymentExpiresAt={order.paymentExpiresAt}
               />
             ) : (

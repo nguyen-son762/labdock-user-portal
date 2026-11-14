@@ -102,7 +102,8 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
     );
   }
 
-  if (cartQuery.isSuccess && items.length === 0) return <EmptyCartScreen />;
+  // After checkout the refreshed cart no longer holds these items; keep the form until navigation finishes.
+  if (cartQuery.isSuccess && items.length === 0 && !checkoutMutation.isSuccess) return <EmptyCartScreen />;
 
   return (
     <div className="bg-[#f5f8fb] py-10">

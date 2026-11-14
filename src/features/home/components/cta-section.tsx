@@ -63,10 +63,11 @@ export function CtaSection() {
               <Button
                 asChild
                 variant={card.buttonVariant}
-                className={`h-10 w-fit gap-4 rounded-full p-1.5 pl-5 ${card.key === "partner"
-                  ? "shadow-[0_0_50px_rgba(47,123,196,0.3)]"
-                  : "shadow-[0_0_50px_rgba(239,163,59,0.3)]"
-                  }`}
+                className={`h-10 w-fit gap-4 rounded-full p-1.5 pl-5 ${
+                  card.key === "partner"
+                    ? "shadow-[0_0_50px_rgba(47,123,196,0.3)]"
+                    : "shadow-[0_0_50px_rgba(239,163,59,0.3)]"
+                }`}
               >
                 <Link href={card.href}>
                   {t(`cta.${card.key}.action`)}

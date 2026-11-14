@@ -9,6 +9,9 @@ import type { OrderSummary } from "../schemas/order.schema";
 import { formatCurrency, formatOrderDate } from "../utils/order-formatters";
 import { OrderStatusBadge } from "./order-status-badge";
 
+const paginationButtonClassName =
+  "h-[34px] rounded-full border-[#dde2e8] px-3.5 text-sm font-medium text-[#051a50] shadow-[0_1px_2px_rgba(10,13,18,0.05)] disabled:text-[#c8d0d9] disabled:opacity-100";
+
 export function OrdersTable({
   orders,
   total,
@@ -33,7 +36,7 @@ export function OrdersTable({
       <div className="hidden md:block">
         <Table>
           <TableHeader className="bg-[#ecf0f3]">
-            <TableRow className="hover:bg-[#ecf0f3]">
+            <TableRow className="border-[#dde2e8] hover:bg-[#ecf0f3]">
               <TableHead>{t("orderNumber")}</TableHead>
               <TableHead>{t("orderDate")}</TableHead>
               <TableHead>{t("status")}</TableHead>
@@ -42,11 +45,11 @@ export function OrdersTable({
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.id} className="h-[50px] hover:bg-[#f9fcff]">
+              <TableRow key={order.id} className="h-[50px] border-[#dde2e8] hover:bg-[#f9fcff]">
                 <TableCell className="px-6 py-2">
                   <Link
                     href={`/orders/${order.id}`}
-                    className="font-medium text-[#164990] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
+                    className="font-medium text-[#051a50] hover:text-[#164990] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
                   >
                     #{order.orderNumber}
                   </Link>
@@ -87,14 +90,14 @@ export function OrdersTable({
           </article>
         ))}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#dde2e8] px-6 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#dde2e8] px-6 pb-4 pt-3">
         <p className="text-sm text-[#73798f]">{t("showing", { start, end, total })}</p>
         <div className="flex gap-3">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="rounded-full border-[#dde2e8]"
+            className={paginationButtonClassName}
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
@@ -104,7 +107,7 @@ export function OrdersTable({
             type="button"
             variant="outline"
             size="sm"
-            className="rounded-full border-[#dde2e8]"
+            className={paginationButtonClassName}
             disabled={page >= Math.ceil(total / pageSize)}
             onClick={() => onPageChange(page + 1)}
           >

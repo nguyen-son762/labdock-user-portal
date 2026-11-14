@@ -137,7 +137,7 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
             className={cn(
               "h-8 flex-1 rounded-full px-2 text-xs shadow-none",
               !presentation.canPurchase &&
-              "border-[#2f7bc4] bg-white text-[#164990] hover:bg-[#f3f8fc] hover:text-[#164990]",
+                "border-[#2f7bc4] bg-white text-[#164990] hover:bg-[#f3f8fc] hover:text-[#164990]",
             )}
           >
             <Link

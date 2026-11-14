@@ -19,7 +19,9 @@ afterEach(() => vi.useRealTimers());
 
 describe("payment deadline countdown", () => {
   it("counts down to the exact API deadline and disables continuing when it expires", () => {
-    renderWithProviders(<PaymentCountdown orderId="order-id" paymentExpiresAt="2026-11-09T18:00:30+08:00" />);
+    renderWithProviders(
+      <PaymentCountdown orderId="order-id" orderNumber="OR-1" paymentExpiresAt="2026-11-09T18:00:30+08:00" />,
+    );
     const timer = screen.getByRole("timer");
     expect(within(timer).getByText("30")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "I've transferred" })).toBeEnabled();
@@ -32,10 +34,14 @@ describe("payment deadline countdown", () => {
   });
 
   it("keeps the server deadline when remounting after a reload", () => {
-    const first = renderWithProviders(<PaymentCountdown orderId="order-id" paymentExpiresAt="2026-11-09T10:00:30Z" />);
+    const first = renderWithProviders(
+      <PaymentCountdown orderId="order-id" orderNumber="OR-1" paymentExpiresAt="2026-11-09T10:00:30Z" />,
+    );
     act(() => vi.advanceTimersByTime(20000));
     first.unmount();
-    renderWithProviders(<PaymentCountdown orderId="order-id" paymentExpiresAt="2026-11-09T10:00:30Z" />);
+    renderWithProviders(
+      <PaymentCountdown orderId="order-id" orderNumber="OR-1" paymentExpiresAt="2026-11-09T10:00:30Z" />,
+    );
     expect(within(screen.getByRole("timer")).getByText("10")).toBeInTheDocument();
   });
 });

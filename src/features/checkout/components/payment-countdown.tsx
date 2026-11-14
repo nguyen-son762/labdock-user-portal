@@ -3,13 +3,28 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { CancelPaymentDialog, getOrderPaymentErrorCode, useConfirmTransferMutation } from "@/features/orders";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useCountdown } from "@/hooks/use-countdown";
+import { getApiErrorMessage } from "@/lib/api-error";
 
-export function PaymentCountdown({ orderId, paymentExpiresAt }: { orderId: string; paymentExpiresAt: string }) {
+const secondaryButtonClassName =
+  "h-11 w-full rounded-full border-[#c8d0d9] bg-white font-normal text-[#051a50] shadow-[0_1px_2px_rgba(10,13,18,0.05)]";
+
+type PaymentCountdownProps = {
+  orderId: string;
+  orderNumber: string;
+  paymentExpiresAt: string;
+};
+
+export function PaymentCountdown({ orderId, orderNumber, paymentExpiresAt }: PaymentCountdownProps) {
   const t = useTranslations("Checkout");
+  const tOrders = useTranslations("Orders");
+  const tErrors = useTranslations("ApiErrors");
+  const confirmTransfer = useConfirmTransferMutation();
   const locale = useLocale();
   const router = useRouter();
   const deadline = new Date(paymentExpiresAt).getTime();
@@ -26,6 +41,22 @@ export function PaymentCountdown({ orderId, paymentExpiresAt }: { orderId: strin
   }, [deadline, locale]);
 
   const expired = remaining === 0;
+  const successHref = `/payment/success?${new URLSearchParams({ orderId })}`;
+
+  function handleConfirmTransfer() {
+    if (confirmTransfer.isPending || confirmTransfer.isSuccess) return;
+    confirmTransfer.mutate(orderId, {
+      onSuccess: () => router.push(successHref),
+      onError: (error) => {
+        const code = getOrderPaymentErrorCode(error);
+        // A repeated confirmation means the transfer is already reported, which is what the buyer wanted.
+        if (code === "transfer_already_confirmed") router.push(successHref);
+        else if (code === "order_status_changed") toast.error(tOrders("orderStatusChanged"));
+        else if (code === "payment_expired") toast.error(t("transferExpired"));
+        else toast.error(tOrders("confirmTransferError"), { description: getApiErrorMessage(error, tErrors) });
+      },
+    });
+  }
   const units = [
     { label: t("hours"), value: remaining === null ? "--" : String(Math.floor(remaining / 3600)).padStart(2, "0") },
     {
@@ -76,8 +107,9 @@ export function PaymentCountdown({ orderId, paymentExpiresAt }: { orderId: strin
         <Button
           type="button"
           variant="brand"
-          disabled={remaining === null || expired}
-          onClick={() => router.push(`/payment/success?${new URLSearchParams({ orderId })}`)}
+          disabled={remaining === null || expired || confirmTransfer.isPending || confirmTransfer.isSuccess}
+          aria-busy={confirmTransfer.isPending}
+          onClick={handleConfirmTransfer}
           className="h-11 w-full gap-4 pl-5 pr-1.5"
         >
           {t("iveTransferred")}
@@ -85,15 +117,26 @@ export function PaymentCountdown({ orderId, paymentExpiresAt }: { orderId: strin
             <Image src="/checkout/bank-transfer/arrow-right.svg" alt="" width={16} height={16} />
           </span>
         </Button>
-        <Button
-          asChild
-          variant="outline"
-          className="h-11 w-full rounded-full border-[#c8d0d9] bg-white font-normal text-[#051a50] shadow-[0_1px_2px_rgba(10,13,18,0.05)]"
-        >
-          <Link href={expired ? `/orders/${orderId}` : "/checkout"}>
-            {expired ? t("viewOrder") : t("cancelPayment")}
-          </Link>
-        </Button>
+        {expired ? (
+          <Button asChild variant="outline" className={secondaryButtonClassName}>
+            <Link href={`/orders/${orderId}`}>{t("viewOrder")}</Link>
+          </Button>
+        ) : (
+          <CancelPaymentDialog
+            orderId={orderId}
+            orderNumber={orderNumber}
+            onCancelled={() => router.push(`/orders/${orderId}`)}
+          >
+            <Button
+              type="button"
+              variant="outline"
+              className={secondaryButtonClassName}
+              disabled={confirmTransfer.isPending || confirmTransfer.isSuccess}
+            >
+              {t("cancelPayment")}
+            </Button>
+          </CancelPaymentDialog>
+        )}
       </div>
     </aside>
   );

@@ -1,4 +1,5 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
+import { AxiosError, type AxiosResponse } from "axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -51,6 +52,17 @@ const order = {
 beforeEach(() => {
   navigation.push.mockReset();
   vi.spyOn(ordersService, "getById").mockResolvedValue(order);
+  vi.spyOn(ordersService, "confirmTransfer").mockResolvedValue({
+    orderId: order.id,
+    refCode: order.refCode,
+    paymentStatus: "BuyerMarkedTransferred",
+    buyerMarkedTransferredAt: "2026-11-09T10:30:00+00:00",
+  });
+  vi.spyOn(ordersService, "cancelPayment").mockResolvedValue({
+    orderId: order.id,
+    orderStatus: "Cancelled",
+    paymentStatus: "Cancelled",
+  });
 });
 
 describe("Bank transfer screen", () => {
@@ -95,10 +107,46 @@ describe("Bank transfer screen", () => {
     await user.click(screen.getByRole("button", { name: "Copy reference code" }));
     expect(writeText).toHaveBeenCalledWith(session.refCode);
     expect(screen.getByRole("status")).toHaveTextContent("Reference code copied.");
-    expect(screen.getByRole("link", { name: "Cancel payment" })).toHaveAttribute("href", "/checkout");
+    expect(screen.getByRole("button", { name: "Cancel payment" })).toBeEnabled();
 
     await user.click(screen.getByRole("button", { name: "I've transferred" }));
-    expect(navigation.push).toHaveBeenCalledWith(`/payment/success?orderId=${order.id}`);
+    expect(ordersService.confirmTransfer).toHaveBeenCalledWith(order.id, expect.anything());
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(`/payment/success?orderId=${order.id}`));
+  });
+
+  it("treats an already confirmed transfer as done and opens the success screen", async () => {
+    const user = userEvent.setup();
+    vi.mocked(ordersService.confirmTransfer).mockRejectedValueOnce(
+      new AxiosError("Conflict", "ERR_BAD_REQUEST", undefined, undefined, {
+        status: 409,
+        data: { title: "transfer_already_confirmed" },
+      } as AxiosResponse),
+    );
+    renderWithProviders(<PaymentScreen orderId={order.id} />);
+
+    await user.click(await screen.findByRole("button", { name: "I've transferred" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(`/payment/success?orderId=${order.id}`));
+  });
+
+  it("cancels the payment after confirmation and opens the order", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<PaymentScreen orderId={order.id} />);
+
+    await user.click(await screen.findByRole("button", { name: "Cancel payment" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel payment" }));
+    expect(within(dialog).getByRole("alert")).toHaveTextContent("Please select a reason for cancellation.");
+    expect(ordersService.cancelPayment).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("radio", { name: "I no longer need this order" }));
+    await user.type(within(dialog).getByRole("textbox", { name: "Additional comments (optional)" }), "Ordered twice");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel payment" }));
+
+    expect(ordersService.cancelPayment).toHaveBeenCalledWith(order.id, {
+      reason: "no_longer_needed",
+      comment: "Ordered twice",
+    });
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(`/orders/${order.id}`));
   });
 
   it("preserves the deadline on reload and prevents continuing after it expires", async () => {

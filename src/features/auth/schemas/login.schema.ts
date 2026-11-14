@@ -10,10 +10,7 @@ export type LoginValidationMessages = {
 export function createLoginSchema(messages: LoginValidationMessages) {
   return z.object({
     email: z.string().trim().min(1, messages.emailRequired).email(messages.emailInvalid),
-    password: z
-      .string()
-      .min(8, messages.passwordMinLength)
-      .max(128, messages.passwordMaxLength),
+    password: z.string().min(8, messages.passwordMinLength).max(128, messages.passwordMaxLength),
   });
 }
 
