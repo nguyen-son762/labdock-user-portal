@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createUuid } from "@/lib/uuid";
 
 import { useCartQuery } from "../api/use-cart-query";
 import { useRemoveCartItemMutation } from "../api/use-remove-cart-item-mutation";
@@ -36,7 +37,7 @@ export function RequestQuoteScreen({ initialItemIds }: { initialItemIds?: string
   const handleSubmit = (contact: QuoteContactValues) => {
     if (submitQuote.isPending || selectedIds.length === 0) return;
     submitQuote.mutate(
-      { contact, itemIds: selectedIds, idempotencyKey: crypto.randomUUID() },
+      { contact, itemIds: selectedIds, idempotencyKey: createUuid() },
       {
         onSuccess: ({ reference }) => router.push(`/request-quote/success?reference=${encodeURIComponent(reference)}`),
       },

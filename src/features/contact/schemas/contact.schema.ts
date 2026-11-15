@@ -4,6 +4,10 @@ export const inquiryTypeSchema = z.enum(["general", "quote"]);
 
 export const contactProductSchema = z.object({
   productName: z.string().trim(),
+  // Filled from the product picked in the search results; never typed by the user.
+  productId: z.string(),
+  slug: z.string(),
+  variantId: z.string(),
   brand: z.string(),
   quantity: z.string().trim(),
   budgetRange: z.string().trim().max(80, "Budget range is too long."),
@@ -37,9 +41,18 @@ export const contactFormSchema = z
           path: ["products", index, "productName"],
           message: "Enter a product name.",
         });
-      }
-      if (!product.brand) {
-        context.addIssue({ code: "custom", path: ["products", index, "brand"], message: "Select a brand." });
+      } else if (!product.productId) {
+        context.addIssue({
+          code: "custom",
+          path: ["products", index, "productName"],
+          message: "Select a product from the search results.",
+        });
+      } else if (!product.variantId) {
+        context.addIssue({
+          code: "custom",
+          path: ["products", index, "variantId"],
+          message: "Select a size.",
+        });
       }
       if (!/^\d+$/.test(product.quantity) || Number(product.quantity) < 1) {
         context.addIssue({ code: "custom", path: ["products", index, "quantity"], message: "Enter a valid quantity." });

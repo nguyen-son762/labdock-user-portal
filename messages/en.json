@@ -812,7 +812,14 @@
     "quantityPlaceholder": "Enter quantity",
     "budgetPlaceholder": "Enter budget range",
     "removeProduct": "Remove product {index}",
-    "addProduct": "Add another product"
+    "addProduct": "Add another product",
+    "searching": "Searching…",
+    "searchError": "Could not search products. Please try again.",
+    "noProducts": "No products found.",
+    "variantsError": "Could not load product sizes. Please re-select the product.",
+    "noVariants": "This product is not available for quotes.",
+    "sizeForProduct": "Size for product {index}",
+    "selectSize": "Select size"
   },
   "About": {
     "home": "Home",

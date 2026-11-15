@@ -812,7 +812,14 @@
     "quantityPlaceholder": "Nhập số lượng",
     "budgetPlaceholder": "Nhập khoảng ngân sách",
     "removeProduct": "Xóa sản phẩm {index}",
-    "addProduct": "Thêm sản phẩm khác"
+    "addProduct": "Thêm sản phẩm khác",
+    "searching": "Đang tìm…",
+    "searchError": "Không thể tìm sản phẩm. Vui lòng thử lại.",
+    "noProducts": "Không tìm thấy sản phẩm.",
+    "variantsError": "Không thể tải quy cách sản phẩm. Vui lòng chọn lại sản phẩm.",
+    "noVariants": "Sản phẩm này hiện không thể yêu cầu báo giá.",
+    "sizeForProduct": "Quy cách của sản phẩm {index}",
+    "selectSize": "Chọn quy cách"
   },
   "About": {
     "home": "Trang chủ",

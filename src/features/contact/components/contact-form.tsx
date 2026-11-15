@@ -12,13 +12,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { createUuid } from "@/lib/uuid";
 
 import { useSubmitContactMutation } from "../api/use-submit-contact-mutation";
 import { contactFormSchema, type ContactFormValues, type InquiryType } from "../schemas/contact.schema";
 import { ContactInfoFields } from "./contact-info-fields";
 import { QuoteProductsTable } from "./quote-products-table";
 
-const blankProduct = { productName: "", brand: "", quantity: "", budgetRange: "" };
+const blankProduct = {
+  productName: "",
+  productId: "",
+  slug: "",
+  variantId: "",
+  brand: "",
+  quantity: "",
+  budgetRange: "",
+};
 
 function createDefaultValues(inquiryType: InquiryType): ContactFormValues {
   return {
@@ -46,7 +55,7 @@ export function ContactForm({ initialType }: { initialType: InquiryType }) {
   const handleSubmit = (values: ContactFormValues) => {
     if (mutation.isPending) return;
     mutation.mutate(
-      { contact: values, idempotencyKey: crypto.randomUUID() },
+      { contact: values, idempotencyKey: createUuid() },
       { onSuccess: () => form.reset(createDefaultValues(values.inquiryType)) },
     );
   };

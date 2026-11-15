@@ -1,6 +1,6 @@
 "use client";
 
-import { Add, CloseCircle, TickCircle, Trash } from "iconsax-reactjs";
+import { Add, Trash } from "iconsax-reactjs";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslations } from "next-intl";
 
@@ -8,13 +8,20 @@ import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import type { ContactFormValues } from "../schemas/contact.schema";
+import { QuoteProductCell } from "./quote-product-cell";
 
-const emptyProduct = { productName: "", brand: "", quantity: "", budgetRange: "" };
-const brands = ["Medisafe", "BIO-RAD", "Sartorius", "Heidolph"] as const;
+const emptyProduct = {
+  productName: "",
+  productId: "",
+  slug: "",
+  variantId: "",
+  brand: "",
+  quantity: "",
+  budgetRange: "",
+};
 
 export function QuoteProductsTable() {
   const t = useTranslations("Contact");
@@ -43,73 +50,15 @@ export function QuoteProductsTable() {
             {fields.map((product, index) => (
               <TableRow key={product.id} className="hover:bg-white">
                 <TableCell className="p-2 align-top">
-                  <div className="flex items-start gap-1.5">
-                    <FormField
-                      control={form.control}
-                      name={`products.${index}.productName`}
-                      render={({ field }) => (
-                        <FormItem className="min-w-0 flex-1">
-                          <FormControl>
-                            <Input
-                              aria-label={`${t("productName")} ${index + 1}`}
-                              placeholder={t("productPlaceholder")}
-                              className="h-[30px] border-[#7aa7e4] bg-white px-2 text-xs"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t("confirmProduct", { index: index + 1 })}
-                      className="size-[30px] text-[#12b76a] hover:bg-[#ecfdf3] hover:text-[#12b76a]"
-                      onClick={() => void form.trigger(`products.${index}.productName`)}
-                    >
-                      <TickCircle className="size-4" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t("clearProduct", { index: index + 1 })}
-                      className="size-[30px] text-[#f04438] hover:bg-[#fef3f2] hover:text-[#f04438]"
-                      onClick={() => form.setValue(`products.${index}.productName`, "", { shouldDirty: true })}
-                    >
-                      <CloseCircle className="size-4" aria-hidden="true" />
-                    </Button>
-                  </div>
+                  <QuoteProductCell index={index} />
                 </TableCell>
                 <TableCell className="p-2 align-top">
-                  <FormField
-                    control={form.control}
-                    name={`products.${index}.brand`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger
-                              aria-label={t("brandForProduct", { index: index + 1 })}
-                              className="h-[30px] bg-white px-2 text-xs"
-                            >
-                              <SelectValue placeholder={t("select")} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-white">
-                            {brands.map((brand) => (
-                              <SelectItem key={brand} value={brand}>
-                                {brand}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-[10px]" />
-                      </FormItem>
-                    )}
-                  />
+                  <p
+                    aria-label={t("brandForProduct", { index: index + 1 })}
+                    className="flex h-[30px] items-center truncate px-1 text-xs text-[#051a50]"
+                  >
+                    {form.watch(`products.${index}.brand`) || "–"}
+                  </p>
                 </TableCell>
                 <TableCell className="p-2 align-top">
                   <FormField
