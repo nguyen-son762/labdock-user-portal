@@ -104,6 +104,10 @@ export const publicProductDetailSchema: z.ZodType<Product> = z.object({
     .string()
     .nullish()
     .transform((value) => value ?? ""),
+  origin: z
+    .string()
+    .nullish()
+    .transform((value) => value?.trim() ?? ""),
   specifications: z.array(productSpecificationSchema),
   variants: z.array(productVariantSchema),
   media: z.array(productMediaSchema),

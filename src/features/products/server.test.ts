@@ -30,6 +30,7 @@ const productsResponse = {
       publishedAt: "2026-08-21T10:00:00+00:00",
       isNew: true,
       isOutstanding: true,
+      origin: "SG",
     },
   ],
   page: 1,
@@ -50,6 +51,7 @@ const productDetailResponse = {
   restrictedCondition: true,
   priceVisible: true,
   casNumber: "64-17-5",
+  origin: "DE",
   specifications: [{ name: "Purity", value: "99%" }],
   variants: [
     {

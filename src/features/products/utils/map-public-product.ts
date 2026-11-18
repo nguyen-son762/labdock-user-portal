@@ -20,6 +20,7 @@ export function mapPublicProduct(product: PublicProductListItem | PublicProductD
     restrictedCondition: false,
     priceVisible: product.priceVisible,
     casNumber: "",
+    origin: product.origin,
     specifications: [
       { name: "Product number", value: product.productNo },
       { name: "Brand", value: product.brandName },
@@ -72,6 +73,7 @@ export function mapRelatedProduct(product: RelatedProduct): Product {
     restrictedCondition: false,
     priceVisible: product.priceVisible,
     casNumber: "",
+    origin: "",
     specifications: [],
     variants: [
       {

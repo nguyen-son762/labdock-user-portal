@@ -24,6 +24,10 @@ export const publicProductListItemSchema = z.object({
   publishedAt: z.iso.datetime({ offset: true }),
   isNew: z.boolean(),
   isOutstanding: z.boolean(),
+  origin: z
+    .string()
+    .nullish()
+    .transform((value) => value?.trim() ?? ""),
 });
 
 export const publicProductsPageSchema = z.object({

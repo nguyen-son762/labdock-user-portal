@@ -26,6 +26,7 @@ const record = (slug: string) => ({
   publishedAt: "2026-08-21T00:00:00Z",
   isNew: false,
   isOutstanding: false,
+  origin: "",
 });
 beforeEach(() => {
   vi.mocked(getArticleSitemapEntries).mockResolvedValue([{ path: "/news/science/real-article" }]);

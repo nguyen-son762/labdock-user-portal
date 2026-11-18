@@ -27,7 +27,8 @@ describe("ProductPurchasePanel", () => {
     expect(screen.getByText("$180.00")).toBeInTheDocument();
     expect(screen.getByText("$200.00")).toHaveClass("line-through");
     expect(screen.getByText("-10%")).toBeInTheDocument();
-    expect(screen.getByText("SUPPLIER-001")).toBeInTheDocument();
+    expect(screen.getByText("Germany")).toBeInTheDocument();
+    expect(screen.queryByText("SUPPLIER-001")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Add to cart" }));
 
     expect(addSpy.mock.calls[0]?.[0]).toEqual({ variantId: "55555555-5555-5555-5555-555555555555", quantity: 1 });

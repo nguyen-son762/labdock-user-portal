@@ -16,6 +16,7 @@ const productDetailResponse: Product = {
   restrictedCondition: true,
   priceVisible: true,
   casNumber: "64-17-5",
+  origin: "DE",
   specifications: [{ name: "Example Name", value: "sample-value" }],
   variants: [
     {
@@ -115,9 +116,10 @@ describe("publicProductDetailSchema", () => {
       notes: null,
       description: null,
       casNumber: null,
+      origin: null,
     });
 
-    expect(result).toEqual(expect.objectContaining({ notes: "", description: "", casNumber: "" }));
+    expect(result).toEqual(expect.objectContaining({ notes: "", description: "", casNumber: "", origin: "" }));
   });
 
   it("preserves hidden prices and normalizes an empty related collection", () => {

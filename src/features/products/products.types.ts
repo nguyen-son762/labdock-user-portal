@@ -79,6 +79,8 @@ export type Product = {
   restrictedCondition: boolean;
   priceVisible: boolean;
   casNumber: string;
+  /** ISO 3166-1 alpha-2 country code, or empty when the product has no origin. */
+  origin: string;
   specifications: ProductSpecification[];
   variants: ProductVariant[];
   media: ProductMedia[];

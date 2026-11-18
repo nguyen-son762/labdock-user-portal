@@ -14,6 +14,7 @@ export const productFixture: Product = {
   restrictedCondition: false,
   priceVisible: true,
   casNumber: "64-17-5",
+  origin: "DE",
   specifications: [],
   variants: [
     {

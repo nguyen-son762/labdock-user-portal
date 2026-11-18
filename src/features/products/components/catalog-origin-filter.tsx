@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getCountryName } from "@/constants/country-options";
 
 type CatalogOriginFilterProps = {
   origins: readonly string[];
@@ -29,7 +30,13 @@ export function CatalogOriginFilter({
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-  const matchingOrigins = origins.filter((origin) => origin.toLowerCase().includes(query.trim().toLowerCase()));
+  const normalizedQuery = query.trim().toLowerCase();
+  const originOptions = origins
+    .map((code) => ({ code, name: getCountryName(code) }))
+    .sort((left, right) => left.name.localeCompare(right.name, "en"));
+  const matchingOrigins = originOptions.filter(({ code, name }) =>
+    [code, name].some((candidate) => candidate.toLowerCase().includes(normalizedQuery)),
+  );
   const visibleOrigins = expanded || query.trim() ? matchingOrigins : matchingOrigins.slice(0, 5);
 
   return (
@@ -79,7 +86,7 @@ export function CatalogOriginFilter({
           </p>
         ) : (
           <div id={`${id}-options`} className="mt-1 max-h-64 space-y-0.5 overflow-y-auto">
-            {visibleOrigins.map((origin) => {
+            {visibleOrigins.map(({ code: origin, name }) => {
               const optionId = `${id}-${encodeURIComponent(origin)}`;
               return (
                 <div key={origin} className="flex min-h-8 items-center gap-2 pl-1">
@@ -100,7 +107,7 @@ export function CatalogOriginFilter({
                     htmlFor={optionId}
                     className="min-w-0 flex-1 cursor-pointer break-words py-1.5 text-sm font-medium leading-5 text-[#2e3038]"
                   >
-                    {origin}
+                    {name}
                   </Label>
                 </div>
               );

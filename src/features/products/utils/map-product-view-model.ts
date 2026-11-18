@@ -23,6 +23,7 @@ export function mapProductViewModel(product: ProductViewModel): Product {
     restrictedCondition: false,
     priceVisible: product.priceVisible !== false,
     casNumber: product.casNumber ?? "",
+    origin: product.origin,
     specifications: product.specifications.map((specification) => ({
       name: specification.label,
       value: specification.value,

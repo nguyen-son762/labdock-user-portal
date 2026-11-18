@@ -80,6 +80,7 @@ export function fromRecentViewedProduct(product: RecentViewedProduct): Product {
     restrictedCondition: false,
     priceVisible: product.priceVisible,
     casNumber: "",
+    origin: "",
     specifications: [],
     variants: product.variants.map((variant) => ({
       ...variant,

@@ -20,6 +20,7 @@ const product: Product = {
   restrictedCondition: false,
   priceVisible: true,
   casNumber: "64-17-5",
+  origin: "DE",
   specifications: [{ name: "Purity", value: "99%" }],
   variants: [],
   media: [],

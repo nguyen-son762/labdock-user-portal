@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import callingCodeData from "./calling-codes.json";
 import countryData from "./countries.json";
-import { countries, getCountryCallingCode, resolveCountryCode } from "./country-options";
+import { countries, getCountryCallingCode, getCountryName, resolveCountryCode } from "./country-options";
 import flagData from "./flag.json";
 
 describe("country data", () => {
@@ -50,5 +50,11 @@ describe("country data", () => {
     expect(resolveCountryCode("Bonaire, Sint Eustatius and Saba")).toBe("BQ");
     expect(resolveCountryCode("Congo, Democratic Republic of the")).toBe("CD");
     expect(resolveCountryCode("not a country")).toBeUndefined();
+  });
+
+  it("resolves display names from ISO codes and keeps unknown values unchanged", () => {
+    expect(getCountryName("SG")).toBe("Singapore");
+    expect(getCountryName("de")).toBe("Germany");
+    expect(getCountryName("Atlantis")).toBe("Atlantis");
   });
 });

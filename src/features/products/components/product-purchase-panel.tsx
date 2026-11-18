@@ -1,12 +1,15 @@
 "use client";
 
-import { Add, ArrowRight, Bookmark, Box1, Minus, ShoppingCart, Verify } from "iconsax-reactjs";
+import { Add, ArrowRight, Bookmark, Box1, LocationTick, Minus, ShoppingCart, Verify } from "iconsax-reactjs";
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
+import { CountryFlag } from "@/components/shared/country-flag";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { findCountry } from "@/constants/country-options";
 import { useAddCartItemMutation } from "@/features/checkout";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
@@ -21,20 +24,42 @@ import {
 
 function ProductFacts({ product }: { product: Product }) {
   const t = useTranslations("Product");
-  const facts = [
-    { label: t("brand"), value: product.brandName, icon: Bookmark },
-    { label: t("categoryNumberLabel"), value: product.productNo, icon: Box1 },
-    { label: t("supplierItemNo"), value: product.supplierItemNo || t("notAvailable"), icon: Box1 },
-    { label: t("casNumber"), value: product.casNumber || t("notAvailable"), icon: Box1 },
+  const iconClassName = "size-4 shrink-0 text-[#868da5]";
+  const originCountry = product.origin ? findCountry(product.origin) : undefined;
+  const facts: Array<{ label: string; value: string; icon: ReactNode; valuePrefix?: ReactNode }> = [
+    {
+      label: t("brand"),
+      value: product.brandName,
+      icon: <Bookmark className={iconClassName} aria-hidden="true" />,
+    },
+    {
+      label: t("categoryNumberLabel"),
+      value: product.productNo,
+      icon: <Box1 className={iconClassName} aria-hidden="true" />,
+    },
+    {
+      label: t("origin"),
+      value: originCountry?.name ?? (product.origin || t("notAvailable")),
+      icon: <LocationTick className={iconClassName} aria-hidden="true" />,
+      valuePrefix: originCountry ? <CountryFlag country={originCountry} className="h-3 w-4" /> : undefined,
+    },
+    {
+      label: t("casNumber"),
+      value: product.casNumber || t("notAvailable"),
+      icon: <Box1 className={iconClassName} aria-hidden="true" />,
+    },
   ];
 
   return (
     <dl className="grid grid-cols-1 gap-x-4 gap-y-2 border-y border-[#e9eaeb] py-4 sm:grid-cols-2">
-      {facts.map(({ label, value, icon: Icon }) => (
+      {facts.map(({ label, value, icon, valuePrefix }) => (
         <div key={label} className="flex min-w-0 items-center gap-1 text-sm">
-          <Icon className="size-4 shrink-0 text-[#868da5]" aria-hidden="true" />
+          {icon}
           <dt className="shrink-0 text-[#868da5]">{label}</dt>
-          <dd className="truncate font-semibold text-[#051a50]">{value}</dd>
+          <dd className="flex min-w-0 items-center gap-1 font-semibold text-[#051a50]">
+            {valuePrefix}
+            <span className="truncate">{value}</span>
+          </dd>
         </div>
       ))}
     </dl>
@@ -134,7 +159,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                     className={cn(
                       "h-8 min-w-[72px] rounded-lg border-[#d4d4d4] bg-white px-2 text-sm text-[#404040] shadow-none",
                       selectedVariant?.id === variant.id &&
-                        "border-[#164990] bg-[#164990] text-white hover:bg-[#164990] hover:text-white",
+                      "border-[#164990] bg-[#164990] text-white hover:bg-[#164990] hover:text-white",
                     )}
                   >
                     {label}

@@ -73,7 +73,7 @@ describe("CatalogFilters brands", () => {
     await user.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("checkbox", { name: first.name })).not.toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "SG" })).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: "Singapore" })).toBeVisible();
     await user.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("checkbox", { name: first.name })).toBeChecked();

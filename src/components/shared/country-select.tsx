@@ -1,17 +1,17 @@
 "use client";
 
 import { ArrowDown2, TickCircle } from "iconsax-reactjs";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { forwardRef, useRef, useState, type ComponentPropsWithoutRef } from "react";
+
+import { CountryFlag } from "@/components/shared/country-flag";
 
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { countries, resolveCountryCode } from "@/constants/country-options";
+import { countries, resolveCountryCode, type Country } from "@/constants/country-options";
 import { cn } from "@/lib/class-names";
 
-type Country = (typeof countries)[number];
 type CountrySelectProps = Omit<ComponentPropsWithoutRef<typeof Button>, "value" | "onChange"> & {
   value: string;
   onValueChange: (value: string) => void;
@@ -20,25 +20,6 @@ type CountrySelectProps = Omit<ComponentPropsWithoutRef<typeof Button>, "value" 
   display?: "country" | "callingCode";
   countryCodes?: readonly string[];
 };
-
-function CountryFlag({ country }: { country: Country }) {
-  const [failed, setFailed] = useState(false);
-  return country.flag && !failed ? (
-    <Image
-      src={country.flag}
-      alt=""
-      width={24}
-      height={18}
-      unoptimized
-      className="h-[18px] w-6 shrink-0 object-contain"
-      onError={() => setFailed(true)}
-    />
-  ) : (
-    <span aria-hidden="true" className="w-6 shrink-0 text-center text-xs text-muted-foreground">
-      {country.code}
-    </span>
-  );
-}
 
 function getValue(country: Country, format: NonNullable<CountrySelectProps["valueFormat"]>) {
   if (format === "name") return country.name;

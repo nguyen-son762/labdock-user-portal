@@ -46,6 +46,7 @@ const product = mapPublicProduct({
   publishedAt: "2026-08-21T10:00:00+00:00",
   isNew: true,
   isOutstanding: false,
+  origin: "",
 });
 
 const filters: ProductCatalogFilters = {
@@ -68,7 +69,7 @@ describe("CatalogWorkspace", () => {
     renderWithProviders(
       <CatalogWorkspace
         products={[product]}
-        origins={["SG", "Germany"]}
+        origins={["SG", "DE"]}
         brands={[{ id: brandId, name: "Example Brand" }]}
         filters={filters}
         page={1}
@@ -129,7 +130,7 @@ describe("CatalogWorkspace", () => {
     renderWithProviders(
       <CatalogWorkspace
         products={[]}
-        origins={["SG", "Germany"]}
+        origins={["SG", "DE"]}
         brands={[{ id: brandId, name: "Example Brand" }]}
         filters={filters}
         page={1}
@@ -143,7 +144,7 @@ describe("CatalogWorkspace", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("We could not load products");
     expect(screen.getByRole("group", { name: "Brands" })).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "SG" })).toBeEnabled();
+    expect(screen.getByRole("checkbox", { name: "Singapore" })).toBeEnabled();
     expect(screen.queryByRole("radiogroup", { name: "Categories" })).not.toBeInTheDocument();
   });
 
@@ -153,7 +154,7 @@ describe("CatalogWorkspace", () => {
     const selectedFilters = { ...filters, brandIds: [brandId], sort: "name" as const, origins: ["SG"], page: 3 };
     const props = {
       products: [product],
-      origins: ["SG", "Germany"],
+      origins: ["SG", "DE"],
       brands: [{ id: brandId, name: "Example Brand" }],
       filters: selectedFilters,
       page: 3,
@@ -165,7 +166,7 @@ describe("CatalogWorkspace", () => {
     };
     const { rerender } = renderWithProviders(<CatalogWorkspace {...props} />);
     await user.click(screen.getByRole("checkbox", { name: "Germany" }));
-    const href = `/products?categoryId=${categoryId}&brandId=${brandId}&sort=name&origins=SG%2CGermany`;
+    const href = `/products?categoryId=${categoryId}&brandId=${brandId}&sort=name&origins=SG%2CDE`;
     expect(routerReplace).toHaveBeenLastCalledWith(href, { scroll: false });
     expect(screen.getByRole("link", { name: "Page 2" })).toHaveAttribute(
       "href",
@@ -173,10 +174,10 @@ describe("CatalogWorkspace", () => {
     );
 
     searchQuery.value = href.split("?")[1] ?? "";
-    rerender(<CatalogWorkspace {...props} filters={{ ...selectedFilters, origins: ["SG", "Germany"], page: 1 }} />);
-    await user.click(screen.getByRole("checkbox", { name: "SG" }));
+    rerender(<CatalogWorkspace {...props} filters={{ ...selectedFilters, origins: ["SG", "DE"], page: 1 }} />);
+    await user.click(screen.getByRole("checkbox", { name: "Singapore" }));
     expect(routerReplace).toHaveBeenLastCalledWith(
-      `/products?categoryId=${categoryId}&brandId=${brandId}&sort=name&origins=Germany`,
+      `/products?categoryId=${categoryId}&brandId=${brandId}&sort=name&origins=DE`,
       { scroll: false },
     );
     await user.click(screen.getByRole("button", { name: "Clear" }));
@@ -201,7 +202,7 @@ describe("CatalogWorkspace", () => {
       />,
     );
     expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
-    await user.click(screen.getByRole("checkbox", { name: "SG" }));
+    await user.click(screen.getByRole("checkbox", { name: "Singapore" }));
     expect(routerReplace).toHaveBeenLastCalledWith("/products", { scroll: false });
   });
 

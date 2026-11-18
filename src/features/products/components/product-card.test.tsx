@@ -33,6 +33,7 @@ const product: Product = {
   restrictedCondition: false,
   priceVisible: true,
   casNumber: "",
+  origin: "",
   specifications: [],
   variants: [
     {

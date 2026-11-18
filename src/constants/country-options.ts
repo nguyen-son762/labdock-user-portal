@@ -27,6 +27,13 @@ export const countries = countryData
   }))
   .sort((left, right) => left.name.localeCompare(right.name, "en"));
 
+export type Country = (typeof countries)[number];
+
+export function findCountry(code: string): Country | undefined {
+  const normalized = code.trim().toUpperCase();
+  return countries.find((country) => country.code === normalized);
+}
+
 export function resolveCountryCode(value: string): string | undefined {
   const normalized = value.trim().toLowerCase();
   return countries.find(({ code, name, aliases }) =>
@@ -37,4 +44,9 @@ export function resolveCountryCode(value: string): string | undefined {
 export function getCountryCallingCode(value: string): string {
   const countryCode = resolveCountryCode(value);
   return countries.find(({ code }) => code === countryCode)?.dialCode ?? "";
+}
+
+/** Returns the display name for an ISO 3166-1 alpha-2 code, or the input when it is not a known code. */
+export function getCountryName(value: string): string {
+  return findCountry(value)?.name ?? value;
 }

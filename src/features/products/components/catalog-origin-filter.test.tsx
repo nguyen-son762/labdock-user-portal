@@ -12,7 +12,7 @@ describe("CatalogOriginFilter", () => {
     const onChange = vi.fn();
     renderWithProviders(
       <CatalogOriginFilter
-        origins={["SG", "Germany", "Italy", "Japan", "Vietnam", "United States"]}
+        origins={["SG", "DE", "IT", "JP", "VN", "US"]}
         selectedOrigins={["SG"]}
         disabled={false}
         hasError={false}
@@ -30,7 +30,10 @@ describe("CatalogOriginFilter", () => {
     expect(screen.getByRole("checkbox", { name: "United States" })).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
     await user.click(screen.getByRole("checkbox", { name: "United States" }));
-    expect(onChange).toHaveBeenCalledWith(["SG", "United States"]);
+    expect(onChange).toHaveBeenCalledWith(["SG", "US"]);
+    await user.clear(screen.getByRole("textbox", { name: "Search origins" }));
+    await user.type(screen.getByRole("textbox", { name: "Search origins" }), "de");
+    expect(screen.getByRole("checkbox", { name: "Germany" })).toBeInTheDocument();
   });
 
   it("shows an empty search result and retains a keyboard-operable checkbox", async () => {
@@ -48,7 +51,7 @@ describe("CatalogOriginFilter", () => {
     await user.tab();
     await user.tab();
     await user.tab();
-    expect(screen.getByRole("checkbox", { name: "SG" })).toHaveFocus();
+    expect(screen.getByRole("checkbox", { name: "Singapore" })).toHaveFocus();
     await user.keyboard(" ");
     expect(onChange).toHaveBeenCalledWith(["SG"]);
     await user.type(screen.getByRole("textbox", { name: "Search origins" }), "unknown");
@@ -72,10 +75,10 @@ describe("CatalogOriginFilter", () => {
     expect(toggle).toHaveFocus();
     await user.keyboard("{Enter}");
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("checkbox", { name: "SG" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Singapore" })).not.toBeInTheDocument();
     await user.keyboard(" ");
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("checkbox", { name: "SG" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Singapore" })).toBeChecked();
     expect(onChange).not.toHaveBeenCalled();
   });
 
@@ -87,7 +90,7 @@ describe("CatalogOriginFilter", () => {
     rerender(
       <CatalogOriginFilter origins={["SG"]} selectedOrigins={[]} disabled hasError={false} onChange={vi.fn()} />,
     );
-    expect(screen.getByRole("checkbox", { name: "SG" })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "Singapore" })).toBeDisabled();
     expect(screen.getByRole("textbox", { name: "Search origins" })).toBeDisabled();
   });
 });
