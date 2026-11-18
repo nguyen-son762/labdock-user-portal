@@ -1,11 +1,13 @@
 "use client";
 
 import { ArrowRight2, Box, HamburgerMenu } from "iconsax-reactjs";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { resolveProductMediaUrl } from "@/features/products/utils/product-display";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
 
@@ -14,6 +16,7 @@ export type HeaderCategory = {
   name: string;
   slug: string;
   productCount?: number;
+  media?: readonly { url: string; isPrimary: boolean }[];
   children: readonly HeaderCategory[];
 };
 
@@ -35,6 +38,11 @@ type CategoryColumnProps = {
   onExpand: (category: HeaderCategory, depth: number) => void;
 };
 
+function getPrimaryThumbnailUrl(category: HeaderCategory): string | null {
+  const primaryMedia = category.media?.find((media) => media.isPrimary);
+  return primaryMedia ? resolveProductMediaUrl(primaryMedia.url) : null;
+}
+
 function CategoryColumn({ categories, depth, activeCategoryId, onActivate, onExpand }: CategoryColumnProps) {
   const t = useTranslations("Header");
 
@@ -43,6 +51,7 @@ function CategoryColumn({ categories, depth, activeCategoryId, onActivate, onExp
       {categories.map((category) => {
         const hasChildren = category.children.length > 0;
         const isActive = activeCategoryId === category.id;
+        const thumbnailUrl = depth === 0 ? getPrimaryThumbnailUrl(category) : null;
 
         return (
           <li
@@ -58,7 +67,11 @@ function CategoryColumn({ categories, depth, activeCategoryId, onActivate, onExp
               onFocus={() => onActivate(category, depth)}
               className="flex min-w-0 flex-1 items-center gap-2 rounded-l-lg px-3 py-2 font-medium text-[#051a50] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2f7ac6]"
             >
-              {depth === 0 ? (
+              {thumbnailUrl ? (
+                <span className="relative size-8 shrink-0 overflow-hidden rounded bg-white ring-1 ring-inset ring-[#eef0f3]">
+                  <Image src={thumbnailUrl} alt="" fill unoptimized sizes="32px" className="object-contain p-0.5" />
+                </span>
+              ) : depth === 0 ? (
                 <Box className="size-5 shrink-0 text-[#2f7ac6]" aria-hidden="true" />
               ) : (
                 <span className="size-1.5 shrink-0 rounded-full bg-[#a3abbd]" aria-hidden="true" />
