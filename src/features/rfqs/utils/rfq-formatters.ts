@@ -6,8 +6,13 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-export function formatRfqCurrency(value: number) {
-  return currencyFormatter.format(value);
+export function formatRfqCurrency(value: number, currency?: string | null) {
+  if (!currency || currency.toUpperCase() === "SGD") return currencyFormatter.format(value);
+  try {
+    return new Intl.NumberFormat("en-SG", { style: "currency", currency }).format(value);
+  } catch {
+    return `${currencyFormatter.format(value).replace(/^\D+/, "")} ${currency}`;
+  }
 }
 
 export function formatRfqDate(value: string) {

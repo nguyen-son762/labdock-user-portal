@@ -33,7 +33,15 @@ describe("ContactForm", () => {
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("MSG-ABC12345"));
   });
 
-  it("switches inquiry variants and manages quote product rows", async () => {
+  it("hides the inquiry type selector and shows the general form", () => {
+    renderWithProviders(<ContactForm initialType="general" />);
+
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("General inquiry")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Subject")).toBeInTheDocument();
+  });
+
+  it("manages quote product rows", async () => {
     const user = userEvent.setup();
     renderWithProviders(<ContactForm initialType="quote" />);
 
@@ -42,10 +50,6 @@ describe("ContactForm", () => {
     expect(screen.getByRole("heading", { name: "Product(s) of interest" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Add another product" }));
     expect(screen.getAllByPlaceholderText("Enter product name")).toHaveLength(2);
-
-    await user.click(screen.getByLabelText("General inquiry"));
-    expect(screen.queryByRole("heading", { name: "Product(s) of interest" })).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Subject")).toBeInTheDocument();
   });
   it("CON-015 shows an accessible error after removing the last quote product", async () => {
     const interaction = userEvent.setup();

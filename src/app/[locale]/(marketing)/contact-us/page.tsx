@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { ContactScreen, type InquiryType } from "@/features/contact";
+import { ContactScreen } from "@/features/contact";
 import { getLocalizedAlternates, getLocalizedPath, isAppLocale } from "@/i18n/locale";
 
 type ContactUsPageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ type?: string }>;
 };
 
 export async function generateMetadata({ params }: ContactUsPageProps): Promise<Metadata> {
@@ -28,9 +27,6 @@ export async function generateMetadata({ params }: ContactUsPageProps): Promise<
   };
 }
 
-export default async function ContactUsPage({ searchParams }: ContactUsPageProps) {
-  const { type } = await searchParams;
-  const initialType: InquiryType = type === "quote" ? "quote" : "general";
-
-  return <ContactScreen initialType={initialType} />;
+export default async function ContactUsPage() {
+  return <ContactScreen initialType="general" />;
 }

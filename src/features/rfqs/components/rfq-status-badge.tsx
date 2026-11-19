@@ -12,10 +12,10 @@ const statusStyles: Record<string, string> = {
   expired: "bg-[#fff0f1] text-[#e81643]",
   cancelled: "bg-[#fff0f1] text-[#e81643]",
 };
-const statusTranslationKeys: Record<
-  string,
-  "submitted" | "quoted" | "pending" | "declined" | "accepted" | "expired" | "cancelled" | "unknown"
-> = {
+
+type RfqStatusLabelKey = "submitted" | "quoted" | "pending" | "declined" | "accepted" | "expired" | "cancelled";
+
+const statusLabelKeys: Record<string, RfqStatusLabelKey> = {
   submitted: "submitted",
   quoted: "quoted",
   pending: "pending",
@@ -25,18 +25,23 @@ const statusTranslationKeys: Record<
   cancelled: "cancelled",
 };
 
+function normalizeStatus(status: RfqStatus) {
+  return status.trim().toLowerCase().replace(/[\s_-]+/g, "");
+}
+
+/** Translation key under `Rfqs.statuses`; unknown API statuses fall back to their raw value. */
+export function rfqStatusLabelKey(status: RfqStatus): RfqStatusLabelKey | "unknown" {
+  return statusLabelKeys[normalizeStatus(status)] ?? "unknown";
+}
+
 export function RfqStatusBadge({ status }: { status: RfqStatus }) {
   const t = useTranslations("Rfqs.statuses");
-  const normalizedStatus = status
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_]+/g, "-");
-  const className = statusStyles[normalizedStatus] ?? "bg-[#ecf0f3] text-[#596579]";
+  const className = statusStyles[normalizeStatus(status)] ?? "bg-[#ecf0f3] text-[#596579]";
 
   return (
     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium", className)}>
       <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
-      {t(statusTranslationKeys[normalizedStatus.replaceAll("-", "")] ?? "unknown", { status })}
+      {t(rfqStatusLabelKey(status), { status })}
     </span>
   );
 }

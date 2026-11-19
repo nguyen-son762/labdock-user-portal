@@ -9,8 +9,6 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { createUuid } from "@/lib/uuid";
 
@@ -66,40 +64,6 @@ export function ContactForm({ initialType }: { initialType: InquiryType }) {
         <h2 className="text-2xl font-semibold leading-[42px] text-[#0f3678] sm:text-[32px]">{t("formTitle")}</h2>
         <Form {...form}>
           <form noValidate onSubmit={form.handleSubmit(handleSubmit)} className="mt-2 space-y-4">
-            <FormField
-              control={form.control}
-              name="inquiryType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={(value: InquiryType) => {
-                        field.onChange(value);
-                        form.clearErrors();
-                        mutation.reset();
-                      }}
-                      className="flex flex-wrap gap-x-8 gap-y-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="general" id="general-inquiry" className="size-4" />
-                        <Label htmlFor="general-inquiry" className="cursor-pointer text-xs font-normal text-[#051a50]">
-                          {t("generalInquiry")}
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="quote" id="request-a-quote" className="size-4" />
-                        <Label htmlFor="request-a-quote" className="cursor-pointer text-xs font-normal text-[#051a50]">
-                          {t("requestQuote")}
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {mutation.isError ? <Alert>{t("submitError")}</Alert> : null}
             {mutation.isSuccess ? (
               <p role="status" className="flex items-center gap-2 rounded-lg bg-[#ecfdf3] p-3 text-sm text-[#027a48]">

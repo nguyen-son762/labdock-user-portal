@@ -1,9 +1,8 @@
-import { Add, SearchNormal1 } from "iconsax-reactjs";
+import { Add } from "iconsax-reactjs";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
 
+import { DebouncedSearchInput } from "@/components/shared/debounced-search-input";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { ORDER_FILTER_STATUSES, orderFilterStatusSchema, type OrderFilterStatus } from "../schemas/order.schema";
@@ -12,7 +11,6 @@ import { OrderPeriodFilter } from "./order-period-filter";
 import { orderFilterStatusLabelKeys } from "./order-status-labels";
 
 const ALL_STATUSES_VALUE = "all";
-const SEARCH_DEBOUNCE_MS = 400;
 
 type OrdersFiltersProps = {
   search: string;
@@ -25,43 +23,6 @@ type OrdersFiltersProps = {
   onPeriodChange: (period: OrderPeriod) => void;
   onClearAll: () => void;
 };
-
-/** Keeps typing responsive and only commits the search term once the buyer pauses. */
-function OrdersSearchInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const t = useTranslations("Orders");
-  const [draft, setDraft] = useState(value);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-
-  useEffect(() => setDraft(value), [value]);
-
-  useEffect(() => {
-    if (draft.trim() === value.trim()) return;
-    const timeout = window.setTimeout(() => onChangeRef.current(draft), SEARCH_DEBOUNCE_MS);
-    return () => window.clearTimeout(timeout);
-  }, [draft, value]);
-
-  return (
-    <div className="relative w-full sm:w-[320px]">
-      <SearchNormal1
-        className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-[#73798f]"
-        aria-hidden="true"
-      />
-      <Input
-        type="search"
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") onChangeRef.current(draft);
-        }}
-        maxLength={100}
-        aria-label={t("searchOrders")}
-        placeholder={t("searchPlaceholder")}
-        className="h-11 rounded-full border-[#dde2e8] bg-white pl-[42px] pr-3.5 text-base text-[#051a50] shadow-[0_1px_1px_rgba(10,13,18,0.05)] placeholder:text-[#b1bac8]"
-      />
-    </div>
-  );
-}
 
 export function OrdersFilters({
   search,
@@ -83,7 +44,12 @@ export function OrdersFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <OrdersSearchInput value={search} onChange={onSearchChange} />
+      <DebouncedSearchInput
+        value={search}
+        onChange={onSearchChange}
+        label={t("searchOrders")}
+        placeholder={t("searchPlaceholder")}
+      />
       <Select value={status ?? ALL_STATUSES_VALUE} onValueChange={handleValueChange}>
         <SelectTrigger
           aria-label={t("filterByStatus")}

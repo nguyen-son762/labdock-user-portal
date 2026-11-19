@@ -13,9 +13,16 @@ const rfqIdSchema = rfqDetailSchema.shape.id;
 
 export const rfqsService = {
   async list(input: RfqFilters, signal?: AbortSignal): Promise<RfqListResponse> {
-    const { page, pageSize } = rfqFiltersSchema.parse(input);
+    const { page, pageSize, status, search, fromDate, toDate } = rfqFiltersSchema.parse(input);
     const response = await httpClient.get<unknown>("/rfqs", {
-      params: { page, pageSize },
+      params: {
+        page,
+        pageSize,
+        ...(status ? { status } : {}),
+        ...(search ? { search } : {}),
+        ...(fromDate ? { fromDate } : {}),
+        ...(toDate ? { toDate } : {}),
+      },
       signal,
     });
 

@@ -65,6 +65,11 @@ export const contactSubmissionSchema = z.object({
   status: z.literal("submitted"),
 });
 
+/** The handoff API returns the created RFQ; the contact flow only needs its number as the reference. */
+export const rfqHandoffResponseSchema = z.object({
+  rfqNumber: z.string().min(1),
+});
+
 export const submitContactInputSchema = z.object({
   contact: contactFormSchema,
   idempotencyKey: z.uuid(),

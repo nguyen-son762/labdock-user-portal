@@ -1,8 +1,8 @@
 import { httpClient } from "@/lib/http-client";
-import { rfqDetailSchema } from "@/features/rfqs/schemas/rfq.schema";
 
 import {
   contactSubmissionSchema,
+  rfqHandoffResponseSchema,
   submitContactInputSchema,
   type ContactFormValues,
   type ContactSubmission,
@@ -35,7 +35,7 @@ async function submitQuote(contact: ContactFormValues): Promise<ContactSubmissio
       specNote: buildSpecNote(product, index === 0 ? contact.message : ""),
     })),
   });
-  const rfq = rfqDetailSchema.parse(response.data);
+  const rfq = rfqHandoffResponseSchema.parse(response.data);
   return contactSubmissionSchema.parse({ reference: rfq.rfqNumber, status: "submitted" });
 }
 

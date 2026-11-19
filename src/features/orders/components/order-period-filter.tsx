@@ -27,6 +27,8 @@ type OrderPeriodFilterProps = {
   period: OrderPeriod;
   onChange: (value: OrderPeriodSelection) => void;
   onPeriodChange: (period: OrderPeriod) => void;
+  /** Accessible name of the date button; defaults to the order wording. */
+  label?: string;
 };
 
 function getTodayAnchor() {
@@ -86,7 +88,7 @@ function PickerOption({ label, isSelected, onSelect }: { label: string; isSelect
   );
 }
 
-export function OrderPeriodFilter({ value, period, onChange, onPeriodChange }: OrderPeriodFilterProps) {
+export function OrderPeriodFilter({ value, period, onChange, onPeriodChange, label }: OrderPeriodFilterProps) {
   const t = useTranslations("Orders");
   const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
@@ -118,7 +120,7 @@ export function OrderPeriodFilter({ value, period, onChange, onPeriodChange }: O
           <Button
             type="button"
             variant="ghost"
-            aria-label={t("filterByDate")}
+            aria-label={label ?? t("filterByDate")}
             className="h-full flex-1 justify-start gap-2 rounded-l-full rounded-r-none px-4 text-[13px] font-medium text-[#051a50] hover:bg-[#f3f8fc] sm:flex-none"
           >
             <CalendarIcon className="size-5" aria-hidden="true" />
