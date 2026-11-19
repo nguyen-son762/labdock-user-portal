@@ -1,6 +1,6 @@
 "use client";
 
-import { Add, ArrowRight, Bookmark, Box1, LocationTick, Minus, ShoppingCart, Verify } from "iconsax-reactjs";
+import { ArrowRight, Bookmark, Box1, LocationTick, ShoppingCart, Verify } from "iconsax-reactjs";
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -21,6 +21,7 @@ import {
   getProductVariantLabel,
   getProductVariantPresentation,
 } from "../utils/product-display";
+import { ProductQuantityStepper } from "./product-quantity-stepper";
 
 function ProductFacts({ product }: { product: Product }) {
   const t = useTranslations("Product");
@@ -78,6 +79,14 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
   const selectedVariant = product.variants.find((variant) => variant.id === selectedVariantId) ?? defaultVariant;
   const presentation = getProductVariantPresentation(product, selectedVariant);
   const maxQuantity = Math.min(999, selectedVariant?.stockQty ?? 0);
+  const exceedsStock = presentation.canPurchase && quantity > maxQuantity;
+  const canAddToCart = presentation.canPurchase && !exceedsStock;
+  const quantityMessage =
+    selectedVariant && presentation.outOfStock
+      ? t("variantOutOfStock")
+      : exceedsStock
+        ? t("quantityExceedsStock")
+        : null;
   const variantLabel =
     selectedVariant?.selections
       .map((selection) => selection.attributeName)
@@ -89,7 +98,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
     .filter(Boolean);
 
   function addProduct(destination?: "/checkout" | "/request-quote") {
-    if (addCartItem.isPending || !presentation.canPurchase || !selectedVariant) return;
+    if (addCartItem.isPending || !canAddToCart || !selectedVariant) return;
     setStatus("");
     addCartItem.mutate(createCartItemFromProduct(product, { quantity, variantId: selectedVariant.id }), {
       onSuccess: (items) => {
@@ -159,11 +168,10 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
                     className={cn(
                       "h-8 min-w-[72px] rounded-lg border-[#d4d4d4] bg-white px-2 text-sm text-[#404040] shadow-none",
                       selectedVariant?.id === variant.id &&
-                      "border-[#164990] bg-[#164990] text-white hover:bg-[#164990] hover:text-white",
+                        "border-[#164990] bg-[#164990] text-white hover:bg-[#164990] hover:text-white",
                     )}
                   >
                     {label}
-                    {!variant.isActive || variant.stockQty <= 0 ? ` ${t("out")}` : ""}
                   </Button>
                 );
               })}
@@ -173,36 +181,16 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
         <div className="mt-4 flex flex-col gap-3 border-b border-[#e9eaeb] pb-4 sm:flex-row sm:items-center">
           <Label className="flex-1 text-sm font-semibold text-[#051a50]">{t("quantity")}</Label>
-          <div className="flex h-11 w-full items-center rounded-lg border border-[#e9eaeb] sm:w-[240px]">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={t("decreaseQuantity")}
-              disabled={!presentation.canPurchase || quantity <= 1}
-              onClick={() => setQuantity((value) => Math.max(1, value - 1))}
-              className="h-full w-10 rounded-none border-r border-[#e9eaeb] text-[#164990]"
-            >
-              <Minus className="size-4" aria-hidden="true" />
-            </Button>
-            <output
-              aria-label={t("quantity")}
-              aria-live="polite"
-              className="min-w-20 flex-1 text-center text-base font-semibold text-[#051a50]"
-            >
-              {quantity}
-            </output>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={t("increaseQuantity")}
-              disabled={!presentation.canPurchase || quantity >= maxQuantity}
-              onClick={() => setQuantity((value) => Math.min(maxQuantity, value + 1))}
-              className="h-full w-10 rounded-none border-l border-[#e9eaeb] text-[#164990]"
-            >
-              <Add className="size-4" aria-hidden="true" />
-            </Button>
+          <div className="w-full sm:w-[240px]">
+            <ProductQuantityStepper
+              value={quantity}
+              max={maxQuantity}
+              disabled={!presentation.canPurchase}
+              onChange={setQuantity}
+            />
+            <p role="status" aria-live="polite" className="mt-1.5 text-sm font-medium text-[#d92d20] empty:hidden">
+              {quantityMessage}
+            </p>
           </div>
         </div>
 
@@ -210,7 +198,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           <Button
             type="button"
             variant="brand"
-            disabled={addCartItem.isPending || !presentation.canPurchase}
+            disabled={addCartItem.isPending || !canAddToCart}
             onClick={() => addProduct("/checkout")}
             className="h-11 justify-between pl-5 pr-1.5"
           >
@@ -221,7 +209,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           </Button>
           <Button
             type="button"
-            disabled={addCartItem.isPending || !presentation.canPurchase}
+            disabled={addCartItem.isPending || !canAddToCart}
             onClick={() => addProduct()}
             className="h-11 justify-between rounded-full bg-gradient-to-r from-[#2f7bc4] to-[#0f3678] pl-5 pr-1.5"
           >
@@ -237,7 +225,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           variant="outline"
           disabled={addCartItem.isPending}
           onClick={() => {
-            if (!presentation.canPurchase) {
+            if (!canAddToCart) {
               router.push(`/contact-us?type=quote&product=${encodeURIComponent(product.slug)}`);
               return;
             }

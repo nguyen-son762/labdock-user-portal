@@ -53,4 +53,38 @@ describe("ProductPurchasePanel", () => {
     expect(screen.getByRole("button", { name: "Add to cart" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Request a quote" })).toBeEnabled();
   });
+
+  it("shows the out-of-stock message below quantity instead of inside the variant button", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ProductPurchasePanel
+        product={{ ...product, variants: [product.variants[0]!, { ...product.variants[1]!, stockQty: 0 }] }}
+      />,
+    );
+
+    expect(screen.queryByText("This option is out of stock.")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "200ml" }));
+    expect(screen.getByRole("button", { name: "200ml" })).toHaveTextContent(/^200ml$/);
+    expect(screen.getByText("This option is out of stock.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to cart" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "100ml" }));
+    expect(screen.queryByText("This option is out of stock.")).not.toBeInTheDocument();
+  });
+
+  it("warns and blocks purchase when the typed quantity exceeds the variant stock", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProductPurchasePanel product={product} />);
+    const input = screen.getByRole("textbox", { name: "Quantity" });
+
+    await user.clear(input);
+    await user.type(input, "11");
+    expect(screen.getByText("The quantity exceeds the available stock")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to cart" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Buy now" })).toBeDisabled();
+
+    await user.clear(input);
+    await user.type(input, "10");
+    expect(screen.queryByText("The quantity exceeds the available stock")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to cart" })).toBeEnabled();
+  });
 });
