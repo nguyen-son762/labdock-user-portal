@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { quoteContactSchema, type QuoteContactValues } from "../schemas/quote.schema";
+import { createQuoteContactSchema, type QuoteContactValues } from "../schemas/quote.schema";
 
 type QuoteContactFormProps = {
   onSubmit: (values: QuoteContactValues) => void;
@@ -21,8 +21,9 @@ type QuoteContactFormProps = {
 
 export function QuoteContactForm({ onSubmit, pending, error }: QuoteContactFormProps) {
   const t = useTranslations("Checkout");
+  const tValidation = useTranslations("Validation");
   const form = useForm<QuoteContactValues>({
-    resolver: zodResolver(quoteContactSchema),
+    resolver: zodResolver(createQuoteContactSchema(tValidation)),
     defaultValues: {
       fullName: "",
       phoneCountry: "65",

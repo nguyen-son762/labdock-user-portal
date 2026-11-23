@@ -10,6 +10,7 @@ import { CountryFlag } from "@/components/shared/country-flag";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { findCountry } from "@/constants/country-options";
+import { useAuthSessionQuery } from "@/features/auth";
 import { useAddCartItemMutation } from "@/features/checkout";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
@@ -22,6 +23,7 @@ import {
   getProductVariantPresentation,
 } from "../utils/product-display";
 import { ProductQuantityStepper } from "./product-quantity-stepper";
+import { ProductLoginDialog } from "./product-login-dialog";
 
 function ProductFacts({ product }: { product: Product }) {
   const t = useTranslations("Product");
@@ -69,8 +71,11 @@ function ProductFacts({ product }: { product: Product }) {
 
 export function ProductPurchasePanel({ product }: { product: Product }) {
   const t = useTranslations("Product");
+  const tPayments = useTranslations("PaymentMethods");
   const productCardT = useTranslations("ProductCard");
   const router = useRouter();
+  const sessionQuery = useAuthSessionQuery();
+  const requiresLogin = sessionQuery.data?.authenticated !== true;
   const addCartItem = useAddCartItemMutation();
   const defaultVariant = getDefaultProductVariant(product);
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariant?.id);
@@ -81,6 +86,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
   const maxQuantity = Math.min(999, selectedVariant?.stockQty ?? 0);
   const exceedsStock = presentation.canPurchase && quantity > maxQuantity;
   const canAddToCart = presentation.canPurchase && !exceedsStock;
+  const purchaseDisabled = sessionQuery.isPending || addCartItem.isPending || (!requiresLogin && !canAddToCart);
   const quantityMessage =
     selectedVariant && presentation.outOfStock
       ? t("variantOutOfStock")
@@ -98,7 +104,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
     .filter(Boolean);
 
   function addProduct(destination?: "/checkout" | "/request-quote") {
-    if (addCartItem.isPending || !canAddToCart || !selectedVariant) return;
+    if (requiresLogin || addCartItem.isPending || !canAddToCart || !selectedVariant) return;
     setStatus("");
     addCartItem.mutate(createCartItemFromProduct(product, { quantity, variantId: selectedVariant.id }), {
       onSuccess: (items) => {
@@ -195,29 +201,33 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Button
-            type="button"
-            variant="brand"
-            disabled={addCartItem.isPending || !canAddToCart}
-            onClick={() => addProduct("/checkout")}
-            className="h-11 justify-between pl-5 pr-1.5"
-          >
-            <span className="flex-1">{addCartItem.isPending ? t("updating") : productCardT("buyNow")}</span>
-            <span className="flex size-8 items-center justify-center rounded-full bg-[#efa33b] shadow-[0_0_15px_rgba(229,122,0,0.5)]">
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </span>
-          </Button>
-          <Button
-            type="button"
-            disabled={addCartItem.isPending || !canAddToCart}
-            onClick={() => addProduct()}
-            className="h-11 justify-between rounded-full bg-gradient-to-r from-[#2f7bc4] to-[#0f3678] pl-5 pr-1.5"
-          >
-            <span className="flex-1">{t("addToCartAction")}</span>
-            <span className="flex size-8 items-center justify-center rounded-full bg-[#1f5fa8]">
-              <ShoppingCart className="size-4" aria-hidden="true" />
-            </span>
-          </Button>
+          <ProductLoginDialog requiresLogin={requiresLogin}>
+            <Button
+              type="button"
+              variant="brand"
+              disabled={purchaseDisabled}
+              onClick={() => addProduct("/checkout")}
+              className="h-11 justify-between pl-5 pr-1.5"
+            >
+              <span className="flex-1">{addCartItem.isPending ? t("updating") : productCardT("buyNow")}</span>
+              <span className="flex size-8 items-center justify-center rounded-full bg-[#efa33b] shadow-[0_0_15px_rgba(229,122,0,0.5)]">
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </span>
+            </Button>
+          </ProductLoginDialog>
+          <ProductLoginDialog requiresLogin={requiresLogin}>
+            <Button
+              type="button"
+              disabled={purchaseDisabled}
+              onClick={() => addProduct()}
+              className="h-11 justify-between rounded-full bg-gradient-to-r from-[#2f7bc4] to-[#0f3678] pl-5 pr-1.5"
+            >
+              <span className="flex-1">{t("addToCartAction")}</span>
+              <span className="flex size-8 items-center justify-center rounded-full bg-[#1f5fa8]">
+                <ShoppingCart className="size-4" aria-hidden="true" />
+              </span>
+            </Button>
+          </ProductLoginDialog>
         </div>
         <p className="my-2 text-center text-sm text-[#051a50]">{t("or")}</p>
         <Button
@@ -225,7 +235,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           variant="outline"
           disabled={addCartItem.isPending}
           onClick={() => {
-            if (!canAddToCart) {
+            if (requiresLogin || !canAddToCart) {
               router.push(`/contact-us?type=quote&product=${encodeURIComponent(product.slug)}`);
               return;
             }
@@ -263,9 +273,9 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         >
           <span className="min-w-0 flex-1 text-sm text-[#5e6375]">{t("securedPaymentWith")}</span>
           {[
-            { name: "Visa", src: "/icon/visa.svg" },
-            { name: "PayNow", src: "/icon/pay_now.svg" },
-            { name: "Mastercard", src: "/icon/pay.svg" },
+            { name: tPayments("visa"), src: "/icon/visa.svg" },
+            { name: tPayments("payNow"), src: "/icon/pay_now.svg" },
+            { name: tPayments("mastercard"), src: "/icon/pay.svg" },
           ].map((payment) => (
             <Image
               src={payment.src}

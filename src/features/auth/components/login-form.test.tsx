@@ -28,9 +28,9 @@ describe("LoginForm", () => {
 
     await user.click(screen.getByRole("button", { name: "Log in" }));
 
-    expect(await screen.findByText("Vui lòng nhập email.")).toBeInTheDocument();
+    expect(await screen.findByText("Please enter your email.")).toBeInTheDocument();
     expect(screen.getByLabelText("Email address *")).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("Mật khẩu phải có ít nhất 8 ký tự.")).toBeInTheDocument();
+    expect(screen.getByText("Password must be at least 8 characters.")).toBeInTheDocument();
   });
 
   it("gửi dữ liệu qua service và chuyển về trang chủ khi thành công", async () => {

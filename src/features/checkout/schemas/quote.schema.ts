@@ -1,16 +1,26 @@
 import { z } from "zod";
 
-export const quoteContactSchema = z.object({
-  fullName: z.string().trim().min(2, "Enter your full name."),
-  phoneCountry: z.string().min(1, "Select a country code."),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\d[\d\s-]{6,18}$/, "Enter a valid phone number."),
-  email: z.email("Enter a valid email address."),
-  companyName: z.string().trim().max(100).optional(),
-  region: z.string().min(1, "Select a region."),
-});
+import { defaultValidationTranslator, type ValidationTranslator } from "@/i18n/validation";
+
+export function createQuoteContactSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z.object({
+    fullName: z.string().trim().min(2, t("fullNameRequired")),
+    phoneCountry: z.string().min(1, t("countryCodeRequired")),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^\d[\d\s-]{6,18}$/, t("phoneInvalid")),
+    email: z.email(t("emailInvalid")),
+    companyName: z
+      .string()
+      .trim()
+      .max(100, t("companyMaxLength", { max: 100 }))
+      .optional(),
+    region: z.string().min(1, t("regionRequired")),
+  });
+}
+
+export const quoteContactSchema = createQuoteContactSchema();
 
 export const submitQuoteInputSchema = z.object({
   contact: quoteContactSchema,

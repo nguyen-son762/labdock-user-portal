@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getCountryName } from "@/constants/country-options";
 
 import type { CurrentUser } from "../schemas/user.schema";
 
@@ -58,10 +59,17 @@ export function ProfileInfoPanel({ user, onEdit }: { user: CurrentUser; onEdit: 
         <SectionTitle>{t("deliveryAddress")}</SectionTitle>
         <Detail label={t("address")} value={user.deliveryAddress} wide />
         <Detail label={t("postalCode")} value={user.postalCode} />
-        <Detail label={t("country")} value={user.country} />
+        <Detail label={t("country")} value={getCountryName(user.country)} />
 
         <SectionTitle>{t("billingAddress")}</SectionTitle>
         <Detail label="" value={user.billingSameAsDelivery ? t("sameAsDelivery") : t("differentBilling")} wide />
+        {!user.billingSameAsDelivery ? (
+          <>
+            <Detail label={t("address")} value={user.billingAddress.address} wide />
+            <Detail label={t("postalCode")} value={user.billingAddress.postalCode} />
+            <Detail label={t("country")} value={getCountryName(user.billingAddress.country)} />
+          </>
+        ) : null}
       </dl>
     </Card>
   );

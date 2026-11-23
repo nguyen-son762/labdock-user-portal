@@ -1,37 +1,59 @@
 import { z } from "zod";
 
+import { defaultValidationTranslator, type ValidationTranslator } from "@/i18n/validation";
+
 const guidSchema = z.string().regex(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i, "Invalid identifier.");
 
-export const signupSchema = z.object({
-  company: z.string().trim().min(1, "Please enter your company name.").max(160, "Company name is too long."),
-  fullName: z.string().trim().min(1, "Please enter your full name."),
-  email: z.string().trim().min(1, "Please enter your email address.").email("Enter a valid email address."),
-  phoneCode: z.string().min(1, "Please select a calling code."),
-  phone: z
+export function createSignupSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z.object({
+    company: z
+      .string()
+      .trim()
+      .min(1, t("companyRequired"))
+      .max(160, t("companyMaxLength", { max: 160 })),
+    fullName: z.string().trim().min(1, t("signupFullNameRequired")),
+    email: z.string().trim().min(1, t("emailRequired")).email(t("emailInvalid")),
+    phoneCode: z.string().min(1, t("callingCodeRequired")),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^\d{6,15}$/, t("phoneInvalid")),
+    country: z.string().regex(/^[A-Z]{2}$/, t("countryRequired")),
+    region: z.string().trim().min(1, t("signupRegionRequired")),
+    address: z.string().trim().min(1, t("addressRequired")),
+  });
+}
+
+export const signupSchema = createSignupSchema();
+
+function createVerificationCodeSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z
     .string()
     .trim()
-    .regex(/^\d{6,15}$/, "Enter a valid phone number."),
-  country: z.string().regex(/^[A-Z]{2}$/, "Please select your country."),
-  region: z.string().trim().min(1, "Please enter your region."),
-  address: z.string().trim().min(1, "Please enter your address."),
-});
+    .regex(/^\d{6}$/, t("verificationCodeInvalid"));
+}
 
-const verificationCodeSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{6}$/, "Enter the 6-digit verification code.");
+const verificationCodeSchema = createVerificationCodeSchema();
 
-export const verificationSchema = z.object({ code: verificationCodeSchema });
+export function createVerificationSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z.object({ code: createVerificationCodeSchema(t) });
+}
 
-const passwordFieldsSchema = z.object({
-  password: z.string().min(8, "Password must be at least 8 characters."),
-  confirmPassword: z.string().min(1, "Please confirm your password."),
-});
+export const verificationSchema = createVerificationSchema();
 
-export const passwordSchema = passwordFieldsSchema.refine((values) => values.password === values.confirmPassword, {
-  path: ["confirmPassword"],
-  message: "Passwords do not match.",
-});
+export function createPasswordSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  const passwordFieldsSchema = z.object({
+    password: z.string().min(8, t("passwordMinLength")),
+    confirmPassword: z.string().min(1, t("confirmPasswordRequired")),
+  });
+
+  return passwordFieldsSchema.refine((values) => values.password === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: t("passwordsMismatch"),
+  });
+}
+
+export const passwordSchema = createPasswordSchema();
 
 export const signupStartResponseSchema = z.object({
   challengeId: guidSchema,

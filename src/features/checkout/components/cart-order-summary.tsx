@@ -10,6 +10,7 @@ import { calculateOrderTotals, formatCurrency } from "../data/checkout-data";
 
 export function CartOrderSummary({ items }: { items: CartItem[] }) {
   const t = useTranslations("Checkout");
+  const tPayments = useTranslations("PaymentMethods");
   const disabled = items.length === 0;
   const selectedIds = items.map(({ id }) => id).join(",");
   const orderTotals = calculateOrderTotals(items);
@@ -80,7 +81,7 @@ export function CartOrderSummary({ items }: { items: CartItem[] }) {
         <span className="flex h-7 w-[46px] items-center justify-center rounded-[5px] border border-[#dde2e8] bg-white p-px">
           <Image
             src="/checkout/paynow-logo.svg"
-            alt="PayNow"
+            alt={tPayments("payNow")}
             width={31}
             height={28}
             className="size-[30px] object-contain"

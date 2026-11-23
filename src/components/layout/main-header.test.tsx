@@ -48,6 +48,32 @@ describe("MainHeader", () => {
     expect(navigation.replace).toHaveBeenCalledWith("/vi/cart");
   });
 
+  it("switches from Vietnamese to English while preserving query and fragment", async () => {
+    const user = userEvent.setup();
+    window.history.replaceState(null, "", "/vi/cart?items=I1#cart-products");
+    try {
+      renderWithProviders(<MainHeader />, { locale: "vi" });
+      await user.click(screen.getByRole("button", { name: "Ngôn ngữ" }));
+      await user.click(screen.getByRole("button", { name: /English/ }));
+      expect(navigation.replace).toHaveBeenCalledWith("/en/cart?items=I1#cart-products");
+    } finally {
+      window.history.replaceState(null, "", "/");
+    }
+  });
+
+  it("closes the language picker with Escape and restores focus", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<MainHeader />);
+    const trigger = screen.getByRole("button", { name: "Language" });
+
+    await user.click(trigger);
+    expect(screen.getByRole("button", { name: /Tiếng Việt/ })).toBeVisible();
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("button", { name: /Tiếng Việt/ })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
   it("opens child categories in a horizontal panel on hover", async () => {
     vi.useFakeTimers();
     renderWithProviders(

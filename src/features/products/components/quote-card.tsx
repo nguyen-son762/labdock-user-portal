@@ -1,9 +1,9 @@
 import { ArrowRight, DocumentText, Verify } from "iconsax-reactjs";
 import Image from "next/image";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 
 export function QuoteCard() {
   const t = useTranslations("Product");

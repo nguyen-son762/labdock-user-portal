@@ -19,9 +19,9 @@ import {
   useVerifyForgotPasswordMutation,
 } from "../api/use-forgot-password-mutation";
 import {
-  forgotPasswordResetSchema,
-  forgotPasswordSchema,
-  forgotPasswordVerificationSchema,
+  createForgotPasswordResetSchema,
+  createForgotPasswordSchema,
+  createForgotPasswordVerificationSchema,
   type ForgotPasswordChallenge,
   type ForgotPasswordResetValues,
   type ForgotPasswordValues,
@@ -37,6 +37,7 @@ type ForgotPasswordFlowState =
 
 export function ForgotPasswordForm() {
   const tErrors = useTranslations("ApiErrors");
+  const tValidation = useTranslations("Validation");
 
   function getForgotPasswordErrorMessage(error: unknown): string | null {
     if (!error) return null;
@@ -50,15 +51,15 @@ export function ForgotPasswordForm() {
   const verifyMutation = useVerifyForgotPasswordMutation();
   const resetMutation = useResetForgotPasswordMutation();
   const emailForm = useForm<ForgotPasswordValues>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(createForgotPasswordSchema(tValidation)),
     defaultValues: { email: "" },
   });
   const verificationForm = useForm<ForgotPasswordVerificationValues>({
-    resolver: zodResolver(forgotPasswordVerificationSchema),
+    resolver: zodResolver(createForgotPasswordVerificationSchema(tValidation)),
     defaultValues: { code: "" },
   });
   const passwordForm = useForm<ForgotPasswordResetValues>({
-    resolver: zodResolver(forgotPasswordResetSchema),
+    resolver: zodResolver(createForgotPasswordResetSchema(tValidation)),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
 

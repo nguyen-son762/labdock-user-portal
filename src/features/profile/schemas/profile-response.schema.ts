@@ -34,6 +34,10 @@ export const profileResponseSchema = z.object({
 
 export type ProfileResponse = z.infer<typeof profileResponseSchema>;
 
+export const profileUpdateResponseSchema = profileResponseSchema.partial({ memberSince: true }).extend({
+  profilePictureMediaId: z.uuid().nullish(),
+});
+
 export const profilePictureMediaUploadResponseSchema = z.object({
   id: z.uuid(),
   relativePath: z.string().min(1),

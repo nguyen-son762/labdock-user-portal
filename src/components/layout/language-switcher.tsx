@@ -29,7 +29,7 @@ export function LanguageSwitcher() {
           type="button"
           variant="ghost"
           aria-label={t("language")}
-          className="h-auto gap-1.5 rounded p-0 font-medium text-white hover:bg-transparent hover:text-white hover:opacity-80"
+          className="h-9 gap-1.5 rounded px-2 py-0 font-medium text-white hover:bg-transparent hover:text-white hover:opacity-80 sm:h-auto sm:px-0"
         >
           {locale === "vi" ? t("vietnamese") : t("english")}
           <ArrowDown2 className="size-3.5" aria-hidden="true" />

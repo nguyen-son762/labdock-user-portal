@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 import { useChangePasswordMutation } from "../api/use-change-password-mutation";
-import { passwordFormSchema, type PasswordFormValues } from "../schemas/profile-form.schema";
+import { createPasswordFormSchema, type PasswordFormValues } from "../schemas/profile-form.schema";
 
 const passwordDefaults: PasswordFormValues = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
@@ -29,11 +29,12 @@ export function ProfileSecurityCard({
   onCancel: () => void;
 }) {
   const tErrors = useTranslations("ApiErrors");
+  const tValidation = useTranslations("Validation");
   const t = useTranslations("Profile");
   const format = useFormatter();
   const mutation = useChangePasswordMutation();
   const form = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordFormSchema),
+    resolver: zodResolver(createPasswordFormSchema(tValidation)),
     defaultValues: passwordDefaults,
   });
 

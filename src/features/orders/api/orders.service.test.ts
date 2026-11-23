@@ -134,6 +134,47 @@ describe("ordersService", () => {
     expect(result.qrImageUrl).toBe(detail.qrImageUrl);
   });
 
+  it.each([{ orderItems: detail.invoice.lines }, { orderItems: [] }])(
+    "normalizes invoice.orderItems into invoice lines: $orderItems",
+    async ({ orderItems }) => {
+      httpClient.get.mockResolvedValue({
+        data: { ...detail, invoice: { ...detail.invoice, lines: undefined, orderItems } },
+      });
+      const controller = new AbortController();
+
+      const result = await ordersService.getById(order.id, controller.signal);
+
+      expect(httpClient.get).toHaveBeenCalledWith(`/orders/${order.id}`, { signal: controller.signal });
+      expect(result.invoice.lines).toEqual(orderItems);
+    },
+  );
+
+  it("uses current orderItems when legacy lines are also present", async () => {
+    const orderItems = [{ ...detail.invoice.lines[0], productName: "Current product" }];
+    httpClient.get.mockResolvedValue({ data: { ...detail, invoice: { ...detail.invoice, orderItems } } });
+
+    await expect(ordersService.getById(order.id)).resolves.toMatchObject({ invoice: { lines: orderItems } });
+  });
+
+  it.each([
+    { orderItems: null },
+    { orderItems: "invalid-items" },
+    { orderItems: [{ ...detail.invoice.lines[0], quantity: 0 }] },
+  ])(
+    "rejects invalid invoice.orderItems instead of falling back to legacy lines: $orderItems",
+    async ({ orderItems }) => {
+      httpClient.get.mockResolvedValue({ data: { ...detail, invoice: { ...detail.invoice, orderItems } } });
+
+      await expect(ordersService.getById(order.id)).rejects.toThrow();
+    },
+  );
+
+  it("rejects an invoice with no item collection", async () => {
+    httpClient.get.mockResolvedValue({ data: { ...detail, invoice: { ...detail.invoice, lines: undefined } } });
+
+    await expect(ordersService.getById(order.id)).rejects.toThrow();
+  });
+
   it.each([
     [1, "Draft"],
     [2, "New"],

@@ -1,37 +1,47 @@
 import { z } from "zod";
 
+import { defaultValidationTranslator, type ValidationTranslator } from "@/i18n/validation";
+
 import { cartApiItemSchema, cartItemsSchema } from "./cart.schema";
 
 export const paymentMethodSchema = z.enum(["bank-transfer"]);
 export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
 
-export const checkoutSchema = z
-  .object({
-    fullName: z.string().trim().min(2, "Enter your full name."),
-    email: z.email("Enter a valid email address."),
-    phone: z
-      .string()
-      .trim()
-      .regex(/^[+\d][\d\s-]{7,19}$/, "Enter a valid phone number."),
-    companyName: z.string().trim().max(100).optional(),
-    address: z.string().trim().min(8, "Enter a complete delivery address."),
-    city: z.string().trim().min(1, "Enter a city."),
-    notes: z.string().trim().optional(),
-    postalCode: z.string().trim().optional(),
-    country: z.string().min(1, "Select a country."),
-    billingSameAsDelivery: z.boolean(),
-    billingAddress: z.string().trim().optional(),
-    billingPostalCode: z.string().trim().optional(),
-    paymentMethod: paymentMethodSchema,
-  })
-  .superRefine((values, context) => {
-    if (!values.billingSameAsDelivery && (!values.billingAddress || values.billingAddress.length < 8)) {
-      context.addIssue({ code: "custom", path: ["billingAddress"], message: "Enter a complete billing address." });
-    }
-    if (!values.billingSameAsDelivery && !/^\d{6}$/.test(values.billingPostalCode ?? "")) {
-      context.addIssue({ code: "custom", path: ["billingPostalCode"], message: "Postal code must contain 6 digits." });
-    }
-  });
+export function createCheckoutSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z
+    .object({
+      fullName: z.string().trim().min(2, t("fullNameRequired")),
+      email: z.email(t("emailInvalid")),
+      phone: z
+        .string()
+        .trim()
+        .regex(/^[+\d][\d\s-]{7,19}$/, t("phoneInvalid")),
+      companyName: z
+        .string()
+        .trim()
+        .max(100, t("companyMaxLength", { max: 100 }))
+        .optional(),
+      address: z.string().trim().min(8, t("deliveryAddressRequired")),
+      city: z.string().trim().min(1, t("cityRequired")),
+      notes: z.string().trim().optional(),
+      postalCode: z.string().trim().optional(),
+      country: z.string().min(1, t("countryRequired")),
+      billingSameAsDelivery: z.boolean(),
+      billingAddress: z.string().trim().optional(),
+      billingPostalCode: z.string().trim().optional(),
+      paymentMethod: z.enum(paymentMethodSchema.options, { error: t("paymentMethodRequired") }),
+    })
+    .superRefine((values, context) => {
+      if (!values.billingSameAsDelivery && (!values.billingAddress || values.billingAddress.length < 8)) {
+        context.addIssue({ code: "custom", path: ["billingAddress"], message: t("billingAddressRequired") });
+      }
+      if (!values.billingSameAsDelivery && !/^\d{6}$/.test(values.billingPostalCode ?? "")) {
+        context.addIssue({ code: "custom", path: ["billingPostalCode"], message: t("billingPostalCodeInvalid") });
+      }
+    });
+}
+
+export const checkoutSchema = createCheckoutSchema();
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 

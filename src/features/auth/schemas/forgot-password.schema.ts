@@ -1,22 +1,36 @@
 import { z } from "zod";
 
+import { defaultValidationTranslator, type ValidationTranslator } from "@/i18n/validation";
+
 const guidSchema = z.string().regex(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i, "Invalid identifier.");
 
-const verificationCodeSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{6}$/, "Enter the 6-digit verification code.");
+function createVerificationCodeSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, t("verificationCodeInvalid"));
+}
 
-export const forgotPasswordSchema = z.object({
-  email: z.string().trim().min(1, "Please enter your email address.").email("Enter a valid email address."),
-});
+const verificationCodeSchema = createVerificationCodeSchema();
+
+export function createForgotPasswordSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z.object({
+    email: z.string().trim().min(1, t("emailRequired")).email(t("emailInvalid")),
+  });
+}
+
+export const forgotPasswordSchema = createForgotPasswordSchema();
 
 export const forgotPasswordStartResponseSchema = z.object({
   challengeId: guidSchema,
   expiresAt: z.iso.datetime({ offset: true }),
 });
 
-export const forgotPasswordVerificationSchema = z.object({ code: verificationCodeSchema });
+export function createForgotPasswordVerificationSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  return z.object({ code: createVerificationCodeSchema(t) });
+}
+
+export const forgotPasswordVerificationSchema = createForgotPasswordVerificationSchema();
 
 export const verifyForgotPasswordInputSchema = z.object({
   challengeId: guidSchema,
@@ -25,15 +39,19 @@ export const verifyForgotPasswordInputSchema = z.object({
 
 export const forgotPasswordVerificationResponseSchema = z.object({ verified: z.boolean() });
 
-const forgotPasswordResetFieldsSchema = z.object({
-  newPassword: z.string().min(8, "Password must be at least 8 characters."),
-  confirmPassword: z.string().min(1, "Please confirm your password."),
-});
+export function createForgotPasswordResetSchema(t: ValidationTranslator = defaultValidationTranslator) {
+  const forgotPasswordResetFieldsSchema = z.object({
+    newPassword: z.string().min(8, t("passwordMinLength")),
+    confirmPassword: z.string().min(1, t("confirmPasswordRequired")),
+  });
 
-export const forgotPasswordResetSchema = forgotPasswordResetFieldsSchema.refine(
-  (values) => values.newPassword === values.confirmPassword,
-  { path: ["confirmPassword"], message: "Passwords do not match." },
-);
+  return forgotPasswordResetFieldsSchema.refine((values) => values.newPassword === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: t("passwordsMismatch"),
+  });
+}
+
+export const forgotPasswordResetSchema = createForgotPasswordResetSchema();
 
 export const resetForgotPasswordInputSchema = z.object({ challengeId: guidSchema }).and(forgotPasswordResetSchema);
 

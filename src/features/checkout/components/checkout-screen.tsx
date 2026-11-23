@@ -17,7 +17,7 @@ import { useCurrentUserQuery } from "@/features/profile";
 import { useCartQuery } from "../api/use-cart-query";
 import { useCreateCheckoutMutation } from "../api/use-create-checkout-mutation";
 import { calculateOrderTotals } from "../data/checkout-data";
-import { checkoutSchema, type CheckoutFormValues } from "../schemas/checkout.schema";
+import { createCheckoutSchema, type CheckoutFormValues } from "../schemas/checkout.schema";
 import { getNationalPhone } from "../utils/national-phone";
 import { DeliveryAddressFields } from "./address-fields";
 import { BillingSection } from "./billing-section";
@@ -28,13 +28,14 @@ import { EmptyCartScreen } from "./empty-cart-screen";
 
 export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }) {
   const tHeader = useTranslations("Header");
+  const tValidation = useTranslations("Validation");
   const t = useTranslations("Checkout");
   const router = useRouter();
   const cartQuery = useCartQuery();
   const profileQuery = useCurrentUserQuery();
   const checkoutMutation = useCreateCheckoutMutation();
   const form = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema),
+    resolver: zodResolver(createCheckoutSchema(tValidation)),
     defaultValues: {
       fullName: "",
       email: "",

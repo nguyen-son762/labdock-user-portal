@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { BrandMark } from "@/components/shared/brand-mark";
 import { LogoutButton } from "@/features/auth";
+import { Link } from "@/i18n/navigation";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Profile");

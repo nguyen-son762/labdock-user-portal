@@ -10,6 +10,7 @@ import {
 import {
   profilePictureMediaUploadResponseSchema,
   profileResponseSchema,
+  profileUpdateResponseSchema,
   type ProfilePictureMediaUploadResponse,
   type ProfileResponse,
 } from "../schemas/profile-response.schema";
@@ -69,11 +70,7 @@ function mapProfileResponse(input: ProfileResponse): CurrentUser {
   });
 }
 
-function mapUpdateProfileRequest(
-  input: ProfileFormValues,
-  currentUser: CurrentUser,
-  profilePictureMediaId?: string,
-): UpdateProfileRequest {
+function mapUpdateProfileRequest(input: ProfileFormValues, profilePictureMediaId?: string): UpdateProfileRequest {
   const deliveryAddress = {
     address: input.deliveryAddress,
     postalCode: input.postalCode,
@@ -89,8 +86,33 @@ function mapUpdateProfileRequest(
     businessRegistrationNumber: input.businessRegistrationNumber,
     deliveryAddress,
     sameAsDeliveryAddress: input.billingSameAsDelivery,
-    billingAddress: input.billingSameAsDelivery ? deliveryAddress : currentUser.billingAddress,
+    billingAddress: input.billingSameAsDelivery
+      ? deliveryAddress
+      : {
+          address: input.billingAddress ?? "",
+          postalCode: input.billingPostalCode ?? "",
+          country: input.billingCountry ?? "",
+        },
     ...(profilePictureMediaId ? { profilePictureMediaId } : {}),
+  };
+}
+
+function mapProfileUpdateResponse(
+  response: unknown,
+  currentUser: CurrentUser,
+  uploadedPictureUrl?: string,
+): CurrentUser {
+  const input = profileUpdateResponseSchema.parse(response);
+  const mapped = mapProfileResponse({ ...input, memberSince: input.memberSince ?? currentUser.joinedAt });
+  return {
+    ...mapped,
+    avatarUrl:
+      input.profilePictureUrl === undefined
+        ? uploadedPictureUrl
+          ? resolveProfilePictureUrl(uploadedPictureUrl)
+          : currentUser.avatarUrl
+        : mapped.avatarUrl,
+    passwordChangedAt: input.passwordChangedAt === undefined ? currentUser.passwordChangedAt : mapped.passwordChangedAt,
   };
 }
 
@@ -130,10 +152,10 @@ export const profileService = {
     const validatedCurrentUser = currentUserSchema.parse(currentUser);
     const response = await httpClient.put<unknown>(
       "/me/profile",
-      mapUpdateProfileRequest(validatedInput, validatedCurrentUser, profilePictureMediaId),
+      mapUpdateProfileRequest(validatedInput, profilePictureMediaId),
     );
 
-    return mapProfileResponse(profileResponseSchema.parse(response.data));
+    return mapProfileUpdateResponse(response.data, validatedCurrentUser);
   },
 
   async changePassword(input: PasswordFormValues): Promise<void> {
@@ -160,6 +182,6 @@ export const profileService = {
       mapProfilePictureUpdateRequest(validatedCurrentUser, media.id),
     );
 
-    return mapProfileResponse(profileResponseSchema.parse(response.data));
+    return mapProfileUpdateResponse(response.data, validatedCurrentUser, media.url);
   },
 };

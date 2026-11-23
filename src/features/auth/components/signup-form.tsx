@@ -9,9 +9,9 @@ import { getApiErrorMessage } from "@/lib/api-error";
 
 import { useCompleteSignupMutation, useSignupMutation, useVerifySignupMutation } from "../api/use-signup-mutation";
 import {
-  passwordSchema,
-  signupSchema,
-  verificationSchema,
+  createPasswordSchema,
+  createSignupSchema,
+  createVerificationSchema,
   type PasswordValues,
   type SignupChallenge,
   type SignupValues,
@@ -26,6 +26,7 @@ type SignupFlowState = { step: 1 } | { step: 2; challenge: SignupChallenge } | {
 
 export function SignupForm() {
   const tErrors = useTranslations("ApiErrors");
+  const tValidation = useTranslations("Validation");
 
   function getSignupErrorMessage(error: unknown): string | null {
     if (!error) return null;
@@ -38,7 +39,7 @@ export function SignupForm() {
   const verifyMutation = useVerifySignupMutation();
   const completeMutation = useCompleteSignupMutation();
   const accountForm = useForm<SignupValues>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(createSignupSchema(tValidation)),
     defaultValues: {
       company: "",
       fullName: "",
@@ -51,11 +52,11 @@ export function SignupForm() {
     },
   });
   const verificationForm = useForm<VerificationValues>({
-    resolver: zodResolver(verificationSchema),
+    resolver: zodResolver(createVerificationSchema(tValidation)),
     defaultValues: { code: "" },
   });
   const passwordForm = useForm<PasswordValues>({
-    resolver: zodResolver(passwordSchema),
+    resolver: zodResolver(createPasswordSchema(tValidation)),
     defaultValues: { password: "", confirmPassword: "" },
   });
 

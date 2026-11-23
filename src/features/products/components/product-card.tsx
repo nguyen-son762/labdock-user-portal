@@ -22,6 +22,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product, appearance = "default" }: ProductCardProps) {
   const t = useTranslations("ProductCard");
+  const tProduct = useTranslations("Product");
   const tErrors = useTranslations("ApiErrors");
   const addCartItem = useAddProductToCartMutation();
   const sessionQuery = useAuthSessionQuery();
@@ -72,13 +73,13 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
             )}
           >
             {!presentation.outOfStock && presentation.badge === "Best Seller" ? (
-              <Image src="/home/icon/fire.svg" alt="Best Seller" width={12} height={12} />
+              <Image src="/home/icon/fire.svg" alt="" width={12} height={12} />
             ) : null}
             {presentation.outOfStock
               ? t("outOfStock")
               : presentation.badge === "Best Seller"
                 ? t("bestSeller")
-                : presentation.badge}
+                : t("new")}
           </span>
         ) : null}
         {presentation.discount ? (
@@ -121,7 +122,7 @@ export function ProductCard({ product, appearance = "default" }: ProductCardProp
             </Link>
           ) : (
             <>
-              {presentation.price}
+              {presentation.priceVisible ? presentation.price : tProduct("contactForPrice")}
               {presentation.originalPrice ? (
                 <span className="text-base font-normal text-[#a3abbd] line-through">{presentation.originalPrice}</span>
               ) : null}

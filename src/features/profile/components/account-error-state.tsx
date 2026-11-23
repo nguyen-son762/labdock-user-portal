@@ -1,11 +1,11 @@
 "use client";
 
 import axios from "axios";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 export function AccountErrorState({ error, onRetry }: { error: unknown; onRetry: () => void }) {

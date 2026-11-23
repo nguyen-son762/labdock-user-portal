@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createUuid } from "@/lib/uuid";
 
 import { useSubmitContactMutation } from "../api/use-submit-contact-mutation";
-import { contactFormSchema, type ContactFormValues, type InquiryType } from "../schemas/contact.schema";
+import { createContactFormSchema, type ContactFormValues, type InquiryType } from "../schemas/contact.schema";
 import { ContactInfoFields } from "./contact-info-fields";
 import { QuoteProductsTable } from "./quote-products-table";
 
@@ -43,9 +43,10 @@ function createDefaultValues(inquiryType: InquiryType): ContactFormValues {
 
 export function ContactForm({ initialType }: { initialType: InquiryType }) {
   const t = useTranslations("Contact");
+  const tValidation = useTranslations("Validation");
   const mutation = useSubmitContactMutation();
   const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactFormSchema),
+    resolver: zodResolver(createContactFormSchema(tValidation)),
     defaultValues: createDefaultValues(initialType),
   });
   const inquiryType = form.watch("inquiryType");

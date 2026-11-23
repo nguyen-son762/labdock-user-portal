@@ -22,6 +22,7 @@
     "homeDescription": "Source verified laboratory equipment, chemicals, reagents and consumables from trusted research suppliers."
   },
   "Header": {
+    "breadcrumb": "Breadcrumb",
     "home": "Home",
     "about": "About us",
     "contact": "Contact us",
@@ -179,6 +180,7 @@
     "opportunitiesLabel": "Explore Labdock opportunities"
   },
   "ProductCard": {
+    "new": "New",
     "learnMore": "Learn more",
     "buyNow": "Buy now",
     "addToCart": "Add {name} to cart",
@@ -187,6 +189,12 @@
     "outOfStock": "Out of stock",
     "bestSeller": "Best Seller",
     "loginToViewPrice": "Login to view Price"
+  },
+  "PaymentMethods": {
+    "label": "Accepted payment methods",
+    "visa": "Visa",
+    "payNow": "PayNow",
+    "mastercard": "Mastercard"
   },
   "ServiceGuarantees": {
     "label": "Labdock service guarantees",
@@ -612,6 +620,8 @@
     "removeItemError": "We could not remove this item. Please try again."
   },
   "Profile": {
+    "memberSince": "Member since {date}",
+    "avatarAlt": "{name}'s profile",
     "title": "My profile",
     "loading": "Loading profile",
     "accountInfo": "Account information",
@@ -634,6 +644,8 @@
     "malaysia": "Malaysia",
     "vietnam": "Vietnam",
     "sameAsDelivery": "Same as delivery address",
+    "billingPostalCode": "Billing postal code",
+    "billingCountry": "Billing country",
     "differentBilling": "Use a different billing address",
     "profileUpdated": "Profile updated.",
     "cancel": "Cancel",
@@ -731,6 +743,9 @@
     "categoryCountUnavailable": "Count unavailable"
   },
   "Product": {
+    "loginRequiredTitle": "Login required",
+    "loginRequiredDescription": "Please log in to add products to your cart or buy now.",
+    "continueBrowsing": "Continue browsing",
     "relatedProducts": "Related Products",
     "recentViewed": "Recent viewed",
     "noDescription": "No description is available.",
@@ -889,5 +904,54 @@
     "featuredImage": "{title} featured image",
     "imageAlt": "Modern laboratory workspace {index}",
     "share": "Share this article"
+  },
+  "Validation": {
+    "signupFullNameRequired": "Please enter your full name.",
+    "emailRequired": "Please enter your email address.",
+    "emailInvalid": "Enter a valid email address.",
+    "fullNameRequired": "Enter your full name.",
+    "fullNameMinLength": "Full name must have at least 2 characters.",
+    "fullNameMaxLength": "Full name must be no more than {max} characters.",
+    "passwordMinLength": "Password must be at least 8 characters.",
+    "confirmPasswordRequired": "Please confirm your password.",
+    "passwordsMismatch": "Passwords do not match.",
+    "verificationCodeInvalid": "Enter the 6-digit verification code.",
+    "companyRequired": "Please enter your company name.",
+    "profileCompanyRequired": "Company name is required.",
+    "companyMaxLength": "Company name must be no more than {max} characters.",
+    "callingCodeRequired": "Please select a calling code.",
+    "countryCodeRequired": "Select a country code.",
+    "phoneInvalid": "Enter a valid phone number.",
+    "phoneMaxLength": "Phone number must be no more than {max} characters.",
+    "countryRequired": "Select a country.",
+    "regionRequired": "Select a region.",
+    "signupRegionRequired": "Please enter your region.",
+    "addressRequired": "Please enter your address.",
+    "deliveryAddressRequired": "Enter a complete delivery address.",
+    "profileDeliveryAddressRequired": "Delivery address is required.",
+    "deliveryAddressMaxLength": "Delivery address must be no more than {max} characters.",
+    "cityRequired": "Enter a city.",
+    "billingAddressMaxLength": "Billing address must be no more than {max} characters.",
+    "billingAddressRequired": "Enter a complete billing address.",
+    "billingPostalCodeInvalid": "Postal code must contain 6 digits.",
+    "postalCodeRequired": "Postal code is required.",
+    "postalCodeMaxLength": "Postal code must be no more than {max} characters.",
+    "companyPhoneInvalid": "Enter a valid company phone number.",
+    "companyPhoneMaxLength": "Company phone number must be no more than {max} characters.",
+    "businessRegistrationInvalid": "Enter a valid business registration number.",
+    "businessRegistrationMaxLength": "Business registration number must be no more than {max} characters.",
+    "currentPasswordMinLength": "Current password must have at least 8 characters.",
+    "newPasswordMinLength": "New password must have at least 8 characters.",
+    "newPasswordConfirmation": "Confirm your new password.",
+    "budgetMaxLength": "Budget range is too long.",
+    "subjectMaxLength": "Subject is too long.",
+    "messageMaxLength": "Message must be 2,000 characters or fewer.",
+    "productsMaxLength": "You can add up to 5 products.",
+    "productRequired": "Add at least one product.",
+    "productNameRequired": "Enter a product name.",
+    "productSelectionRequired": "Select a product from the search results.",
+    "variantRequired": "Select a size.",
+    "quantityInvalid": "Enter a valid quantity.",
+    "paymentMethodRequired": "Select a payment method."
   }
 }

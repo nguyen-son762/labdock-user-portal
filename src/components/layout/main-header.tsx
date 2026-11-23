@@ -173,17 +173,19 @@ export function MainHeader({
               </Link>
             ))}
           </nav>
-          <div className="hidden h-5 items-center sm:flex">
-            <a href="mailto:info@i-dna.sg" className="inline-flex items-center gap-1.5">
-              <Sms className="size-3.5" variant="Bold" aria-hidden="true" />
-              info@i-dna.sg
-            </a>
-            <span className="mx-5 h-5 w-px bg-white/20" aria-hidden="true" />
+          <div className="flex h-9 shrink-0 items-center sm:h-5">
+            <div className="hidden items-center sm:flex">
+              <a href="mailto:info@i-dna.sg" className="inline-flex items-center gap-1.5">
+                <Sms className="size-3.5" variant="Bold" aria-hidden="true" />
+                info@i-dna.sg
+              </a>
+              <span className="mx-5 h-5 w-px bg-white/20" aria-hidden="true" />
+            </div>
             <LanguageSwitcher />
             <Button
               type="button"
               variant="ghost"
-              className="ml-5 h-auto gap-1.5 rounded p-0 font-medium text-white hover:bg-transparent hover:text-white hover:opacity-80"
+              className="ml-5 hidden h-auto gap-1.5 rounded p-0 font-medium text-white hover:bg-transparent hover:text-white hover:opacity-80 sm:inline-flex"
             >
               <span aria-hidden="true">🇸🇬</span> SGD <ArrowDown2 className="size-3.5" aria-hidden="true" />
             </Button>

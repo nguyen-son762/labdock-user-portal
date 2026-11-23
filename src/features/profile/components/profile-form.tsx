@@ -15,14 +15,23 @@ import { Input } from "@/components/ui/input";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 import { useUpdateProfileMutation } from "../api/use-update-profile-mutation";
-import { profileFormSchema, type ProfileFormValues } from "../schemas/profile-form.schema";
+import { createProfileFormSchema, type ProfileFormValues } from "../schemas/profile-form.schema";
 import type { CurrentUser } from "../schemas/user.schema";
 
-type FieldName = Exclude<keyof ProfileFormValues, "country" | "billingSameAsDelivery">;
+type FieldName = Exclude<keyof ProfileFormValues, "country" | "billingCountry" | "billingSameAsDelivery">;
 
 const fieldLabelKeys: Record<
   FieldName,
-  "fullName" | "phone" | "email" | "companyName" | "companyPhone" | "businessRegistration" | "address" | "postalCode"
+  | "fullName"
+  | "phone"
+  | "email"
+  | "companyName"
+  | "companyPhone"
+  | "businessRegistration"
+  | "address"
+  | "postalCode"
+  | "billingAddress"
+  | "billingPostalCode"
 > = {
   fullName: "fullName",
   phone: "phone",
@@ -32,6 +41,8 @@ const fieldLabelKeys: Record<
   businessRegistrationNumber: "businessRegistration",
   deliveryAddress: "address",
   postalCode: "postalCode",
+  billingAddress: "billingAddress",
+  billingPostalCode: "billingPostalCode",
 };
 const fields: Array<{ name: FieldName; required?: boolean; wide?: boolean; type?: "email" | "tel" }> = [
   { name: "fullName", required: true },
@@ -42,6 +53,8 @@ const fields: Array<{ name: FieldName; required?: boolean; wide?: boolean; type?
   { name: "businessRegistrationNumber", wide: true },
   { name: "deliveryAddress", required: true, wide: true },
   { name: "postalCode", required: true },
+  { name: "billingAddress", required: true, wide: true },
+  { name: "billingPostalCode", required: true },
 ];
 
 function SectionTitle({ children }: { children: string }) {
@@ -60,17 +73,23 @@ function toFormValues(user: CurrentUser): ProfileFormValues {
     postalCode: user.postalCode,
     country: user.country,
     billingSameAsDelivery: user.billingSameAsDelivery,
+    billingAddress: user.billingAddress.address,
+    billingPostalCode: user.billingAddress.postalCode,
+    billingCountry: user.billingAddress.country,
   };
 }
 
 export function ProfileForm({ user, onCancel }: { user: CurrentUser; onCancel: () => void }) {
   const tErrors = useTranslations("ApiErrors");
+  const tValidation = useTranslations("Validation");
   const t = useTranslations("Profile");
   const mutation = useUpdateProfileMutation();
   const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
+    resolver: zodResolver(createProfileFormSchema(tValidation)),
     defaultValues: toFormValues(user),
   });
+
+  const sameAsDelivery = form.watch("billingSameAsDelivery");
 
   function handleSubmit(values: ProfileFormValues) {
     mutation.mutate(values, { onSuccess: (updated) => form.reset(toFormValues(updated)) });
@@ -91,6 +110,32 @@ export function ProfileForm({ user, onCancel }: { user: CurrentUser; onCancel: (
             </FormLabel>
             <FormControl>
               <Input type={config.type ?? "text"} className="h-10 border-[#dde2e8] bg-white" {...field} />
+            </FormControl>
+            <FormMessage className="text-xs" />
+          </FormItem>
+        )}
+      />
+    );
+  }
+
+  function renderCountryField(name: "country" | "billingCountry") {
+    return (
+      <FormField
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+          <FormItem className="space-y-1.5">
+            <FormLabel className="text-xs text-[#051a50]">
+              {t(name === "country" ? "country" : "billingCountry")} <span className="text-red-600">*</span>
+            </FormLabel>
+            <FormControl>
+              <CountrySelect
+                {...field}
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                placeholder={t("selectCountry")}
+                className="h-10 border-[#dde2e8] bg-white"
+              />
             </FormControl>
             <FormMessage className="text-xs" />
           </FormItem>
@@ -134,26 +179,7 @@ export function ProfileForm({ user, onCancel }: { user: CurrentUser; onCancel: (
             <SectionTitle>{t("deliveryAddress")}</SectionTitle>
             {renderField("deliveryAddress")}
             {renderField("postalCode")}
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel className="text-xs text-[#051a50]">
-                    {t("country")} <span className="text-red-600">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <CountrySelect
-                      {...field}
-                      onValueChange={field.onChange}
-                      placeholder={t("selectCountry")}
-                      className="h-10 border-[#dde2e8] bg-white"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
+            {renderCountryField("country")}
 
             <SectionTitle>{t("billingAddress")}</SectionTitle>
             <FormField
@@ -168,6 +194,13 @@ export function ProfileForm({ user, onCancel }: { user: CurrentUser; onCancel: (
                 </FormItem>
               )}
             />
+            {!sameAsDelivery ? (
+              <>
+                {renderField("billingAddress")}
+                {renderField("billingPostalCode")}
+                {renderCountryField("billingCountry")}
+              </>
+            ) : null}
           </div>
           <div className="flex justify-end gap-3 border-t border-[#dde2e8] px-4 py-3">
             <Button

@@ -41,6 +41,7 @@ const certifications = ["S5G Certified", "CSBE Certified", "ISO Certified"] as c
 
 export function SiteFooter() {
   const t = useTranslations("Footer");
+  const tPayments = useTranslations("PaymentMethods");
 
   return (
     <footer id="contact-us" className="border-t border-[#d9e4ee] bg-white text-[#5e6375]">
@@ -111,9 +112,19 @@ export function SiteFooter() {
             </a>
           </address>
           <p className="mt-8 text-sm font-semibold text-[#164990]">{t("payment")}</p>
-          <div className="mt-3 flex gap-2" aria-label="Accepted payment methods">
-            {["visa", "pay_now", "pay"].map((payment) => (
-              <Image key={payment} src={`/icon/${payment}.svg`} alt={payment} width={40} height={28} />
+          <div className="mt-3 flex gap-2" aria-label={tPayments("label")}>
+            {[
+              { image: "visa", label: tPayments("visa") },
+              { image: "pay_now", label: tPayments("payNow") },
+              { image: "pay", label: tPayments("mastercard") },
+            ].map((payment) => (
+              <Image
+                key={payment.image}
+                src={`/icon/${payment.image}.svg`}
+                alt={payment.label}
+                width={40}
+                height={28}
+              />
             ))}
           </div>
         </div>

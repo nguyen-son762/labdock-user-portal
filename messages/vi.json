@@ -22,6 +22,7 @@
     "homeDescription": "Tìm kiếm thiết bị, hóa chất, thuốc thử và vật tư phòng thí nghiệm từ các nhà cung cấp nghiên cứu đáng tin cậy."
   },
   "Header": {
+    "breadcrumb": "Đường dẫn",
     "home": "Trang chủ",
     "about": "Về chúng tôi",
     "contact": "Liên hệ",
@@ -179,6 +180,7 @@
     "opportunitiesLabel": "Khám phá cơ hội cùng Labdock"
   },
   "ProductCard": {
+    "new": "Mới",
     "learnMore": "Tìm hiểu thêm",
     "buyNow": "Mua ngay",
     "addToCart": "Thêm {name} vào giỏ hàng",
@@ -187,6 +189,12 @@
     "outOfStock": "Hết hàng",
     "bestSeller": "Bán chạy",
     "loginToViewPrice": "Đăng nhập để xem giá"
+  },
+  "PaymentMethods": {
+    "label": "Phương thức thanh toán được chấp nhận",
+    "visa": "Thẻ Visa",
+    "payNow": "Thanh toán qua PayNow",
+    "mastercard": "Thẻ Mastercard"
   },
   "ServiceGuarantees": {
     "label": "Cam kết dịch vụ Labdock",
@@ -612,6 +620,8 @@
     "removeItemError": "Không thể xóa sản phẩm này. Vui lòng thử lại."
   },
   "Profile": {
+    "memberSince": "Thành viên từ {date}",
+    "avatarAlt": "Ảnh hồ sơ của {name}",
     "title": "Hồ sơ của tôi",
     "loading": "Đang tải hồ sơ",
     "accountInfo": "Thông tin tài khoản",
@@ -634,6 +644,8 @@
     "malaysia": "Malaysia",
     "vietnam": "Việt Nam",
     "sameAsDelivery": "Giống địa chỉ giao hàng",
+    "billingPostalCode": "Mã bưu chính thanh toán",
+    "billingCountry": "Quốc gia thanh toán",
     "differentBilling": "Dùng địa chỉ thanh toán khác",
     "profileUpdated": "Đã cập nhật hồ sơ.",
     "cancel": "Hủy",
@@ -731,6 +743,9 @@
     "categoryCountUnavailable": "Chưa tải được số lượng"
   },
   "Product": {
+    "loginRequiredTitle": "Yêu cầu đăng nhập",
+    "loginRequiredDescription": "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng hoặc mua ngay.",
+    "continueBrowsing": "Tiếp tục xem sản phẩm",
     "relatedProducts": "Sản phẩm liên quan",
     "recentViewed": "Đã xem gần đây",
     "noDescription": "Chưa có mô tả sản phẩm.",
@@ -889,5 +904,54 @@
     "featuredImage": "Ảnh nổi bật: {title}",
     "imageAlt": "Không gian phòng thí nghiệm hiện đại {index}",
     "share": "Chia sẻ bài viết"
+  },
+  "Validation": {
+    "signupFullNameRequired": "Vui lòng nhập họ và tên.",
+    "emailRequired": "Vui lòng nhập địa chỉ email.",
+    "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ.",
+    "fullNameRequired": "Vui lòng nhập họ và tên.",
+    "fullNameMinLength": "Họ và tên phải có ít nhất 2 ký tự.",
+    "fullNameMaxLength": "Họ và tên không được vượt quá {max} ký tự.",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự.",
+    "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu.",
+    "passwordsMismatch": "Mật khẩu xác nhận không khớp.",
+    "verificationCodeInvalid": "Vui lòng nhập mã xác minh gồm 6 chữ số.",
+    "companyRequired": "Vui lòng nhập tên công ty.",
+    "profileCompanyRequired": "Vui lòng nhập tên công ty.",
+    "companyMaxLength": "Tên công ty không được vượt quá {max} ký tự.",
+    "callingCodeRequired": "Vui lòng chọn mã vùng điện thoại.",
+    "countryCodeRequired": "Vui lòng chọn mã quốc gia.",
+    "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
+    "phoneMaxLength": "Số điện thoại không được vượt quá {max} ký tự.",
+    "countryRequired": "Vui lòng chọn quốc gia.",
+    "regionRequired": "Vui lòng chọn khu vực.",
+    "signupRegionRequired": "Vui lòng nhập khu vực.",
+    "addressRequired": "Vui lòng nhập địa chỉ.",
+    "deliveryAddressRequired": "Vui lòng nhập đầy đủ địa chỉ giao hàng.",
+    "profileDeliveryAddressRequired": "Vui lòng nhập địa chỉ giao hàng.",
+    "deliveryAddressMaxLength": "Địa chỉ giao hàng không được vượt quá {max} ký tự.",
+    "cityRequired": "Vui lòng nhập tỉnh/thành phố.",
+    "billingAddressMaxLength": "Địa chỉ thanh toán không được vượt quá {max} ký tự.",
+    "billingAddressRequired": "Vui lòng nhập đầy đủ địa chỉ thanh toán.",
+    "billingPostalCodeInvalid": "Mã bưu chính phải gồm 6 chữ số.",
+    "postalCodeRequired": "Vui lòng nhập mã bưu chính.",
+    "postalCodeMaxLength": "Mã bưu chính không được vượt quá {max} ký tự.",
+    "companyPhoneInvalid": "Vui lòng nhập số điện thoại công ty hợp lệ.",
+    "companyPhoneMaxLength": "Số điện thoại công ty không được vượt quá {max} ký tự.",
+    "businessRegistrationInvalid": "Vui lòng nhập mã số đăng ký kinh doanh hợp lệ.",
+    "businessRegistrationMaxLength": "Mã số đăng ký kinh doanh không được vượt quá {max} ký tự.",
+    "currentPasswordMinLength": "Mật khẩu hiện tại phải có ít nhất 8 ký tự.",
+    "newPasswordMinLength": "Mật khẩu mới phải có ít nhất 8 ký tự.",
+    "newPasswordConfirmation": "Vui lòng xác nhận mật khẩu mới với ít nhất 8 ký tự.",
+    "budgetMaxLength": "Khoảng ngân sách không được vượt quá {max} ký tự.",
+    "subjectMaxLength": "Tiêu đề không được vượt quá {max} ký tự.",
+    "messageMaxLength": "Nội dung tin nhắn không được vượt quá {max} ký tự.",
+    "productsMaxLength": "Bạn chỉ có thể thêm tối đa {max} sản phẩm.",
+    "productRequired": "Vui lòng thêm ít nhất một sản phẩm.",
+    "productNameRequired": "Vui lòng nhập tên sản phẩm.",
+    "productSelectionRequired": "Vui lòng chọn sản phẩm từ kết quả tìm kiếm.",
+    "variantRequired": "Vui lòng chọn quy cách.",
+    "quantityInvalid": "Vui lòng nhập số lượng hợp lệ.",
+    "paymentMethodRequired": "Vui lòng chọn phương thức thanh toán."
   }
 }

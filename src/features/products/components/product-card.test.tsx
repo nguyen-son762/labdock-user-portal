@@ -126,6 +126,20 @@ describe("ProductCard", () => {
     expect(screen.queryByRole("button", { name: `Add ${product.name} to cart` })).not.toBeInTheDocument();
   });
 
+  it("translates hidden prices and the new badge in Vietnamese", async () => {
+    vi.spyOn(authService, "getSession").mockResolvedValue(SIGNED_IN_SESSION);
+    renderWithProviders(<ProductCard product={{ ...product, priceVisible: false }} />, { locale: "vi" });
+
+    expect(await screen.findByText("Liên hệ để biết giá")).toBeInTheDocument();
+    expect(screen.getByText("Mới")).toBeInTheDocument();
+    expect(screen.queryByText("Contact for price")).not.toBeInTheDocument();
+    expect(screen.queryByText("New")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: `Tìm hiểu thêm: ${product.name}` })).toHaveAttribute(
+      "href",
+      "/vi/products/round-bottom-flask",
+    );
+  });
+
   it("loads detail and adds its first variant instead of the variant from the product card", async () => {
     const addSpy = vi.spyOn(cartService, "add").mockResolvedValue([]);
     const firstVariantId = "66666666-6666-6666-6666-666666666666";

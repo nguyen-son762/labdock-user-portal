@@ -24,6 +24,43 @@ describe("profileFormSchema", () => {
     expect(profileFormSchema.safeParse({ ...validProfile, email: "invalid" }).success).toBe(false);
   });
 
+  it("requires a separate billing address only when delivery is not reused", () => {
+    expect(profileFormSchema.safeParse(validProfile).success).toBe(true);
+    expect(profileFormSchema.safeParse({ ...validProfile, billingSameAsDelivery: false }).success).toBe(false);
+    expect(
+      profileFormSchema.safeParse({
+        ...validProfile,
+        billingSameAsDelivery: false,
+        billingAddress: "2 Le Loi",
+        billingPostalCode: "700001",
+        billingCountry: "VN",
+      }).success,
+    ).toBe(true);
+  });
+
+  it.each([
+    ["billingAddress", "A".repeat(4), false],
+    ["billingAddress", "A".repeat(5), true],
+    ["billingAddress", "A".repeat(200), true],
+    ["billingAddress", "A".repeat(201), false],
+    ["billingPostalCode", "123", false],
+    ["billingPostalCode", "1234", true],
+    ["billingPostalCode", "1".repeat(12), true],
+    ["billingPostalCode", "1".repeat(13), false],
+    ["billingCountry", "  ", false],
+  ])("validates separate %s boundaries", (field, value, valid) => {
+    expect(
+      profileFormSchema.safeParse({
+        ...validProfile,
+        billingSameAsDelivery: false,
+        billingAddress: "2 Le Loi",
+        billingPostalCode: "700001",
+        billingCountry: "VN",
+        [field]: value,
+      }).success,
+    ).toBe(valid);
+  });
+
   it("allows company phone and business registration number to be empty", () => {
     const result = profileFormSchema.parse({
       ...validProfile,

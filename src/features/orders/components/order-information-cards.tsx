@@ -13,6 +13,7 @@ import { parseOrderDeliveryAddress } from "../utils/parse-order-delivery-address
 
 export function OrderInformationCards({ order }: { order: OrderDetail }) {
   const t = useTranslations("Orders");
+  const tPayments = useTranslations("PaymentMethods");
   const address = parseOrderDeliveryAddress(order.shippingSnapshotJson);
   const pending = isOrderAwaitingPayment(order.status);
   const cancelled = ["cancelled", "canceled"].includes(order.status.toLowerCase());
@@ -46,7 +47,13 @@ export function OrderInformationCards({ order }: { order: OrderDetail }) {
             {pending || cancelled ? (
               <CardIcon size={28} className="shrink-0 text-[#1f5fa8]" aria-hidden="true" />
             ) : (
-              <Image src="/orders/visa.svg" alt="Visa" width={28} height={20} className="mt-0.5 shrink-0" />
+              <Image
+                src="/orders/visa.svg"
+                alt={tPayments("visa")}
+                width={28}
+                height={20}
+                className="mt-0.5 shrink-0"
+              />
             )}
             <div className="space-y-1.5">
               <p className="text-base font-semibold text-[#051a50]">

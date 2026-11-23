@@ -1,6 +1,7 @@
 import { ArrowRight2 } from "iconsax-reactjs";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
 
 type BreadcrumbItem = {
@@ -14,8 +15,9 @@ type BreadcrumbsProps = {
 };
 
 export function Breadcrumbs({ items, appearance = "current-primary" }: BreadcrumbsProps) {
+  const t = useTranslations("Header");
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-[#164990] font-medium">
+    <nav aria-label={t("breadcrumb")} className="flex flex-wrap items-center gap-2 text-sm text-[#164990] font-medium">
       {items.map((item, index) => (
         <span key={item.label} className="inline-flex items-center gap-2">
           {index > 0 ? <ArrowRight2 className="size-3.5 text-[#a3abbd]" aria-hidden="true" /> : null}

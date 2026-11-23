@@ -178,8 +178,14 @@ describe("profileService", () => {
     );
   });
 
-  it("preserves the current billing address when it differs from delivery", async () => {
-    const input = { ...updateInput, billingSameAsDelivery: false };
+  it("sends the entered billing address when it differs from delivery", async () => {
+    const input = {
+      ...updateInput,
+      billingSameAsDelivery: false,
+      billingAddress: "99 New Billing Street",
+      billingPostalCode: "10000",
+      billingCountry: "US",
+    };
     httpClient.put.mockResolvedValue({
       data: { ...profileResponse, sameAsDeliveryAddress: false, billingAddress: currentUser.billingAddress },
     });
@@ -190,15 +196,42 @@ describe("profileService", () => {
       "/me/profile",
       expect.objectContaining({
         sameAsDeliveryAddress: false,
-        billingAddress: currentUser.billingAddress,
+        billingAddress: {
+          address: input.billingAddress,
+          postalCode: input.billingPostalCode,
+          country: input.billingCountry,
+        },
       }),
     );
+  });
+
+  it("accepts the PUT response without GET-only metadata and retains existing profile metadata", async () => {
+    const updated = {
+      ...profileResponse,
+      memberSince: undefined,
+      passwordChangedAt: undefined,
+      profilePictureUrl: undefined,
+    };
+    httpClient.put.mockResolvedValue({ data: { ...updated, profilePictureMediaId: uploadedMedia.id } });
+    const result = await profileService.updateCurrent(updateInput, currentUser);
+    expect(result).toMatchObject({
+      joinedAt: currentUser.joinedAt,
+      passwordChangedAt: currentUser.passwordChangedAt,
+      avatarUrl: currentUser.avatarUrl,
+    });
   });
 
   it("rejects an invalid update response at the API boundary", async () => {
     httpClient.put.mockResolvedValue({ data: { ...profileResponse, email: "invalid" } });
 
     await expect(profileService.updateCurrent(updateInput, currentUser)).rejects.toThrow();
+  });
+
+  it("does not send a separate billing address when required inputs are missing", async () => {
+    await expect(
+      profileService.updateCurrent({ ...updateInput, billingSameAsDelivery: false }, currentUser),
+    ).rejects.toThrow();
+    expect(httpClient.put).not.toHaveBeenCalled();
   });
 
   it("changes the authenticated user's password with the API contract", async () => {
@@ -232,12 +265,23 @@ describe("profileService", () => {
     expect(formData.get("file")).toBe(file);
   });
 
-  it("saves the uploaded media id on the profile after the media upload succeeds", async () => {
+  it.each([true, false])("saves the uploaded media id with metadata in PUT response: %s", async (includesMetadata) => {
     const file = new File(["avatar"], "avatar.png", { type: "image/png" });
     httpClient.post.mockResolvedValue({ data: uploadedMedia });
-    httpClient.put.mockResolvedValue({ data: profileResponse });
+    httpClient.put.mockResolvedValue({
+      data: includesMetadata
+        ? profileResponse
+        : {
+            ...profileResponse,
+            memberSince: undefined,
+            passwordChangedAt: undefined,
+            profilePictureUrl: undefined,
+            profilePictureMediaId: uploadedMedia.id,
+          },
+    });
 
-    await profileService.updateAvatar(file, currentUser);
+    const result = await profileService.updateAvatar(file, currentUser);
+    expect(result.avatarUrl).toContain(includesMetadata ? profileResponse.profilePictureUrl : uploadedMedia.url);
 
     expect(httpClient.post).toHaveBeenCalledWith("/me/profile/media", expect.any(FormData), expect.any(Object));
     expect(httpClient.put).toHaveBeenCalledWith("/me/profile", {

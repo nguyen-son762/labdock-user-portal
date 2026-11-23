@@ -109,18 +109,27 @@ export const orderDetailSchema = orderSummarySchema.omit({ subtotal: true, tax: 
     .union([z.literal(""), z.url({ protocol: /^https?$/ })])
     .nullish()
     .transform((value) => value ?? ""),
-  invoice: z.object({
-    orderNumber: z.string().min(1),
-    createdAt: dateTimeSchema,
-    buyerEmail: z.string().min(1),
-    lines: z.array(orderInvoiceLineSchema),
-    subtotal: z.number().nonnegative(),
-    tax: z.number().nonnegative(),
-    platformFee: z.number().nonnegative(),
-    total: z.number().nonnegative(),
-    currency: currencySchema,
-    status: orderStatusSchema,
-  }),
+  invoice: z.preprocess(
+    (invoice) => {
+      // The API now calls the collection orderItems; keep lines as the view model and accept legacy responses.
+      if (typeof invoice === "object" && invoice !== null && "orderItems" in invoice) {
+        return { ...invoice, lines: invoice.orderItems };
+      }
+      return invoice;
+    },
+    z.object({
+      orderNumber: z.string().min(1),
+      createdAt: dateTimeSchema,
+      buyerEmail: z.string().min(1),
+      lines: z.array(orderInvoiceLineSchema),
+      subtotal: z.number().nonnegative(),
+      tax: z.number().nonnegative(),
+      platformFee: z.number().nonnegative(),
+      total: z.number().nonnegative(),
+      currency: currencySchema,
+      status: orderStatusSchema,
+    }),
+  ),
 });
 
 export const orderFiltersSchema = z.object({
