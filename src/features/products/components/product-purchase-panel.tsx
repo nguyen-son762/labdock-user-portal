@@ -29,7 +29,7 @@ function ProductFacts({ product }: { product: Product }) {
   const t = useTranslations("Product");
   const iconClassName = "size-4 shrink-0 text-[#868da5]";
   const originCountry = product.origin ? findCountry(product.origin) : undefined;
-  const facts: Array<{ label: string; value: string; icon: ReactNode; valuePrefix?: ReactNode }> = [
+  const facts: Array<{ label: string; value: string; icon: ReactNode; valuePrefix?: ReactNode; title?: string }> = [
     {
       label: t("brand"),
       value: product.brandName,
@@ -42,7 +42,8 @@ function ProductFacts({ product }: { product: Product }) {
     },
     {
       label: t("origin"),
-      value: originCountry?.name ?? (product.origin || t("notAvailable")),
+      value: originCountry?.alpha3 ?? (product.origin || t("notAvailable")),
+      title: originCountry?.name,
       icon: <LocationTick className={iconClassName} aria-hidden="true" />,
       valuePrefix: originCountry ? <CountryFlag country={originCountry} className="h-3 w-4" /> : undefined,
     },
@@ -55,13 +56,15 @@ function ProductFacts({ product }: { product: Product }) {
 
   return (
     <dl className="grid grid-cols-1 gap-x-4 gap-y-2 border-y border-[#e9eaeb] py-4 sm:grid-cols-2">
-      {facts.map(({ label, value, icon, valuePrefix }) => (
+      {facts.map(({ label, value, icon, valuePrefix, title }) => (
         <div key={label} className="flex min-w-0 items-center gap-1 text-sm">
           {icon}
           <dt className="shrink-0 text-[#868da5]">{label}</dt>
           <dd className="flex min-w-0 items-center gap-1 font-semibold text-[#051a50]">
             {valuePrefix}
-            <span className="truncate">{value}</span>
+            <span className="truncate" title={title}>
+              {value}
+            </span>
           </dd>
         </div>
       ))}

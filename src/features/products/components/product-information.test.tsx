@@ -56,7 +56,7 @@ const product: Product = {
 };
 
 describe("ProductInformation", () => {
-  it("renders API specifications and product documents", async () => {
+  it("renders API specifications and product documents in the Documents tab", async () => {
     const user = userEvent.setup();
     renderWithProviders(<ProductInformation product={product} descriptionHtml={product.description} />);
 
@@ -67,11 +67,38 @@ describe("ProductInformation", () => {
     specificationsTab.focus();
     await user.keyboard("{ArrowRight}");
 
-    expect(screen.getByRole("tab", { name: "References" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Documents" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("link", { name: /Safety sheet/ })).toHaveAttribute(
       "href",
       "https://uat-api-labdock.365studio.vn/media/public/safety-sheet.pdf",
     );
+    expect(screen.queryByRole("link", { name: /PubChem entry/ })).not.toBeInTheDocument();
+  });
+
+  it("shows the documents empty state when the product has no documents", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ProductInformation product={{ ...product, documents: [] }} descriptionHtml={product.description} />,
+    );
+    await user.click(screen.getByRole("tab", { name: "Documents" }));
+    expect(screen.getByText("No product documents are available.")).toBeVisible();
+  });
+
+  it("does not show documents in the References tab", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <ProductInformation product={{ ...product, references: [] }} descriptionHtml={product.description} />,
+    );
+    await user.click(screen.getByRole("tab", { name: "References" }));
+    const panel = document.getElementById("product-panel-references");
+    expect(panel).toHaveTextContent("No references are available.");
+    expect(panel).not.toHaveTextContent("Safety sheet");
+  });
+
+  it("renders only safe references in the References tab", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProductInformation product={product} descriptionHtml={product.description} />);
+    await user.click(screen.getByRole("tab", { name: "References" }));
     expect(screen.getByRole("link", { name: /PubChem entry/ })).toHaveAttribute(
       "href",
       "https://pubchem.ncbi.nlm.nih.gov/compound/5280723",
@@ -79,27 +106,6 @@ describe("ProductInformation", () => {
     expect(screen.queryByRole("link", { name: /Unsafe link/ })).not.toBeInTheDocument();
   });
 
-  it("shows the empty state only when there are no references or documents", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(
-      <ProductInformation
-        product={{ ...product, documents: [], references: [] }}
-        descriptionHtml={product.description}
-      />,
-    );
-    await user.click(screen.getByRole("tab", { name: "References" }));
-    expect(screen.getByText("No product documents are available.")).toBeVisible();
-  });
-
-  it("renders references when the product has no documents", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(
-      <ProductInformation product={{ ...product, documents: [] }} descriptionHtml={product.description} />,
-    );
-    await user.click(screen.getByRole("tab", { name: "References" }));
-    expect(screen.getByRole("link", { name: /PubChem entry/ })).toHaveAttribute("target", "_blank");
-    expect(screen.queryByText("No product documents are available.")).not.toBeInTheDocument();
-  });
   it("PDP-020 SEO-008 renders every tab panel and preserves its accessible relationship", () => {
     renderWithProviders(<ProductInformation product={product} descriptionHtml={product.description} />);
     for (const tab of screen.getAllByRole("tab")) {

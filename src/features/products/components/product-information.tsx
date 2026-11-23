@@ -10,13 +10,19 @@ import { cn } from "@/lib/class-names";
 import type { Product } from "../products.types";
 import { resolveProductMediaUrl, toSafeExternalUrl } from "../utils/product-display";
 
-const tabs = ["Description", "Specifications", "References"] as const;
+const tabs = ["Description", "Specifications", "Documents", "References"] as const;
 type Tab = (typeof tabs)[number];
 
 export function ProductInformation({ product, descriptionHtml }: { product: Product; descriptionHtml: string }) {
   const t = useTranslations("Product");
   const [activeTab, setActiveTab] = useState<Tab>("Specifications");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tabLabels: Record<Tab, string> = {
+    Description: t("descriptionTab"),
+    Specifications: t("specificationsTab"),
+    Documents: t("documentsTab"),
+    References: t("referencesTab"),
+  };
   const references = [...product.references]
     .sort((left, right) => left.sortOrder - right.sortOrder)
     .flatMap((reference) => {
@@ -77,11 +83,7 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
               activeTab === tab && "border-[#2061a9] text-[#2061a9] hover:border-[#2061a9] hover:text-[#2061a9]",
             )}
           >
-            {tab === "Description"
-              ? t("descriptionTab")
-              : tab === "Specifications"
-                ? t("specificationsTab")
-                : t("referencesTab")}
+            {tabLabels[tab]}
           </Button>
         ))}
       </div>
@@ -121,22 +123,9 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
               <p className="text-sm leading-6 text-[#5e6375]">{t("noSpecifications")}</p>
             )
           ) : null}
-          {tab === "References" ? (
-            references.length || documents.length ? (
+          {tab === "Documents" ? (
+            documents.length ? (
               <ul className="space-y-2">
-                {references.map((reference) => (
-                  <li key={reference.id}>
-                    <a
-                      href={reference.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-lg border border-[#e5e9ef] px-4 py-3 text-sm font-medium text-[#164990] transition-colors hover:bg-[#f3f8fc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
-                    >
-                      <Link21 className="size-5 shrink-0" aria-hidden="true" />
-                      <span className="min-w-0 flex-1 truncate">{reference.title}</span>
-                    </a>
-                  </li>
-                ))}
                 {documents.map((document) => (
                   <li key={document.id}>
                     <a
@@ -156,6 +145,27 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
               </ul>
             ) : (
               <p className="text-sm leading-6 text-[#5e6375]">{t("noDocuments")}</p>
+            )
+          ) : null}
+          {tab === "References" ? (
+            references.length ? (
+              <ul className="space-y-2">
+                {references.map((reference) => (
+                  <li key={reference.id}>
+                    <a
+                      href={reference.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg border border-[#e5e9ef] px-4 py-3 text-sm font-medium text-[#164990] transition-colors hover:bg-[#f3f8fc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#164990]"
+                    >
+                      <Link21 className="size-5 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 flex-1 truncate">{reference.title}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm leading-6 text-[#5e6375]">{t("noReferences")}</p>
             )
           ) : null}
         </div>

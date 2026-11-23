@@ -1,3 +1,4 @@
+import alpha3Data from "./country-alpha3.json";
 import callingCodeData from "./calling-codes.json";
 import countryData from "./countries.json";
 import flagData from "./flag.json";
@@ -20,6 +21,7 @@ const flagByCountry = new Map(
 export const countries = countryData
   .map(({ code, name }) => ({
     code,
+    alpha3: (alpha3Data as Record<string, string>)[code] ?? code,
     name: flagByCountry.get(code)?.name ?? name,
     aliases: [name],
     flag: flagByCountry.get(code)?.flag,

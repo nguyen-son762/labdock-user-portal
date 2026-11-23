@@ -120,7 +120,7 @@ describe("ProductPurchasePanel", () => {
     expect(screen.getByText("$180.00")).toBeInTheDocument();
     expect(screen.getByText("$200.00")).toHaveClass("line-through");
     expect(screen.getByText("-10%")).toBeInTheDocument();
-    expect(screen.getByText("Germany")).toBeInTheDocument();
+    expect(screen.getByText("DEU")).toHaveAttribute("title", "Germany");
     expect(screen.queryByText("SUPPLIER-001")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Add to cart" }));
 
