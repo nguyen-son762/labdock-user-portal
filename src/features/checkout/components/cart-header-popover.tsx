@@ -23,15 +23,20 @@ export function CartHeaderPopover() {
   const t = useTranslations("Header");
   const checkoutT = useTranslations("Checkout");
   const removeCartItem = useRemoveCartItemMutation();
+  const [open, setOpen] = useState(false);
   const [selection, setSelection] = useState<string[] | null>(null);
   const items = cartQuery.data ?? [];
   const selectedIds =
     selection === null ? items.map(({ id }) => id) : selection.filter((id) => items.some((item) => item.id === id));
   const totals = calculateOrderTotals(items);
   const hasSelection = selectedIds.length > 0;
+  const closePopover = () => setOpen(false);
+  const closePopoverIfSelected = () => {
+    if (hasSelection) setOpen(false);
+  };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -61,10 +66,10 @@ export function CartHeaderPopover() {
         <div className="flex items-center justify-between border-b border-[#edf0f2] px-4 py-3">
           <h2 className="text-lg font-semibold">{checkoutT("cart")}</h2>
           <nav aria-label={checkoutT("cartShortcuts")} className="flex items-center gap-4">
-            <Link href="/cart" className="text-xs font-semibold text-[#164990] hover:underline">
+            <Link href="/cart" onClick={closePopover} className="text-xs font-semibold text-[#164990] hover:underline">
               {checkoutT("viewCart")}
             </Link>
-            <Link href="/orders" className="text-xs font-semibold text-[#164990] hover:underline">
+            <Link href="/orders" onClick={closePopover} className="text-xs font-semibold text-[#164990] hover:underline">
               {checkoutT("viewOrders")}
             </Link>
           </nav>
@@ -139,6 +144,7 @@ export function CartHeaderPopover() {
               href={createSelectionHref("/request-quote", selectedIds)}
               aria-disabled={!hasSelection}
               tabIndex={hasSelection ? undefined : -1}
+              onClick={closePopoverIfSelected}
             >
               {checkoutT("requestQuote")}
             </Link>
@@ -148,6 +154,7 @@ export function CartHeaderPopover() {
               href={createSelectionHref("/checkout", selectedIds)}
               aria-disabled={!hasSelection}
               tabIndex={hasSelection ? undefined : -1}
+              onClick={closePopoverIfSelected}
             >
               {checkoutT("proceedCheckout")}
             </Link>

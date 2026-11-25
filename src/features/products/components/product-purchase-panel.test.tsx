@@ -1,7 +1,9 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { Toaster } from "@/components/ui/sonner";
 import { authService } from "@/features/auth/api/auth.service";
 import { cartService } from "@/features/checkout/api/cart.service";
 import { renderWithProviders } from "@/test/render-with-providers";
@@ -16,6 +18,11 @@ vi.mock("@/i18n/navigation", async (importOriginal) => ({
 }));
 
 describe("ProductPurchasePanel", () => {
+  afterEach(() => {
+    act(() => {
+      toast.dismiss();
+    });
+  });
   beforeEach(() => {
     navigation.push.mockReset();
     vi.spyOn(authService, "getSession").mockResolvedValue({
@@ -111,10 +118,15 @@ describe("ProductPurchasePanel", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("adds the variant selected from the API payload to cart", async () => {
+  it("adds the variant selected from the API payload to cart and shows a success toast", async () => {
     const addSpy = vi.spyOn(cartService, "add").mockResolvedValue([]);
     const user = userEvent.setup();
-    renderWithProviders(<ProductPurchasePanel product={product} />);
+    renderWithProviders(
+      <>
+        <ProductPurchasePanel product={product} />
+        <Toaster />
+      </>,
+    );
 
     await user.click(screen.getByRole("button", { name: "200ml" }));
     expect(screen.getByText("$180.00")).toBeInTheDocument();
@@ -125,7 +137,7 @@ describe("ProductPurchasePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add to cart" }));
 
     expect(addSpy.mock.calls[0]?.[0]).toEqual({ variantId: "55555555-5555-5555-5555-555555555555", quantity: 1 });
-    expect(await screen.findByText(`${product.name} added to cart.`)).toBeInTheDocument();
+    expect(await screen.findByText(`${product.name} added to cart.`)).toBeVisible();
     expect(screen.getByText("ISO 27001")).toBeInTheDocument();
   });
 

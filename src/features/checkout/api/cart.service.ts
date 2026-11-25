@@ -5,11 +5,15 @@ import { httpClient } from "@/lib/http-client";
 
 import {
   addCartItemSchema,
+  cartQuoteInputSchema,
+  cartQuoteSchema,
   cartResponseSchema,
   removeCartItemSchema,
   updateCartItemSchema,
   type AddCartItemInput,
   type CartItem,
+  type CartQuote,
+  type CartQuoteInput,
   type RemoveCartItemInput,
   type UpdateCartItemInput,
 } from "../schemas/cart.schema";
@@ -34,6 +38,12 @@ export const cartService = {
   async get(signal?: AbortSignal): Promise<CartItem[]> {
     const response = await httpClient.get<unknown>("/cart", { signal });
     return cartResponseSchema.parse(response.data).items;
+  },
+
+  async quote(input: CartQuoteInput, signal?: AbortSignal): Promise<CartQuote> {
+    const body = cartQuoteInputSchema.parse(input);
+    const response = await httpClient.post<unknown>("/cart/quote", body, { signal });
+    return cartQuoteSchema.parse(response.data);
   },
 
   async add(input: AddCartItemInput): Promise<CartItem[]> {

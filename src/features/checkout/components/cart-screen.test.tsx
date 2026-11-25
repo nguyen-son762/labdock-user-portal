@@ -30,8 +30,42 @@ const variants = [
 ];
 const item = { ...checkoutItems[0]!, variantId: variants[0]!.id, variants, quantity: 2 };
 
+const quote = {
+  subtotal: 70,
+  tax: 6.48,
+  taxRatePercent: 9,
+  shippingFee: 10,
+  isFreeShipping: false,
+  additionalFeeTotal: 1.4,
+  platformFee: 0,
+  total: 87.88,
+  currency: "SGD",
+  lines: [],
+};
+
 beforeEach(() => {
   vi.spyOn(cartService, "get").mockResolvedValue([item]);
+  vi.spyOn(cartService, "quote").mockResolvedValue(quote);
+});
+
+it("loads the order summary from the quote API for the checked items", async () => {
+  const user = userEvent.setup();
+  const quoteSpy = vi.spyOn(cartService, "quote");
+  renderWithProviders(<CartScreen />);
+
+  const summary = await screen.findByRole("complementary", { name: "Order summary" });
+  await waitFor(() => expect(summary).toHaveTextContent("$87.88"));
+  expect(quoteSpy).toHaveBeenCalledWith({ cartItemIds: [item.id] }, expect.anything());
+  expect(summary).toHaveTextContent("Tax (9%)$6.48");
+  expect(summary).toHaveTextContent("Total discount-$0.00");
+  expect(summary).toHaveTextContent("Delivery$10.00");
+  expect(summary).toHaveTextContent("Additional fees$1.40");
+  expect(summary).not.toHaveTextContent("Platform fee");
+
+  quoteSpy.mockClear();
+  await user.click(screen.getByRole("checkbox", { name: /select beakers/i }));
+  expect(quoteSpy).not.toHaveBeenCalled();
+  await waitFor(() => expect(summary).toHaveTextContent("Total$0.00"));
 });
 
 it("updates the selected variant through the API and renders the returned cart", async () => {

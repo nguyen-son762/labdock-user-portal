@@ -4,6 +4,7 @@ import { ArrowRight, Bookmark, Box1, LocationTick, ShoppingCart, Verify } from "
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import type { ReactNode } from "react";
 
 import { CountryFlag } from "@/components/shared/country-flag";
@@ -120,7 +121,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
           }
           return;
         }
-        setStatus(productCardT("added", { name: product.name }));
+        toast.success(productCardT("added", { name: product.name }));
       },
       onError: () => setStatus(productCardT("error")),
     });

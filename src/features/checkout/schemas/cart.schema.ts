@@ -75,6 +75,42 @@ export const updateCartItemSchema = z.object({
 export const removeCartItemSchema = z.object({ itemId: z.string().min(1) });
 export const addCartItemSchema = z.object({ variantId: guidSchema, quantity: z.number().int().min(1).max(999_999) });
 
+export const cartQuoteInputSchema = z.object({ cartItemIds: z.array(guidSchema).min(1) });
+
+const cartQuoteFeeSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  value: z.number(),
+  amount: z.number().nonnegative(),
+});
+
+const cartQuoteLineSchema = z.object({
+  cartItemId: guidSchema,
+  variantId: guidSchema,
+  productName: z.string(),
+  sku: z.string(),
+  quantity: z.number().int().positive(),
+  unitPrice: z.number().nonnegative(),
+  lineTotal: z.number().nonnegative(),
+  additionalFeeTotal: z.number().nonnegative(),
+  additionalFees: z.array(cartQuoteFeeSchema),
+});
+
+export const cartQuoteSchema = z.object({
+  subtotal: z.number().nonnegative(),
+  tax: z.number().nonnegative(),
+  taxRatePercent: z.number().nonnegative(),
+  shippingFee: z.number().nonnegative(),
+  isFreeShipping: z.boolean(),
+  additionalFeeTotal: z.number().nonnegative(),
+  platformFee: z.number().nonnegative(),
+  total: z.number().nonnegative(),
+  currency: z.string().length(3),
+  lines: z.array(cartQuoteLineSchema),
+});
+
+export type CartQuoteInput = z.infer<typeof cartQuoteInputSchema>;
+export type CartQuote = z.infer<typeof cartQuoteSchema>;
 export type CartApiItem = z.infer<typeof cartApiItemSchema>;
 export type CartResponse = z.infer<typeof cartResponseSchema>;
 export type CartItem = z.infer<typeof cartItemSchema>;

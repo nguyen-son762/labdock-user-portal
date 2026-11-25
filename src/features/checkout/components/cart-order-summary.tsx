@@ -5,22 +5,50 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 
+import { useCartQuoteQuery } from "../api/use-cart-quote-query";
 import type { CartItem } from "../schemas/cart.schema";
-import { calculateOrderTotals, formatCurrency } from "../data/checkout-data";
+import { formatCurrency } from "../data/checkout-data";
+
+function ValueSkeleton({ className }: { className: string }) {
+  return (
+    <span aria-hidden="true" className={`inline-block animate-pulse rounded-md bg-muted align-middle ${className}`} />
+  );
+}
 
 export function CartOrderSummary({ items }: { items: CartItem[] }) {
   const t = useTranslations("Checkout");
   const tPayments = useTranslations("PaymentMethods");
   const disabled = items.length === 0;
   const selectedIds = items.map(({ id }) => id).join(",");
-  const orderTotals = calculateOrderTotals(items);
-  const currency = items[0]?.currency;
-  const rows = [
-    ["subtotal", formatCurrency(orderTotals.subtotal, currency)],
-    ["discount", `-${formatCurrency(orderTotals.discount, currency)}`],
-    ["delivery", t("free")],
-    ["tax", formatCurrency(orderTotals.tax, currency)],
-  ] as const;
+  const quoteQuery = useCartQuoteQuery(items);
+  const quote = disabled ? undefined : quoteQuery.data;
+  const currency = quote?.currency ?? items[0]?.currency;
+  const isLoading = !disabled && quoteQuery.isPending;
+  const rows: { key: string; label: string; value: string }[] = [
+    { key: "subtotal", label: t("subtotal"), value: formatCurrency(quote?.subtotal ?? 0, currency) },
+    // The quote API has no discount yet, so this row stays at zero.
+    { key: "discount", label: t("discount"), value: `-${formatCurrency(0, currency)}` },
+    {
+      key: "delivery",
+      label: t("delivery"),
+      value: quote?.isFreeShipping ? t("free") : formatCurrency(quote?.shippingFee ?? 0, currency),
+    },
+  ];
+  if (quote && quote.additionalFeeTotal > 0) {
+    rows.push({
+      key: "additionalFees",
+      label: t("additionalFees"),
+      value: formatCurrency(quote.additionalFeeTotal, currency),
+    });
+  }
+  if (quote && quote.platformFee > 0) {
+    rows.push({ key: "platformFee", label: t("platformFee"), value: formatCurrency(quote.platformFee, currency) });
+  }
+  rows.push({
+    key: "tax",
+    label: quote ? t("taxWithRate", { rate: quote.taxRatePercent }) : t("tax"),
+    value: formatCurrency(quote?.tax ?? 0, currency),
+  });
 
   return (
     <aside
@@ -31,16 +59,25 @@ export function CartOrderSummary({ items }: { items: CartItem[] }) {
         {t("orderSummary")}
       </h2>
       <dl className="mt-4 space-y-3">
-        {rows.map(([label, value]) => (
-          <div key={label} className="flex justify-between gap-4 text-sm leading-5">
-            <dt className="text-[#73798f]">{t(label)}</dt>
-            <dd className="font-semibold text-[#051a50]">{value}</dd>
+        {rows.map(({ key, label, value }) => (
+          <div key={key} className="flex justify-between gap-4 text-sm leading-5">
+            <dt className="text-[#73798f]">{label}</dt>
+            <dd className="font-semibold text-[#051a50]">
+              {isLoading ? <ValueSkeleton className="h-5 w-16" /> : value}
+            </dd>
           </div>
         ))}
       </dl>
+      {!disabled && quoteQuery.isError ? (
+        <p role="alert" className="mt-3 text-xs text-[#d92d20]">
+          {t("loadQuoteError")}
+        </p>
+      ) : null}
       <div className="mt-5 flex items-center justify-between border-t border-[#dde2e8] pt-4">
         <span className="text-sm font-semibold text-[#051a50]">{t("total")}</span>
-        <strong className="text-lg font-semibold text-[#164990]">{formatCurrency(orderTotals.total, currency)}</strong>
+        <strong className="text-lg font-semibold text-[#164990]">
+          {isLoading ? <ValueSkeleton className="h-6 w-20" /> : formatCurrency(quote?.total ?? 0, currency)}
+        </strong>
       </div>
       <Button
         asChild
