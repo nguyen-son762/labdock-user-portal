@@ -36,6 +36,9 @@
     "categoriesUnavailable": "Categories could not be loaded.",
     "categoryProductCount": "{count} products",
     "openSubcategories": "Open subcategories for {category}",
+    "closeCategories": "Close categories",
+    "backTo": "Back to {category}",
+    "viewAllInCategory": "View all {category}",
     "subcategoriesOf": "Subcategories of {category}",
     "categories": {
       "chemicals": "Chemicals & Reagents",

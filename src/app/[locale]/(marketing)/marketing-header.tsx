@@ -3,7 +3,7 @@
 import { MainHeader } from "@/components/layout/main-header";
 import { HeaderAccountMenu, useAuthSessionQuery } from "@/features/auth";
 import type { PublicCategoryTreeNode } from "@/features/categories";
-import { CartHeaderPopover, CompactCartLink } from "@/features/checkout";
+import { CartHeaderPopover } from "@/features/checkout";
 import { useCurrentUserQuery } from "@/features/profile";
 
 type MarketingHeaderProps = {
@@ -25,7 +25,7 @@ export function MarketingHeader({ categories, categoriesError = false }: Marketi
       accountContent={account ? <HeaderAccountMenu account={account} /> : undefined}
       compactAccountContent={account ? <HeaderAccountMenu account={account} compact /> : undefined}
       cartContent={<CartHeaderPopover />}
-      compactCartContent={<CompactCartLink />}
+      compactCartContent={<CartHeaderPopover variant="compact" />}
       categories={categories}
       categoriesError={categoriesError}
     />

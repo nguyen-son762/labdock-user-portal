@@ -11,6 +11,8 @@ import { resolveProductMediaUrl } from "@/features/products/utils/product-displa
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/class-names";
 
+import { CategorySidebar } from "./category-sidebar";
+
 export type HeaderCategory = {
   id: string;
   name: string;
@@ -179,6 +181,8 @@ export function CategoryPopover({
     clearHoverTimer();
     hoverTimerRef.current = window.setTimeout(() => changeOpen(false), HOVER_CLOSE_DELAY_MS);
   }
+
+  if (compact) return <CategorySidebar categories={categories} isLoading={isLoading} hasError={hasError} />;
 
   return (
     <Popover open={open} onOpenChange={changeOpen}>

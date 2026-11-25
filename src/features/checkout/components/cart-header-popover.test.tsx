@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -20,5 +20,18 @@ describe("CartHeaderPopover", () => {
 
     expect(removeSpy).toHaveBeenCalledWith({ itemId: checkoutItems[0]?.id }, expect.anything());
     expect(await screen.findByRole("button", { name: "Cart with 1 products" })).toBeInTheDocument();
+  });
+
+  it("opens the cart shortcuts from the compact mobile trigger and closes after navigating", async () => {
+    vi.spyOn(cartService, "get").mockResolvedValue(checkoutItems);
+    const user = userEvent.setup();
+    renderWithProviders(<CartHeaderPopover variant="compact" />);
+
+    await user.click(await screen.findByRole("button", { name: "Cart, 2 items" }));
+    expect(screen.getByRole("link", { name: "View cart" })).toHaveAttribute("href", "/cart");
+    expect(screen.getByRole("link", { name: "View orders" })).toHaveAttribute("href", "/orders");
+
+    await user.click(screen.getByRole("link", { name: "View orders" }));
+    await waitFor(() => expect(screen.queryByRole("link", { name: "View cart" })).not.toBeInTheDocument());
   });
 });

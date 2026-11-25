@@ -28,7 +28,7 @@ export function OrderInformationCards({ order }: { order: OrderDetail }) {
           {address?.recipient || address?.address || address?.phone ? (
             <>
               {address.recipient ? <p className="text-base font-semibold text-[#051a50]">{address.recipient}</p> : null}
-              <div className="max-w-[320px] space-y-2 text-center">
+              <div className="space-y-2 text-left">
                 {address.address ? <p>{address.address}</p> : null}
                 {address.phone ? <p>{address.phone}</p> : null}
               </div>

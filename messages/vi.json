@@ -36,6 +36,9 @@
     "categoriesUnavailable": "Không thể tải danh mục.",
     "categoryProductCount": "{count} sản phẩm",
     "openSubcategories": "Mở danh mục con của {category}",
+    "closeCategories": "Đóng danh mục",
+    "backTo": "Quay lại {category}",
+    "viewAllInCategory": "Xem tất cả {category}",
     "subcategoriesOf": "Danh mục con của {category}",
     "categories": {
       "chemicals": "Hóa chất và thuốc thử",

@@ -12,6 +12,9 @@ import type { CartItem } from "../schemas/cart.schema";
 import { formatCurrency } from "../data/checkout-data";
 import { getCartItemOption, getCartVariantLabel } from "../utils/get-cart-item-option";
 
+const checkboxClassName =
+  "size-4 rounded-[4px] border-[#c8d0d9] bg-white shadow-none data-[state=checked]:border-[#596ab7] data-[state=checked]:bg-[#f2f7fd] data-[state=checked]:text-[#596ab7]";
+
 type CartItemsTableProps = {
   items: CartItem[];
   selectedIds: string[];
@@ -46,7 +49,7 @@ function ProductDetails({ item }: { item: CartItem }) {
 
 function ProductPrice({ item }: { item: CartItem }) {
   return (
-    <div className="flex min-w-0 flex-col items-start">
+    <div className="flex min-w-0 flex-col items-end md:items-start">
       <span className="text-sm font-medium leading-5 text-[#051a50]">
         {formatCurrency(item.unitPrice, item.currency)}
       </span>
@@ -97,7 +100,7 @@ function QuantityInput({
       aria-label={t("quantityForProduct", { name: item.productName })}
       aria-busy={pending}
       disabled={pending}
-      className="h-11 bg-white text-center text-sm text-[#051a50]"
+      className="h-11 w-24 bg-white text-center text-sm text-[#051a50] md:w-full"
       isAllowed={({ floatValue }) => floatValue === undefined || floatValue <= maximumQuantity}
       onFocus={() => {
         focusedRef.current = true;
@@ -126,16 +129,28 @@ export function CartItemsTable({
     onSelectedIdsChange(checked ? [...selectedIds, id] : selectedIds.filter((itemId) => itemId !== id));
   };
 
+  const selectAll = (checked: boolean) => onSelectedIdsChange(checked ? items.map(({ id }) => id) : []);
+
   return (
     <section
-      className="overflow-hidden rounded-xl border border-[#e9eaeb] bg-white px-4 py-6"
+      className="overflow-hidden rounded-xl border border-[#e9eaeb] bg-white px-4 py-3 md:py-6"
       aria-label={t("cartProducts")}
     >
+      {/* Mobile: a compact select-all bar replaces the desktop column headings. */}
+      <label className="flex cursor-pointer items-center gap-3 border-b border-[#dde2e8] pb-3 text-sm font-semibold text-[#051a50] md:hidden">
+        <Checkbox
+          className={checkboxClassName}
+          checked={allSelected}
+          onCheckedChange={(checked) => selectAll(checked === true)}
+          aria-label={t("selectAllProducts")}
+        />
+        <span>{t("selectAll", { count: items.length })}</span>
+      </label>
       <div className="hidden grid-cols-[24px_minmax(0,1.7fr)_minmax(90px,0.7fr)_80px_minmax(120px,0.85fr)_32px] items-center gap-2 border-b border-[#dde2e8] pb-2 text-sm font-semibold text-[#051a50] md:grid">
         <Checkbox
-          className="size-4 rounded-[4px] border-[#c8d0d9] bg-white shadow-none data-[state=checked]:border-[#596ab7] data-[state=checked]:bg-[#f2f7fd] data-[state=checked]:text-[#596ab7]"
+          className={checkboxClassName}
           checked={allSelected}
-          onCheckedChange={(checked) => onSelectedIdsChange(checked ? items.map(({ id }) => id) : [])}
+          onCheckedChange={(checked) => selectAll(checked === true)}
           aria-label={t("selectAllProducts")}
         />
         <span>{t("selectAll", { count: items.length })}</span>
@@ -155,7 +170,7 @@ export function CartItemsTable({
             className="grid grid-cols-[24px_minmax(0,1fr)_32px] items-center gap-x-3 gap-y-3 border-b border-[#dde2e8] py-4 last:border-b-0 md:grid-cols-[24px_minmax(0,1.7fr)_minmax(90px,0.7fr)_80px_minmax(120px,0.85fr)_32px] md:gap-2 md:py-3"
           >
             <Checkbox
-              className="size-4 rounded-[4px] border-[#c8d0d9] bg-white shadow-none data-[state=checked]:border-[#596ab7] data-[state=checked]:bg-[#f2f7fd] data-[state=checked]:text-[#596ab7] md:col-auto"
+              className={checkboxClassName}
               checked={selected}
               onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
               aria-label={t("selectProduct", { name: item.productName })}
@@ -164,14 +179,17 @@ export function CartItemsTable({
               <ProductImage item={item} />
               <ProductDetails item={item} />
             </div>
-            <div className="col-start-2 row-start-2 md:col-auto md:row-auto">
-              <ProductPrice item={item} />
+            {/* Mobile: quantity and price share one row; on desktop the wrapper dissolves into the grid columns. */}
+            <div className="col-span-2 col-start-2 row-start-3 flex items-end justify-between gap-3 md:contents">
+              <div className="md:col-auto md:row-auto">
+                <ProductPrice item={item} />
+              </div>
+              <label className="order-first min-w-0 text-xs text-[#73798f] md:order-none md:col-auto md:row-auto">
+                <span className="mb-1 block text-[11px] font-medium text-[#73798f] md:hidden">{t("quantity")}</span>
+                <QuantityInput item={item} pending={pending} onCommit={onQuantityChange} />
+              </label>
             </div>
-            <label className="col-start-1 row-start-2 min-w-0 text-xs text-[#73798f] md:col-auto md:row-auto">
-              <span className="mb-1 block text-[11px] font-medium text-[#73798f] md:hidden">{t("quantity")}</span>
-              <QuantityInput item={item} pending={pending} onCommit={onQuantityChange} />
-            </label>
-            <div className="col-span-3 col-start-1 row-start-3 min-w-0 md:col-auto md:row-auto">
+            <div className="col-span-2 col-start-2 row-start-2 min-w-0 md:col-auto md:row-auto">
               <span className="mb-1 block text-[11px] font-medium text-[#73798f] md:hidden">{t("option")}</span>
               <Select
                 value={item.variantId ?? item.id}

@@ -18,7 +18,7 @@ function createSelectionHref(pathname: string, selectedIds: string[]) {
   return selectedIds.length ? `${pathname}?items=${encodeURIComponent(selectedIds.join(","))}` : "#cart-products";
 }
 
-export function CartHeaderPopover() {
+export function CartHeaderPopover({ variant = "full" }: { variant?: "full" | "compact" }) {
   const cartQuery = useCartQuery();
   const t = useTranslations("Header");
   const checkoutT = useTranslations("Checkout");
@@ -38,25 +38,41 @@ export function CartHeaderPopover() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-9 shrink-0 justify-start gap-2 rounded-full p-0 font-normal text-white transition-[height,padding,background-color] duration-200 hover:h-11 hover:px-1 hover:py-1 hover:bg-white/10 hover:text-white focus-visible:ring-white"
-          aria-label={`Cart with ${items.length} products`}
-        >
-          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">
-            <ShoppingCart className="size-4" variant="Bold" aria-hidden="true" />
-            <span className="absolute -right-1 -top-0.5 flex size-4 items-center justify-center rounded-full bg-[#e57a00] text-[10px] font-semibold leading-none">
+        {variant === "compact" ? (
+          <button
+            type="button"
+            aria-label={t("cartItemCount", { count: items.length })}
+            className="relative flex size-10 items-center justify-center rounded-full bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <ShoppingCart className="size-5" variant="Bold" aria-hidden="true" />
+            <span
+              aria-hidden="true"
+              className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-[#e57a00] text-[10px] font-semibold"
+            >
               {items.length}
             </span>
-          </span>
-          <span className="flex flex-col text-left leading-none">
-            <span className="text-[13px] leading-[17px]">{t("orders")}</span>
-            <strong className="whitespace-nowrap text-sm leading-[18px]">
-              {formatCurrency(totals.subtotal, items[0]?.currency)}
-            </strong>
-          </span>
-        </Button>
+          </button>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-9 shrink-0 justify-start gap-2 rounded-full p-0 font-normal text-white transition-[height,padding,background-color] duration-200 hover:h-11 hover:px-1 hover:py-1 hover:bg-white/10 hover:text-white focus-visible:ring-white"
+            aria-label={`Cart with ${items.length} products`}
+          >
+            <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10">
+              <ShoppingCart className="size-4" variant="Bold" aria-hidden="true" />
+              <span className="absolute -right-1 -top-0.5 flex size-4 items-center justify-center rounded-full bg-[#e57a00] text-[10px] font-semibold leading-none">
+                {items.length}
+              </span>
+            </span>
+            <span className="flex flex-col text-left leading-none">
+              <span className="text-[13px] leading-[17px]">{t("orders")}</span>
+              <strong className="whitespace-nowrap text-sm leading-[18px]">
+                {formatCurrency(totals.subtotal, items[0]?.currency)}
+              </strong>
+            </span>
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent
         align="end"
