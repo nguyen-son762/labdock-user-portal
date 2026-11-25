@@ -47,8 +47,14 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
       postalCode: "",
       country: "SG",
       billingSameAsDelivery: true,
+      billingFullName: "",
+      billingEmail: "",
+      billingPhone: "",
+      billingCompanyName: "",
       billingAddress: "",
+      billingCity: "",
       billingPostalCode: "",
+      billingCountry: "SG",
       paymentMethod: "bank-transfer",
     },
   });
@@ -62,11 +68,14 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
     const callingCode = getCountryCallingCode(country);
     const phone = user.phone.trim();
     const nationalPhone = getNationalPhone(phone, callingCode);
+    const fullPhone = [callingCode, nationalPhone].filter(Boolean).join(" ");
+    const billingCountry = resolveCountryCode(user.billingAddress.country) ?? country;
+    const billingCallingCode = getCountryCallingCode(billingCountry);
 
     form.reset({
       fullName: user.fullName,
       email: user.email,
-      phone: [callingCode, nationalPhone].filter(Boolean).join(" "),
+      phone: fullPhone,
       companyName: user.companyName,
       address: user.deliveryAddress,
       city: "",
@@ -74,8 +83,14 @@ export function CheckoutScreen({ initialItemIds }: { initialItemIds?: string[] }
       postalCode: user.postalCode,
       country,
       billingSameAsDelivery: user.billingSameAsDelivery,
+      billingFullName: user.fullName,
+      billingEmail: user.email,
+      billingPhone: [billingCallingCode, nationalPhone].filter(Boolean).join(" "),
+      billingCompanyName: user.companyName,
       billingAddress: user.billingAddress.address,
+      billingCity: "",
       billingPostalCode: user.billingAddress.postalCode,
+      billingCountry,
       paymentMethod: "bank-transfer",
     });
   }, [form, isDirty, profileQuery.data]);

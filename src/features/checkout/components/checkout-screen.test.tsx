@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders } from "@/test/render-with-providers";
@@ -71,5 +71,52 @@ describe("CheckoutScreen", () => {
     renderWithProviders(<CheckoutScreen />);
     expect(await screen.findByRole("textbox", { name: "Full name *" })).toHaveValue("");
     expect(screen.getByRole("textbox", { name: "Email address *" })).toHaveValue("");
+  });
+
+  it("collects a separate billing contact and address when it differs from delivery", async () => {
+    const user = userEvent.setup();
+    const createSpy = vi.spyOn(checkoutService, "create").mockResolvedValue(checkoutSessionFixture);
+    renderWithProviders(<CheckoutScreen initialItemIds={[checkoutItems[0]!.id]} />);
+
+    await user.type(await screen.findByRole("textbox", { name: "Full name *" }), "QA Tester");
+    await user.type(screen.getByRole("textbox", { name: "Email address *" }), "qa@example.test");
+    await user.type(screen.getByRole("textbox", { name: "Phone no. *" }), "88009900");
+    await user.type(screen.getByRole("textbox", { name: "Address *" }), "123 Test Street");
+    await user.type(screen.getByRole("textbox", { name: "City *" }), "Singapore");
+    await user.click(screen.getByRole("checkbox", { name: "Same as delivery address" }));
+
+    const billing = within(screen.getByRole("region", { name: "Billing address" }));
+    const billingName = billing.getByRole("textbox", { name: "Full name *" });
+    expect(billingName).toHaveValue("QA Tester");
+    expect(billing.getByRole("textbox", { name: "Email address *" })).toHaveValue("qa@example.test");
+    expect(billing.getByRole("textbox", { name: "City *" })).toHaveValue("Singapore");
+
+    await user.click(screen.getByRole("button", { name: "Make payment" }));
+    expect(await billing.findByText("Enter a complete billing address.")).toBeInTheDocument();
+    expect(createSpy).not.toHaveBeenCalled();
+
+    await user.clear(billingName);
+    await user.type(billingName, "Accounts Team");
+    await user.type(billing.getByRole("textbox", { name: "Address *" }), "2 Billing Road");
+    await user.type(billing.getByRole("textbox", { name: "Postal code *" }), "123456");
+    await user.click(screen.getByRole("button", { name: "Make payment" }));
+
+    await waitFor(() =>
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          checkout: expect.objectContaining({
+            fullName: "QA Tester",
+            billingSameAsDelivery: false,
+            billingFullName: "Accounts Team",
+            billingEmail: "qa@example.test",
+            billingAddress: "2 Billing Road",
+            billingCity: "Singapore",
+            billingPostalCode: "123456",
+            billingCountry: "SG",
+          }),
+        }),
+        expect.anything(),
+      ),
+    );
   });
 });

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { apiImageUrlSchema } from "@/lib/media-url";
+
 // The API's documented sample IDs don't include an RFC UUID variant nibble,
 // so validate GUID shape without enforcing the UUID version/variant bits.
 const guidSchema = z.guid();
@@ -105,10 +107,7 @@ export const orderDetailSchema = orderSummarySchema.omit({ subtotal: true, tax: 
     .trim()
     .nullish()
     .transform((value) => value ?? ""),
-  qrImageUrl: z
-    .union([z.literal(""), z.url({ protocol: /^https?$/ })])
-    .nullish()
-    .transform((value) => value ?? ""),
+  qrImageUrl: apiImageUrlSchema,
   invoice: z.preprocess(
     (invoice) => {
       // The API now calls the collection orderItems; keep lines as the view model and accept legacy responses.

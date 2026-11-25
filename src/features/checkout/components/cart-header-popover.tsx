@@ -69,7 +69,11 @@ export function CartHeaderPopover() {
             <Link href="/cart" onClick={closePopover} className="text-xs font-semibold text-[#164990] hover:underline">
               {checkoutT("viewCart")}
             </Link>
-            <Link href="/orders" onClick={closePopover} className="text-xs font-semibold text-[#164990] hover:underline">
+            <Link
+              href="/orders"
+              onClick={closePopover}
+              className="text-xs font-semibold text-[#164990] hover:underline"
+            >
               {checkoutT("viewOrders")}
             </Link>
           </nav>

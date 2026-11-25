@@ -1,21 +1,11 @@
-import { clientEnv } from "@/config/client-env";
+import { resolveApiMediaUrl } from "@/lib/media-url";
 
 import type { Product, ProductVariant } from "../products.types";
 
 const fallbackProductImage = "/home/product-flask-round.png";
 
 export function resolveProductMediaUrl(mediaUrl: string): string {
-  if (/^https?:\/\//i.test(mediaUrl)) return mediaUrl;
-
-  const relativePath = mediaUrl.replace(/^\/+/, "");
-  if (!relativePath.startsWith("media/") && !relativePath.startsWith("public/")) {
-    return mediaUrl.startsWith("/") ? mediaUrl : `/${mediaUrl}`;
-  }
-
-  const assetPath = relativePath.startsWith("public/") ? `media/${relativePath}` : relativePath;
-  if (clientEnv.NEXT_PUBLIC_API_BASE_URL.startsWith("/")) return `/${assetPath}`;
-
-  return new URL(assetPath, `${new URL(clientEnv.NEXT_PUBLIC_API_BASE_URL).origin}/`).toString();
+  return resolveApiMediaUrl(mediaUrl);
 }
 
 /** Returns an http(s) URL for an editor-entered link, or undefined when it is unsafe or invalid. */

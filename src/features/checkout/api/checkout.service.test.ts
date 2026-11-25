@@ -42,12 +42,84 @@ describe("checkoutService.create", () => {
     expect(httpClient.post).toHaveBeenCalledExactlyOnceWith("/checkout/sessions", {
       cartItemIds: ["11111111-1111-1111-1111-111111111111"],
       recipientName: "Buyer Demo",
+      email: "buyer@example.test",
       phone: "+84123456789",
+      companyName: "",
       addressLine1: "1 Nguyen Hue",
       city: "HCM",
+      postalCode: "700000",
       country: "VN",
       notes: "Postman checkout",
+      sameAsDelivery: true,
+      billingRecipientName: "Buyer Demo",
+      billingEmail: "buyer@example.test",
+      billingPhone: "+84123456789",
+      billingCompanyName: "",
+      billingAddressLine1: "1 Nguyen Hue",
+      billingCity: "HCM",
+      billingPostalCode: "700000",
+      billingCountry: "VN",
     });
+  });
+
+  it("sends the separate billing contact and address when it differs from delivery", async () => {
+    httpClient.post.mockResolvedValue({ data: session });
+
+    await checkoutService.create({
+      ...input,
+      checkout: {
+        ...input.checkout,
+        companyName: "Demo Lab",
+        billingSameAsDelivery: false,
+        billingFullName: "Accounts Team",
+        billingEmail: "ap@example.test",
+        billingPhone: "+84 987-654-321",
+        billingCompanyName: "Demo Lab Finance",
+        billingAddress: "2 Le Loi",
+        billingCity: "Ha Noi",
+        billingPostalCode: "100000",
+        billingCountry: "Vietnam",
+      },
+    });
+
+    expect(httpClient.post).toHaveBeenCalledWith(
+      "/checkout/sessions",
+      expect.objectContaining({
+        companyName: "Demo Lab",
+        sameAsDelivery: false,
+        billingRecipientName: "Accounts Team",
+        billingEmail: "ap@example.test",
+        billingPhone: "+84987654321",
+        billingCompanyName: "Demo Lab Finance",
+        billingAddressLine1: "2 Le Loi",
+        billingCity: "Ha Noi",
+        billingPostalCode: "100000",
+        billingCountry: "VN",
+      }),
+    );
+  });
+
+  it("accepts the live API response with a relative QR path and .NET timestamp precision", async () => {
+    httpClient.post.mockResolvedValue({
+      data: {
+        orderId: "4ddb6932-feaf-416d-8a0a-8cd19f7103ce",
+        orderNumber: "OR-20261125-1716",
+        refCode: "ASYYZH22",
+        amount: 10075,
+        currency: "SGD",
+        paymentExpiresAt: "2026-11-25T10:54:08.4399242+00:00",
+        companyName: "I-DNA BIOTECHNOLOGY PTE LTD",
+        businessRegistrationNo: "200402942H",
+        qrImageUrl: "/media/public/payments/paynow-qr-936dc9af9e824e94998cb5c57304cb11.png",
+      },
+    });
+
+    const result = await checkoutService.create(input);
+
+    expect(result.orderId).toBe("4ddb6932-feaf-416d-8a0a-8cd19f7103ce");
+    expect(result.qrImageUrl).toMatch(
+      /^https?:\/\/[^/]+\/media\/public\/payments\/paynow-qr-936dc9af9e824e94998cb5c57304cb11\.png$/,
+    );
   });
 
   it("normalizes country names and allows no notes", async () => {
