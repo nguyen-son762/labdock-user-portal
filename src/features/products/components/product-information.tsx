@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/class-names";
 
 import type { Product } from "../products.types";
-import { resolveProductMediaUrl, toSafeExternalUrl } from "../utils/product-display";
+import { resolveProductMediaUrl, resolveProductReferenceUrl } from "../utils/product-display";
 
 const tabs = ["Description", "Specifications", "Documents", "References"] as const;
 type Tab = (typeof tabs)[number];
@@ -26,7 +26,7 @@ export function ProductInformation({ product, descriptionHtml }: { product: Prod
   const references = [...product.references]
     .sort((left, right) => left.sortOrder - right.sortOrder)
     .flatMap((reference) => {
-      const href = toSafeExternalUrl(reference.url);
+      const href = resolveProductReferenceUrl(reference.url);
       return href ? [{ id: reference.id, title: reference.title.trim() || href, href }] : [];
     });
   const documents = [...product.documents].sort((left, right) => left.sortOrder - right.sortOrder);

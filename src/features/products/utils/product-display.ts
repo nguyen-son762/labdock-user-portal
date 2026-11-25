@@ -8,6 +8,13 @@ export function resolveProductMediaUrl(mediaUrl: string): string {
   return resolveApiMediaUrl(mediaUrl);
 }
 
+/** Resolves a product reference: API media paths (e.g. `/media/public/x.pdf`) or safe external links. */
+export function resolveProductReferenceUrl(rawUrl: string): string | undefined {
+  const trimmed = rawUrl.trim();
+  if (/^\/(?!\/)/.test(trimmed)) return resolveProductMediaUrl(trimmed);
+  return toSafeExternalUrl(trimmed);
+}
+
 /** Returns an http(s) URL for an editor-entered link, or undefined when it is unsafe or invalid. */
 export function toSafeExternalUrl(rawUrl: string): string | undefined {
   const trimmed = rawUrl.trim();

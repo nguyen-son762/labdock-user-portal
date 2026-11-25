@@ -43,6 +43,12 @@ const product: Product = {
       sortOrder: 1,
     },
     {
+      id: "55555555-5555-5555-5555-555555555555",
+      title: "Uploaded reference",
+      url: "/media/public/example.jpg",
+      sortOrder: 2,
+    },
+    {
       id: "44444444-4444-4444-4444-444444444444",
       title: "Unsafe link",
       url: "javascript:alert(1)",
@@ -102,6 +108,10 @@ describe("ProductInformation", () => {
     expect(screen.getByRole("link", { name: /PubChem entry/ })).toHaveAttribute(
       "href",
       "https://pubchem.ncbi.nlm.nih.gov/compound/5280723",
+    );
+    expect(screen.getByRole("link", { name: /Uploaded reference/ })).toHaveAttribute(
+      "href",
+      expect.stringMatching(/^https?:\/\/[^/]+\/media\/public\/example\.jpg$/),
     );
     expect(screen.queryByRole("link", { name: /Unsafe link/ })).not.toBeInTheDocument();
   });
